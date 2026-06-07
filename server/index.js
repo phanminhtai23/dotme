@@ -17,6 +17,48 @@ const ACCOUNTS_FILE = join(DATA_DIR, 'accounts.json')
 const LINKS_FILE    = join(DATA_DIR, 'links.json')
 const MESSAGES_FILE = join(DATA_DIR, 'messages.json')
 
+const CONTENT_SECTIONS = ['experience', 'projects', 'certificates', 'publications']
+const CONTENT_FILES = Object.fromEntries(CONTENT_SECTIONS.map(s => [s, join(DATA_DIR, `${s}.json`)]))
+
+const INITIAL_CONTENT = {
+  experience: [
+    { id:'tma', company:'TMA Solutions', role:'AI Engineer', period:'Jan 2026 – Present', location:'Ho Chi Minh, VN', current:true, bullets:[
+      'Architected an <strong>autonomous AI Agent</strong> to automate cross-functional task aggregation and daily reporting.',
+      'Built an LLM-driven ingestion framework with Apache SeaTunnel achieving <strong>&gt;90% accuracy</strong> across diverse enterprise sources.',
+      'Built a <strong>Multi-Agent</strong> system with LangChain/LangGraph for end-to-end data ingestion from natural language requests.',
+      'Implemented RAG for orchestration using <strong>Qdrant</strong> as vector database.',
+      'Managed <strong>Docker</strong> containerization and deployment of production services on Ubuntu servers.',
+    ]},
+    { id:'pod', company:'POD Software', role:'Contract Computer Vision Engineer', period:'Nov 2025 – Dec 2025', location:'Can Tho, VN', current:false, bullets:[
+      'Developed a <strong>real-time OCR system</strong> for extracting text from garment labels using PaddleOCR.',
+      'Optimized pipeline to <strong>&lt;100ms/frame and &gt;95% accuracy</strong> on CPU-only devices.',
+      'Integrated and tested the system within the existing WinForms application for factory deployment.',
+    ]},
+    { id:'biwoco', company:'BIWOCO', role:'AI Engineer Intern', period:'Apr 2025 – Jul 2025', location:'Can Tho, VN', current:false, bullets:[
+      'Researched and built AI Agent / Multi-Agent systems using <strong>Google ADK</strong> to automate processing tasks.',
+      'Developed <strong>automated workflows</strong> with Playwright, StageHand, and AI Browser tools.',
+      'Conducted LLM evaluations using <strong>Phoenix Experiments</strong> to track metrics and optimize prompts.',
+    ]},
+  ],
+  projects: [
+    { id:'finsight', title:'FinSight Agent', subtitleVi:'Phân tích tài chính AI', subtitleEn:'AI Financial Analyst', descVi:'Hệ thống multi-agent RAG phân tích tài chính thời gian thực. Xử lý báo cáo 10-K, kết quả kinh doanh và dữ liệu thị trường để tạo ra các nhận định hữu ích.', descEn:'Multi-agent RAG system for real-time financial analysis. Ingests 10-K filings, earnings reports, and market data to generate actionable insights.', tags:['LangGraph','FastAPI','Qdrant','React','Claude'], color:'#8B5CF6', icon:'📈', status:'Live', year:'2026', liveUrl:'https://finsightagent.tech', githubUrl:'https://github.com/phanminhtai23/finsight-agentic-production' },
+    { id:'mammoai', title:'MammoAI', subtitleVi:'Phát hiện ung thư vú AI', subtitleEn:'Breast Cancer Detection', descVi:'Hệ thống deep learning đầu cuối phân tích ảnh chụp vú (mammogram) để dự đoán BI-RADS và tư vấn sàng lọc online. Triển khai trên AWS với CI/CD tự động.', descEn:'End-to-end deep learning system for mammogram analysis — predicts BI-RADS scores and offers online screening. Deployed on AWS with full CI/CD.', tags:['Python','PyTorch','FastAPI','Docker','AWS'], color:'#22D3EE', icon:'🔬', status:'Research', year:'2025', liveUrl:'', githubUrl:'https://github.com/phanminhtai23/BE_MammoAI' },
+    { id:'vietlex', title:'VietLex', subtitleVi:'Công cụ nghiên cứu NLP', subtitleEn:'NLP Research Tool', descVi:'Công cụ tìm kiếm văn bản pháp luật tiếng Việt dựa trên semantic embedding. Xử lý 50k+ tài liệu pháp lý với tốc độ truy xuất dưới 1 giây.', descEn:'Vietnamese legal document search engine powered by semantic embeddings. Processes 50k+ legal documents with sub-second retrieval.', tags:['Elasticsearch','FastAPI','React','Sentence Transformers'], color:'#10B981', icon:'⚖️', status:'Research', year:'2024', liveUrl:'', githubUrl:'' },
+    { id:'scheduleai', title:'ScheduleAI', subtitleVi:'Lịch hẹn thông minh', subtitleEn:'Smart Scheduler', descVi:'Công cụ lên lịch cuộc họp bằng ngôn ngữ tự nhiên, tích hợp Google Calendar. Xử lý các ràng buộc phức tạp như múi giờ và sở thích người tham gia.', descEn:'Natural language meeting scheduler that integrates with Google Calendar. Handles complex constraints like time zones and participant preferences.', tags:['OpenAI','Node.js','Next.js','Google API'], color:'#F59E0B', icon:'📅', status:'Beta', year:'2024', liveUrl:'', githubUrl:'' },
+    { id:'streamdash', title:'StreamDash', subtitleVi:'Phân tích thời gian thực', subtitleEn:'Real-time Analytics', descVi:'Dashboard WebSocket theo dõi hiệu suất pipeline AI. Giám sát lượng token, độ trễ và tỷ lệ lỗi trên các agent.', descEn:'WebSocket-powered dashboard for monitoring AI pipeline performance. Tracks token usage, latency, and error rates across agents.', tags:['Redis','FastAPI','React','WebSocket','Recharts'], color:'#EC4899', icon:'📊', status:'In Progress', year:'2026', liveUrl:'', githubUrl:'' },
+    { id:'dotme', title:'dotme', subtitleVi:'Trang cá nhân', subtitleEn:'Personal Site', descVi:'Chính là trang này! Portfolio pixel-perfect xây bằng React, với giao diện tối, đẹp và nhanh.', descEn:'This very site! A pixel-perfect portfolio built with React, inspired by taste-skill design principles. Dark, beautiful, fast.', tags:['React','Vite','CSS'], color:'#8B5CF6', icon:'✨', status:'Live', year:'2026', liveUrl:'#', githubUrl:'#' },
+  ],
+  certificates: [
+    { id:'toeic', name:'TOEIC 740', issuer:'ETS', icon:'🌐', color:'#22D3EE' },
+    { id:'googleai', name:'Google AI Essentials', issuer:'Google', icon:'🤖', color:'#10B981' },
+    { id:'aws', name:'AWS for Beginners', issuer:'Udemy', icon:'☁️', color:'#F59E0B' },
+    { id:'rag', name:'RAG Systems Expert', issuer:'Ready Tensor', icon:'🧠', color:'#8B5CF6' },
+  ],
+  publications: [
+    { id:'goodtechs2025', title:'Design and Implementation of an Intelligent System for Drug-Drug Interaction Management and Retrieval', authors:[{name:'Tien Dao Luu',highlight:false},{name:'Minh Tai Phan',highlight:true},{name:'Hoang Dien Nguyen',highlight:false},{name:'Hieu Duong Trung',highlight:false},{name:'Thien Vu Nguyen',highlight:false}], year:'2025', conference:'11th EAI International Conference on Smart Objects and Technologies for Social Good (GOODTECHS 2025)', link:'https://goodtechs.eai-conferences.org/2025/' },
+  ],
+}
+
 const app    = express()
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM   = process.env.RESEND_FROM || 'inbox-resume@finsightagent.tech'
@@ -54,6 +96,9 @@ async function initData() {
   }
   if (!existsSync(LINKS_FILE))    wj(LINKS_FILE, [])
   if (!existsSync(MESSAGES_FILE)) wj(MESSAGES_FILE, [])
+  for (const s of CONTENT_SECTIONS) {
+    if (!existsSync(CONTENT_FILES[s])) wj(CONTENT_FILES[s], INITIAL_CONTENT[s])
+  }
 }
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
@@ -212,6 +257,37 @@ app.delete('/api/messages/:idx', (req, res) => {
 })
 
 app.delete('/api/messages', (_, res) => { wj(MESSAGES_FILE, []); res.json({ ok: true }) })
+
+// ── Content CRUD ──────────────────────────────────────────────────────────────
+app.get('/api/content/:section', (req, res) => {
+  if (!CONTENT_SECTIONS.includes(req.params.section)) return res.status(400).json({ error: 'Invalid section' })
+  res.json(rj(CONTENT_FILES[req.params.section]))
+})
+
+app.post('/api/content/:section', (req, res) => {
+  if (!CONTENT_SECTIONS.includes(req.params.section)) return res.status(400).json({ error: 'Invalid section' })
+  const items = rj(CONTENT_FILES[req.params.section])
+  const item = { ...req.body, id: genId() }
+  wj(CONTENT_FILES[req.params.section], [...items, item])
+  res.json(item)
+})
+
+app.put('/api/content/:section/:id', (req, res) => {
+  if (!CONTENT_SECTIONS.includes(req.params.section)) return res.status(400).json({ error: 'Invalid section' })
+  const items = rj(CONTENT_FILES[req.params.section])
+  const idx = items.findIndex(i => i.id === req.params.id)
+  if (idx === -1) return res.status(404).json({ error: 'Not found' })
+  items[idx] = { ...items[idx], ...req.body, id: req.params.id }
+  wj(CONTENT_FILES[req.params.section], items)
+  res.json(items[idx])
+})
+
+app.delete('/api/content/:section/:id', (req, res) => {
+  if (!CONTENT_SECTIONS.includes(req.params.section)) return res.status(400).json({ error: 'Invalid section' })
+  const remaining = rj(CONTENT_FILES[req.params.section]).filter(i => i.id !== req.params.id)
+  wj(CONTENT_FILES[req.params.section], remaining)
+  res.json({ ok: true })
+})
 
 app.get('/api/health', (_, res) => res.json({ ok: true }))
 

@@ -30,7 +30,7 @@ export default function About() {
         <div style={{ flex:1, height:1, background:'var(--border)' }} />
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr' : '1fr 1fr', gap: isMobile ? '48px' : '80px', alignItems:'center' }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr' : '1fr 1fr', gap: isMobile ? '48px' : '80px', alignItems:'flex-start' }}>
         {/* Left */}
         <div style={{ display:'flex', flexDirection:'column', gap:24, alignItems: isMobile ? 'center' : 'flex-start', opacity: visible ? 1 : 0, transform: visible ? 'translateX(0)' : 'translateX(-40px)', transition:'all 0.7s cubic-bezier(0.16,1,0.3,1)' }}>
 
@@ -43,17 +43,16 @@ export default function About() {
               filter:'blur(24px)', zIndex:0, pointerEvents:'none',
             }} />
 
-            <div style={{ position:'relative', zIndex:1, aspectRatio:'3/4' }}>
+            <div style={{ position:'relative', zIndex:1 }}>
               {imgError ? (
-                <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:96 }}>👨‍💻</div>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'center', fontSize:96, padding:'40px 0' }}>👨‍💻</div>
               ) : (
                 <img
                   src="/avatar.png"
                   alt="Kevin Phan"
                   onError={() => setImgError(true)}
                   style={{
-                    width:'100%', height:'100%',
-                    objectFit:'contain', objectPosition:'center bottom', display:'block',
+                    width:'100%', height:'auto', display:'block',
                     filter:
                       'drop-shadow(0 0 1px rgba(255,255,255,0.55)) ' +
                       'drop-shadow(0 0 8px rgba(255,255,255,0.18)) ' +
@@ -91,7 +90,7 @@ export default function About() {
             ))}
           </div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginTop:28, justifyContent: isMobile ? 'center' : 'flex-start' }}>
-            {['Python', 'LangGraph', 'FastAPI', 'Docker', 'React', 'AWS'].map(tag => (
+            {['Python', 'LangGraph', 'LangChain', 'RAG', 'AI Agent', 'Qdrant', 'Docker', 'FastAPI', 'AWS', 'PostgreSQL', 'GitHub Actions'].map(tag => (
               <span key={tag} style={{ background:'rgba(139,92,246,0.1)', border:'1px solid rgba(139,92,246,0.25)', color:'#a78bfa', borderRadius:'var(--radius-full)', padding:'5px 14px', fontSize:13, fontWeight:500 }}>{tag}</span>
             ))}
           </div>

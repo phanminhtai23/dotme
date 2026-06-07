@@ -1,0 +1,43 @@
+[
+  {
+    "id": "tma",
+    "company": "TMA Solutions",
+    "role": "Fresher AI Engineer",
+    "period": "Jan 2026 – Present",
+    "location": "Ho Chi Minh, VN",
+    "current": true,
+    "bullets": [
+      "Architected an <strong>autonomous AI Agent</strong> to automate cross-functional task aggregation and daily reporting.",
+      "Built an LLM-driven ingestion framework with Apache SeaTunnel achieving <strong>&gt;90% accuracy</strong> across diverse enterprise sources.",
+      "Built a <strong>Multi-Agent</strong> system with LangChain/LangGraph for end-to-end data ingestion from natural language requests.",
+      "Implemented RAG for orchestration using <strong>Qdrant</strong> as vector database.",
+      "Managed <strong>Docker</strong> containerization and deployment of production services on Ubuntu servers."
+    ]
+  },
+  {
+    "id": "pod",
+    "company": "POD Software",
+    "role": "Contract Computer Vision Engineer",
+    "period": "Nov 2025 – Dec 2025",
+    "location": "Can Tho, VN",
+    "current": false,
+    "bullets": [
+      "Developed a <strong>real-time OCR system</strong> for extracting text from garment labels using PaddleOCR.",
+      "Optimized pipeline to <strong>&lt;100ms/frame and &gt;95% accuracy</strong> on CPU-only devices.",
+      "Integrated and tested the system within the existing WinForms application for factory deployment."
+    ]
+  },
+  {
+    "id": "biwoco",
+    "company": "BIWOCO",
+    "role": "AI Engineer Intern",
+    "period": "Apr 2025 – Jul 2025",
+    "location": "Can Tho, VN",
+    "current": false,
+    "bullets": [
+      "Researched and built AI Agent / Multi-Agent systems using <strong>Google ADK</strong> to automate processing tasks.",
+      "Developed <strong>automated workflows</strong> with Playwright, StageHand, and AI Browser tools.",
+      "Conducted LLM evaluations using <strong>Phoenix Experiments</strong> to track metrics and optimize prompts."
+    ]
+  }
+]

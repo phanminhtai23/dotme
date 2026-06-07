@@ -1,0 +1,31 @@
+[
+  {
+    "id": "goodtechs2025",
+    "title": "Design and Implementation of an Intelligent System for Drug-Drug Interaction Management and Retrieval",
+    "authors": [
+      {
+        "name": "Tien Dao Luu",
+        "highlight": false
+      },
+      {
+        "name": "Minh Tai Phan",
+        "highlight": true
+      },
+      {
+        "name": "Hoang Dien Nguyen",
+        "highlight": false
+      },
+      {
+        "name": "Hieu Duong Trung",
+        "highlight": false
+      },
+      {
+        "name": "Thien Vu Nguyen",
+        "highlight": false
+      }
+    ],
+    "year": "2025",
+    "conference": "11th EAI International Conference on Smart Objects and Technologies for Social Good (GOODTECHS 2025)",
+    "link": "https://goodtechs.eai-conferences.org/2025/"
+  }
+]

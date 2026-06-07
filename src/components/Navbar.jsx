@@ -32,7 +32,7 @@ export default function Navbar() {
   const { lang } = useLang()
   const tr = t[lang].nav
 
-  const anchors = ['about', 'skills', 'projects', 'contact']
+  const anchors = ['about', 'experience', 'skills', 'edupub', 'projects', 'contact']
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "toeic",
+    "name": "TOEIC 740",
+    "issuer": "ETS",
+    "icon": "🌐",
+    "color": "#22D3EE"
+  },
+  {
+    "id": "googleai",
+    "name": "Google AI Essentials",
+    "issuer": "Google",
+    "icon": "🤖",
+    "color": "#10B981"
+  },
+  {
+    "id": "aws",
+    "name": "AWS for Beginners",
+    "issuer": "Udemy",
+    "icon": "☁️",
+    "color": "#F59E0B"
+  },
+  {
+    "id": "rag",
+    "name": "RAG Systems Expert",
+    "issuer": "Ready Tensor",
+    "icon": "🧠",
+    "color": "#8B5CF6"
+  }
+]

@@ -1,0 +1,124 @@
+[
+  {
+    "id": "finsight",
+    "title": "FinSight Agent",
+    "subtitleVi": "Phân tích tài chính AI",
+    "subtitleEn": "AI Financial Analyst",
+    "descVi": "Hệ thống multi-agent RAG phân tích tài chính thời gian thực. Xử lý báo cáo 10-K, kết quả kinh doanh và dữ liệu thị trường để tạo ra các nhận định hữu ích.",
+    "descEn": "Multi-agent RAG system for real-time financial analysis. Ingests 10-K filings, earnings reports, and market data to generate actionable insights.",
+    "tags": [
+      "LangGraph",
+      "FastAPI",
+      "Qdrant",
+      "React",
+      "Claude"
+    ],
+    "color": "#8B5CF6",
+    "icon": "📈",
+    "status": "Live",
+    "year": "2026",
+    "liveUrl": "https://finsightagent.tech",
+    "githubUrl": "https://github.com/phanminhtai23/finsight-agentic-production"
+  },
+  {
+    "id": "mammoai",
+    "title": "MammoAI",
+    "subtitleVi": "Phát hiện ung thư vú AI",
+    "subtitleEn": "Breast Cancer Detection",
+    "descVi": "Hệ thống deep learning đầu cuối phân tích ảnh chụp vú (mammogram) để dự đoán BI-RADS và tư vấn sàng lọc online. Triển khai trên AWS với CI/CD tự động.",
+    "descEn": "End-to-end deep learning system for mammogram analysis — predicts BI-RADS scores and offers online screening. Deployed on AWS with full CI/CD.",
+    "tags": [
+      "Python",
+      "PyTorch",
+      "FastAPI",
+      "Docker",
+      "AWS"
+    ],
+    "color": "#22D3EE",
+    "icon": "🔬",
+    "status": "Research",
+    "year": "2025",
+    "liveUrl": "",
+    "githubUrl": "https://github.com/phanminhtai23/BE_MammoAI"
+  },
+  {
+    "id": "vietlex",
+    "title": "VietLex",
+    "subtitleVi": "Công cụ nghiên cứu NLP",
+    "subtitleEn": "NLP Research Tool",
+    "descVi": "Công cụ tìm kiếm văn bản pháp luật tiếng Việt dựa trên semantic embedding. Xử lý 50k+ tài liệu pháp lý với tốc độ truy xuất dưới 1 giây.",
+    "descEn": "Vietnamese legal document search engine powered by semantic embeddings. Processes 50k+ legal documents with sub-second retrieval.",
+    "tags": [
+      "Elasticsearch",
+      "FastAPI",
+      "React",
+      "Sentence Transformers"
+    ],
+    "color": "#10B981",
+    "icon": "⚖️",
+    "status": "Research",
+    "year": "2024",
+    "liveUrl": "",
+    "githubUrl": ""
+  },
+  {
+    "id": "scheduleai",
+    "title": "ScheduleAI",
+    "subtitleVi": "Lịch hẹn thông minh",
+    "subtitleEn": "Smart Scheduler",
+    "descVi": "Công cụ lên lịch cuộc họp bằng ngôn ngữ tự nhiên, tích hợp Google Calendar. Xử lý các ràng buộc phức tạp như múi giờ và sở thích người tham gia.",
+    "descEn": "Natural language meeting scheduler that integrates with Google Calendar. Handles complex constraints like time zones and participant preferences.",
+    "tags": [
+      "OpenAI",
+      "Node.js",
+      "Next.js",
+      "Google API"
+    ],
+    "color": "#F59E0B",
+    "icon": "📅",
+    "status": "Beta",
+    "year": "2024",
+    "liveUrl": "",
+    "githubUrl": ""
+  },
+  {
+    "id": "streamdash",
+    "title": "StreamDash",
+    "subtitleVi": "Phân tích thời gian thực",
+    "subtitleEn": "Real-time Analytics",
+    "descVi": "Dashboard WebSocket theo dõi hiệu suất pipeline AI. Giám sát lượng token, độ trễ và tỷ lệ lỗi trên các agent.",
+    "descEn": "WebSocket-powered dashboard for monitoring AI pipeline performance. Tracks token usage, latency, and error rates across agents.",
+    "tags": [
+      "Redis",
+      "FastAPI",
+      "React",
+      "WebSocket",
+      "Recharts"
+    ],
+    "color": "#EC4899",
+    "icon": "📊",
+    "status": "In Progress",
+    "year": "2026",
+    "liveUrl": "",
+    "githubUrl": ""
+  },
+  {
+    "id": "dotme",
+    "title": "dotme",
+    "subtitleVi": "Trang cá nhân",
+    "subtitleEn": "Personal Site",
+    "descVi": "Chính là trang này! Portfolio pixel-perfect xây bằng React, với giao diện tối, đẹp và nhanh.",
+    "descEn": "This very site! A pixel-perfect portfolio built with React, inspired by taste-skill design principles. Dark, beautiful, fast.",
+    "tags": [
+      "React",
+      "Vite",
+      "CSS"
+    ],
+    "color": "#8B5CF6",
+    "icon": "✨",
+    "status": "Live",
+    "year": "2026",
+    "liveUrl": "#",
+    "githubUrl": "#"
+  }
+]

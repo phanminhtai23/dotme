@@ -119,12 +119,32 @@ function ProjectCard({ project, index, visible, tr, lang }) {
   )
 }
 
+function apiToProject(p) {
+  return {
+    id: p.id,
+    title: p.title,
+    subtitle: { vi: p.subtitleVi || '', en: p.subtitleEn || '' },
+    description: { vi: p.descVi || '', en: p.descEn || '' },
+    tags: Array.isArray(p.tags) ? p.tags : (p.tags || '').split(',').map(t => t.trim()).filter(Boolean),
+    color: p.color || '#8B5CF6',
+    icon: p.icon || '📦',
+    status: p.status || 'In Progress',
+    year: p.year || '',
+    links: { live: p.liveUrl || null, github: p.githubUrl || null },
+  }
+}
+
 export default function Projects() {
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
+  const [projectList, setProjectList] = useState(projects)
   const { isMobile, isTablet } = useBreakpoint()
   const { lang } = useLang()
   const tr = t[lang].projects
+
+  useEffect(() => {
+    fetch('/api/content/projects').then(r => r.json()).then(data => setProjectList(data.map(apiToProject))).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => {
@@ -152,7 +172,7 @@ export default function Projects() {
           {tr.sub}
         </p>
         <div style={{ display:'grid', gridTemplateColumns:`repeat(${cols}, 1fr)`, gap: isMobile ? '14px' : '18px' }}>
-          {projects.map((project, i) => (
+          {projectList.map((project, i) => (
             <ProjectCard key={project.id} project={project} index={i} visible={visible} tr={tr} lang={lang} />
           ))}
         </div>

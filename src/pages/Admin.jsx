@@ -6,6 +6,7 @@ import { DIFFICULTY } from '../games/difficulty'
 import { getAnalytics, trackVisit } from '../analytics'
 import { api } from '../api'
 import ImageUploader from '../components/ImageUploader'
+import AdminContent from '../components/AdminContent'
 import { LangProvider, useLang } from '../LangContext'
 import { t } from '../i18n'
 
@@ -393,6 +394,7 @@ function AdminInner() {
     { id:'accounts',  label:tr.tabs.accounts,  icon:'👥' },
     { id:'links',     label:tr.tabs.links,     icon:'🔑' },
     { id:'messages',  label:tr.tabs.messages,  icon:'💬' },
+    { id:'content',   label:tr.tabs.content,   icon:'✏️' },
   ]
 
   const refresh = useCallback(() => {
@@ -764,6 +766,9 @@ function AdminInner() {
             )}
           </div>
         )}
+
+        {/* ── CONTENT ── */}
+        {tab === 'content' && <AdminContent />}
 
         {/* ── MESSAGES ── */}
         {tab === 'messages' && (
