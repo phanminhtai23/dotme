@@ -5,33 +5,33 @@ import { t } from '../i18n'
 
 const skillGroups = [
   {
-    category: { vi: 'AI & ML', en: 'AI & ML' }, icon: '🤖', color: '#8B5CF6',
+    category: { vi: 'LLM & AI Agent', en: 'LLM & AI Agent' }, icon: '🤖', color: '#8B5CF6',
     skills: [
       { name: 'LangChain / LangGraph', level: 90 },
       { name: 'RAG Pipelines', level: 88 },
-      { name: 'OpenAI / Claude API', level: 92 },
-      { name: 'Vector Databases', level: 80 },
       { name: 'Multi-Agent Systems', level: 85 },
+      { name: 'Prompt Engineering', level: 82 },
+      { name: 'Qdrant / Vector DB', level: 80 },
     ],
   },
   {
-    category: { vi: 'Backend', en: 'Backend' }, icon: '⚙️', color: '#22D3EE',
+    category: { vi: 'ML & Deep Learning', en: 'ML & Deep Learning' }, icon: '🧠', color: '#22D3EE',
+    skills: [
+      { name: 'Machine Learning', level: 85 },
+      { name: 'Deep Learning', level: 83 },
+      { name: 'TensorFlow / PyTorch', level: 80 },
+      { name: 'YOLO / Computer Vision', level: 78 },
+      { name: 'PaddleOCR / OCR', level: 75 },
+    ],
+  },
+  {
+    category: { vi: 'Backend & DevOps', en: 'Backend & DevOps' }, icon: '⚙️', color: '#EC4899',
     skills: [
       { name: 'Python / FastAPI', level: 90 },
-      { name: 'Node.js / Express', level: 78 },
-      { name: 'PostgreSQL', level: 84 },
-      { name: 'Redis', level: 72 },
-      { name: 'Docker / DevOps', level: 75 },
-    ],
-  },
-  {
-    category: { vi: 'Frontend', en: 'Frontend' }, icon: '✨', color: '#EC4899',
-    skills: [
-      { name: 'React / Vite', level: 87 },
-      { name: 'TypeScript', level: 82 },
-      { name: 'CSS / Animation', level: 85 },
-      { name: 'Tailwind CSS', level: 90 },
-      { name: 'Next.js', level: 75 },
+      { name: 'Docker / GitHub Actions', level: 80 },
+      { name: 'AWS / Ubuntu Server', level: 75 },
+      { name: 'PostgreSQL / MongoDB', level: 82 },
+      { name: 'Nginx / Redis', level: 72 },
     ],
   },
 ]

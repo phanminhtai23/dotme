@@ -64,19 +64,6 @@ export default function About() {
             </div>
           </div>
 
-          {/* Badge bên dưới ảnh */}
-          <div style={{ display:'flex', justifyContent: isMobile ? 'center' : 'flex-start' }}>
-            <span style={{
-              display:'inline-flex', alignItems:'center', gap:7,
-              background:'linear-gradient(135deg,#10B981,#22D3EE)',
-              borderRadius:12, padding:'10px 20px',
-              fontSize:13, fontWeight:700, color:'#fff',
-              boxShadow:'0 4px 20px rgba(16,185,129,0.4)',
-            }}>
-              🤖 AI Lover
-            </span>
-          </div>
-
           {/* Stats grid */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, width:'100%' }}>
             {statValues.map((val, i) => (
@@ -104,7 +91,7 @@ export default function About() {
             ))}
           </div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginTop:28, justifyContent: isMobile ? 'center' : 'flex-start' }}>
-            {['Python', 'React', 'LangGraph', 'FastAPI', 'PostgreSQL', 'TypeScript'].map(tag => (
+            {['Python', 'LangGraph', 'FastAPI', 'Docker', 'React', 'AWS'].map(tag => (
               <span key={tag} style={{ background:'rgba(139,92,246,0.1)', border:'1px solid rgba(139,92,246,0.25)', color:'#a78bfa', borderRadius:'var(--radius-full)', padding:'5px 14px', fontSize:13, fontWeight:500 }}>{tag}</span>
             ))}
           </div>
