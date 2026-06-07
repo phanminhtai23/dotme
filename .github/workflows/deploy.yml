@@ -36,19 +36,8 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
 
       - name: Deploy over SSH
-        env:
-          HOST: ${{ secrets.SERVER_HOST }}
-          DEPLOY_USER: ${{ secrets.SERVER_USER }}
-        run: >
-          ssh -i ~/.ssh/deploy_key
-          -o StrictHostKeyChecking=no
-          "$DEPLOY_USER@$HOST"
-          "set -e &&
-          cd /root/project/dotme &&
-          git fetch origin &&
-          git reset --hard origin/main &&
-          npm ci --omit=dev &&
-          npm run build &&
-          pm2 reload dotme-api --update-env &&
-          pm2 save &&
-          echo Deploy done"
+        run: |
+          H=$(echo '${{ secrets.SERVER_HOST }}' | tr -d '[:space:]')
+          U=$(echo '${{ secrets.SERVER_USER }}' | tr -d '[:space:]')
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -l "$U" "$H" \
+            "set -e && cd /root/project/dotme && git fetch origin && git reset --hard origin/main && npm ci --omit=dev && npm run build && pm2 reload dotme-api --update-env && pm2 save && echo done"
