@@ -36,15 +36,13 @@ export default function Login() {
 
       <div style={{ width:'100%', maxWidth:400, position:'relative', zIndex:1 }}>
         <div style={{ textAlign:'center', marginBottom:36 }}>
-          <a href="/" style={{ textDecoration:'none' }}>
-            <span style={{
-              fontFamily:'Syne, sans-serif', fontSize:30, fontWeight:800,
-              background:'linear-gradient(135deg,#8B5CF6,#22D3EE)',
-              WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
-            }}>
-              .me
-            </span>
-          </a>
+          <span style={{
+            fontFamily:'Syne, sans-serif', fontSize:30, fontWeight:800,
+            background:'linear-gradient(135deg,#8B5CF6,#22D3EE)',
+            WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
+          }}>
+            .me
+          </span>
           <p style={{ color:'#555577', fontSize:13, marginTop:6 }}>Admin Panel</p>
         </div>
 
