@@ -30,7 +30,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
-            cd /var/www/dotme
+            cd /root/project/dotme
 
             # Pull latest
             git pull origin main
@@ -45,8 +45,8 @@ jobs:
             pm2 reload dotme-api --update-env || pm2 start server/index.js \
               --name dotme-api \
               --interpreter node \
-              --node-args="--env-file=/var/www/dotme/.env" \
-              --cwd /var/www/dotme
+              --node-args="--env-file=/root/project/dotme/.env" \
+              --cwd /root/project/dotme
 
             pm2 save
             echo "✅ Deploy done"
