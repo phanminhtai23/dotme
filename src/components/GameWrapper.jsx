@@ -223,7 +223,7 @@ function MaxedOverlay({ onClose }) {
       <div style={{ background:'rgba(10,5,25,0.97)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:24, padding:'40px 36px', maxWidth:360, textAlign:'center' }}>
         <div style={{ fontSize:56, marginBottom:16 }}>🔒</div>
         <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:22, fontWeight:800, color:'#f0f0ff', marginBottom:10 }}>Hết lượt chơi</h2>
-        <p style={{ color:'#8888aa', fontSize:14, lineHeight:1.7, marginBottom:24 }}>Link này đã dùng đủ 3 lượt. Liên hệ Minh Tài để xin thêm nhé!</p>
+        <p style={{ color:'#8888aa', fontSize:14, lineHeight:1.7, marginBottom:24 }}>Link này đã dùng đủ 3 lượt. Liên hệ Kevin để xin thêm nhé!</p>
         <button onClick={onClose} style={{ background:'linear-gradient(135deg,#8B5CF6,#22d3ee)', color:'#fff', border:'none', borderRadius:12, padding:'12px 28px', fontSize:14, fontWeight:700, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>
           OK, tôi hiểu
         </button>

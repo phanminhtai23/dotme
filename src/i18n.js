@@ -18,7 +18,7 @@ export const t = {
       heading: 'Tôi biến ý tưởng thành sản phẩm thông minh.',
       headingAccent: 'thông minh',
       bio: [
-        'Xin chào! Tôi là Minh Tài, một kỹ sư phần mềm ở Việt Nam với niềm đam mê kết hợp AI và trải nghiệm người dùng tuyệt vời.',
+        'Xin chào! Tôi là Kevin, một kỹ sư phần mềm ở Việt Nam với niềm đam mê kết hợp AI và trải nghiệm người dùng tuyệt vời.',
         'Tôi chuyên xây dựng hệ thống AI đa tác nhân, pipeline RAG và ứng dụng full-stack. Hiện đang tập trung vào agentic workflow và AI tooling sẵn sàng cho production.',
         'Khi không code, tôi đọc research paper, đóng góp mã nguồn mở, hoặc mentoring cho các lập trình viên trẻ.',
       ],
@@ -99,7 +99,7 @@ export const t = {
       heading: 'I turn ideas into intelligent products.',
       headingAccent: 'intelligent',
       bio: [
-        "Hi! I'm Minh Tài, a software engineer based in Vietnam who's obsessed with the intersection of AI and great user experiences.",
+        "Hi! I'm Kevin, a software engineer based in Vietnam who's obsessed with the intersection of AI and great user experiences.",
         "I specialize in building multi-agent AI systems, RAG pipelines, and full-stack applications. Currently focused on agentic workflows and production-grade AI tooling.",
         "When I'm not coding, I'm exploring new research papers, contributing to open source, or mentoring aspiring developers.",
       ],

@@ -49,7 +49,7 @@ export default function About() {
               ) : (
                 <img
                   src="/avatar.png"
-                  alt="Minh Tài Phan"
+                  alt="Kevin Phan"
                   onError={() => setImgError(true)}
                   style={{
                     width:'100%', height:'100%',

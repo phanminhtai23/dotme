@@ -123,7 +123,7 @@ export default function Hero() {
           fontFamily:'var(--font-display)', fontSize:'clamp(52px, 9vw, 100px)',
           fontWeight:800, lineHeight:1.0, letterSpacing:'-0.03em', marginBottom:'24px',
         }}>
-          <span style={{ color:'var(--text-primary)' }}>Minh Tài</span>
+          <span style={{ color:'var(--text-primary)' }}>Kevin</span>
           <br />
           <span style={{ background:'var(--gradient-text)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
             Phan

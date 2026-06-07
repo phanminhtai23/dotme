@@ -62,7 +62,7 @@ export default function WinScreen({ winTime, remaining, accent = '#8B5CF6' }) {
           borderRadius:16, padding:'20px 24px', marginBottom:28,
         }}>
           <p style={{ fontSize:16, color:'rgba(255,255,255,0.85)', lineHeight:1.7, marginBottom:12 }}>
-            📸 <strong>Chụp màn hình này lại</strong> và liên hệ <strong style={{ color:'#ffd700' }}>Minh Tài</strong> để nhận quà nhé!
+            📸 <strong>Chụp màn hình này lại</strong> và liên hệ <strong style={{ color:'#ffd700' }}>Kevin</strong> để nhận quà nhé!
           </p>
           <p style={{ fontSize:13, color:'rgba(255,255,255,0.45)', lineHeight:1.6 }}>
             Màn hình win có ghi ngày giờ — đây là bằng chứng chiến thắng của bạn 🌟

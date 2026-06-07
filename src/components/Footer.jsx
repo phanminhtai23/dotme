@@ -14,7 +14,7 @@ export default function Footer() {
             .me
           </span>
           <p style={{ color:'var(--text-muted)', fontSize:'13px' }}>
-            © {year} Minh Tài Phan. {tr.credit}
+            © {year} Kevin Phan. {tr.credit}
           </p>
           <a href="#" style={{ display:'flex', alignItems:'center', gap:'6px', color:'var(--text-muted)', fontSize:'13px', textDecoration:'none', transition:'color 0.2s' }}
           onMouseEnter={e => e.currentTarget.style.color='var(--accent-purple)'}

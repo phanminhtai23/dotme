@@ -7,9 +7,9 @@ const STEP = { idle: 'idle', name: 'name', message: 'message', done: 'done' }
 const tr = {
   vi: {
     tooltip: 'Bạn muốn nhắn gì đến tôi không? 💌',
-    title: 'Nhắn cho Minh Tài',
+    title: 'Nhắn cho Kevin',
     subtitle: 'Thường trả lời trong 24h',
-    askName: 'Minh Tài hay gọi bạn là gì? 🐾',
+    askName: 'Kevin hay gọi bạn là gì? 🐾',
     namePh: 'Tên của bạn...',
     next: 'Tiếp theo →',
     greeting: (name) => <>Xin chào <strong style={{ color: '#a78bfa' }}>{name}</strong>! 👋<br/>Bạn muốn nhắn gì đến tôi?</>,
@@ -19,11 +19,11 @@ const tr = {
     doneTitle: 'Gửi rồi! 🎉',
     doneMsg: (name) => <>Cảm ơn <strong style={{ color: '#a78bfa' }}>{name}</strong>!<br/>Tôi sẽ đọc và trả lời sớm nhé! 🐾</>,
     error: 'Có lỗi xảy ra, bạn thử lại nhé! 🙏',
-    btnTitle: 'Nhắn tin cho Minh Tài',
+    btnTitle: 'Nhắn tin cho Kevin',
   },
   en: {
     tooltip: 'Want to send me a message? 💌',
-    title: 'Message Minh Tài',
+    title: 'Message Kevin',
     subtitle: 'Usually replies within 24h',
     askName: 'What should I call you? 🐾',
     namePh: 'Your name...',
@@ -35,7 +35,7 @@ const tr = {
     doneTitle: 'Sent! 🎉',
     doneMsg: (name) => <>Thanks <strong style={{ color: '#a78bfa' }}>{name}</strong>!<br/>I'll read it and reply soon! 🐾</>,
     error: 'Something went wrong, please try again! 🙏',
-    btnTitle: 'Message Minh Tài',
+    btnTitle: 'Message Kevin',
   },
 }
 
