@@ -40,7 +40,7 @@ jobs:
              cd /root/project/dotme && \
              git fetch origin && \
              git reset --hard origin/main && \
-             npm ci --omit=dev && \
+             npm ci && \
              npm run build && \
              pm2 reload dotme-api --update-env && \
              pm2 save && \
