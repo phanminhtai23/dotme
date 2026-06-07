@@ -38,11 +38,11 @@ jobs:
       - name: Deploy over SSH
         env:
           HOST: ${{ secrets.SERVER_HOST }}
-          USER: ${{ secrets.SERVER_USER }}
+          DEPLOY_USER: ${{ secrets.SERVER_USER }}
         run: >
           ssh -i ~/.ssh/deploy_key
           -o StrictHostKeyChecking=no
-          "$USER@$HOST"
+          "$DEPLOY_USER@$HOST"
           "set -e &&
           cd /root/project/dotme &&
           git fetch origin &&
