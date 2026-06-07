@@ -1,4 +1,4 @@
-name: Deploy dotme → kevinphan.me
+name: Deploy dotme to kevinphan.me
 
 on:
   push:
@@ -22,33 +22,33 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install & build frontend
+      - name: Install and build frontend
         run: |
           npm ci
           npm run build
 
-      - name: Deploy over SSH
+      - name: Setup SSH
         env:
           SSH_KEY_B64: ${{ secrets.SERVER_SSH_KEY }}
-          HOST: ${{ secrets.SERVER_HOST }}
-          USER: ${{ secrets.SERVER_USER }}
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_KEY_B64" | base64 -d > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "$USER@$HOST" << 'ENDSSH'
-            set -e
-            cd /root/project/dotme
-            git fetch origin
-            git reset --hard origin/main
-            npm ci --omit=dev
-            npm run build
-            pm2 reload dotme-api --update-env || pm2 start server/index.js \
-              --name dotme-api \
-              --node-args="--env-file=/root/project/dotme/.env" \
-              --cwd /root/project/dotme
-            pm2 save
-            echo "✅ Deployed $(git rev-parse --short HEAD)"
-ENDSSH
+      - name: Deploy over SSH
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+        run: >
+          ssh -i ~/.ssh/deploy_key
+          -o StrictHostKeyChecking=no
+          "$USER@$HOST"
+          "set -e &&
+          cd /root/project/dotme &&
+          git fetch origin &&
+          git reset --hard origin/main &&
+          npm ci --omit=dev &&
+          npm run build &&
+          pm2 reload dotme-api --update-env &&
+          pm2 save &&
+          echo Deploy done"
