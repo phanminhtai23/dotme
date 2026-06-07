@@ -28,13 +28,17 @@ jobs:
           npm run build
 
       - name: Deploy over SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          script: |
+        env:
+          SSH_KEY_B64: ${{ secrets.SERVER_SSH_KEY }}
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY_B64" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "$USER@$HOST" << 'ENDSSH'
             set -e
             cd /root/project/dotme
             git fetch origin
@@ -46,4 +50,5 @@ jobs:
               --node-args="--env-file=/root/project/dotme/.env" \
               --cwd /root/project/dotme
             pm2 save
-            echo "Deployed $(git rev-parse --short HEAD)"
+            echo "✅ Deployed $(git rev-parse --short HEAD)"
+ENDSSH
