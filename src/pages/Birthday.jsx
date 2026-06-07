@@ -154,7 +154,7 @@ function Candles({ name }) {
           background:'linear-gradient(135deg,#ff6b9d,#c44dff)',
           color:'#fff', border:'none', borderRadius:99,
           padding:'13px 32px', fontSize:15, fontWeight:700,
-          fontFamily:'Inter, sans-serif', cursor:'pointer',
+          fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", cursor:'pointer',
           boxShadow:'0 0 30px rgba(255,107,157,0.5)', transition:'all 0.3s',
           animation: blowing ? 'none' : 'candlePulse 2s ease-in-out infinite',
         }}
@@ -200,7 +200,7 @@ function BirthdayContent({ link }) {
   return (
     <div style={{
       minHeight:'100vh', background:'radial-gradient(ellipse at 30% 10%, #2d0545 0%, #0d0118 45%, #1a0030 100%)',
-      fontFamily:'Inter, sans-serif', color:'#f0f0ff', overflowX:'hidden',
+      fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", color:'#f0f0ff', overflowX:'hidden',
     }}>
       <Confetti />
 

@@ -198,7 +198,7 @@ function LoveContent({ link }) {
   const section = { maxWidth:760, margin:'0 auto', padding:'0 24px' }
 
   return (
-    <div style={{ minHeight:'100vh', background:'radial-gradient(ellipse at 40% 20%, #2d0015 0%, #0d0007 50%, #1a000a 100%)', fontFamily:'Inter, sans-serif', color:'#f0f0ff', overflowX:'hidden' }}>
+    <div style={{ minHeight:'100vh', background:'radial-gradient(ellipse at 40% 20%, #2d0015 0%, #0d0007 50%, #1a000a 100%)', fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", color:'#f0f0ff', overflowX:'hidden' }}>
       <HeartsCanvas />
       <Stars />
 

@@ -130,7 +130,7 @@ function MotivationContent({ link }) {
   ]
 
   return (
-    <div style={{ minHeight:'100vh', background:'radial-gradient(ellipse at 20% 10%, #1a0f00 0%, #0a0f1e 50%, #0f0a00 100%)', fontFamily:'Inter, sans-serif', color:'#f0f0ff', overflowX:'hidden' }}>
+    <div style={{ minHeight:'100vh', background:'radial-gradient(ellipse at 20% 10%, #1a0f00 0%, #0a0f1e 50%, #0f0a00 100%)', fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", color:'#f0f0ff', overflowX:'hidden' }}>
       {/* Floating decorations */}
       {['💪','🔥','⚡','🎯','🚀','😸'].map((e, i) => (
         <span key={i} style={{ position:'fixed', fontSize:32+i*4, opacity:0.06, pointerEvents:'none', top:`${10+i*14}%`, left: i % 2 ? `${3+i*2}%` : undefined, right: i % 2 === 0 ? `${3+i*2}%` : undefined, animation:`floatDeco ${2.5+i*0.3}s ease-in-out infinite alternate`, animationDelay:`${i*0.3}s`, userSelect:'none' }}>{e}</span>
@@ -239,7 +239,7 @@ function MotivationContent({ link }) {
             <button onClick={nextQ} style={{
               background:`linear-gradient(135deg, ${q.color}, ${q.color}bb)`, color:'#000',
               border:'none', borderRadius:99, padding:'14px 36px', fontSize:15, fontWeight:800,
-              fontFamily:'Inter, sans-serif', cursor:'pointer', boxShadow:`0 0 30px ${q.color}44`, transition:'all 0.3s',
+              fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", cursor:'pointer', boxShadow:`0 0 30px ${q.color}44`, transition:'all 0.3s',
             }}
             onMouseEnter={e => { e.currentTarget.style.transform='translateY(-3px) scale(1.04)'; e.currentTarget.style.boxShadow=`0 0 50px ${q.color}88` }}
             onMouseLeave={e => { e.currentTarget.style.transform='translateY(0) scale(1)'; e.currentTarget.style.boxShadow=`0 0 30px ${q.color}44` }}
@@ -249,7 +249,7 @@ function MotivationContent({ link }) {
             <button onClick={() => { navigator.clipboard?.writeText(q.text) }} style={{
               background:'transparent', color:'rgba(255,255,255,0.5)', border:'1px solid rgba(255,255,255,0.15)',
               borderRadius:99, padding:'14px 28px', fontSize:14, fontWeight:600,
-              fontFamily:'Inter, sans-serif', cursor:'pointer', transition:'all 0.2s',
+              fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", cursor:'pointer', transition:'all 0.2s',
             }}
             onMouseEnter={e => { e.currentTarget.style.color='#fff'; e.currentTarget.style.borderColor='rgba(255,255,255,0.4)' }}
             onMouseLeave={e => { e.currentTarget.style.color='rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.15)' }}

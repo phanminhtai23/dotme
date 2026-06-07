@@ -12,7 +12,7 @@ const TYPE_META = {
 // ── Floating "Bạn muốn nhận quà?" button ────────────────────────────────────
 function GiftButton({ onClick, accent }) {
   return (
-    <div style={{ position:'fixed', bottom:96, right:28, zIndex:150, display:'flex', flexDirection:'column', alignItems:'center', gap:8, fontFamily:'Inter, sans-serif' }}>
+    <div style={{ position:'fixed', bottom:96, right:28, zIndex:150, display:'flex', flexDirection:'column', alignItems:'center', gap:8, fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif" }}>
       {/* Wiggling tooltip */}
       <div style={{
         background:'rgba(10,5,20,0.92)', backdropFilter:'blur(16px)',
@@ -91,7 +91,7 @@ function IntroOverlay({ meta, diffCfg, difficulty, remaining, onStart, onClose, 
       position:'fixed', inset:0, zIndex:200,
       background:'rgba(0,0,0,0.78)', backdropFilter:'blur(8px)',
       display:'flex', alignItems:'center', justifyContent:'center', padding:24,
-      fontFamily:'Inter, sans-serif',
+      fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif",
     }}
     onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div style={{
@@ -131,7 +131,7 @@ function IntroOverlay({ meta, diffCfg, difficulty, remaining, onStart, onClose, 
         <button onClick={onStart} style={{
           width:'100%', background:`linear-gradient(135deg, ${accent}, ${accent}aa)`,
           color:'#fff', border:'none', borderRadius:12, padding:'15px',
-          fontSize:16, fontWeight:800, fontFamily:'Inter, sans-serif', cursor:'pointer',
+          fontSize:16, fontWeight:800, fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", cursor:'pointer',
           boxShadow:`0 0 30px ${accent}44`, transition:'all 0.3s',
           letterSpacing:'0.05em',
         }}
@@ -160,7 +160,7 @@ function LoseOverlay({ remaining, onRetry, onClose, accent, loseData }) {
       position:'fixed', inset:0, zIndex:300,
       background:'rgba(0,0,0,0.88)', backdropFilter:'blur(12px)',
       display:'flex', alignItems:'center', justifyContent:'center',
-      padding:24, fontFamily:'Inter, sans-serif',
+      padding:24, fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif",
     }}>
       <div style={{
         background:'rgba(10,5,25,0.97)', border:'1px solid rgba(239,68,68,0.3)',
@@ -191,7 +191,7 @@ function LoseOverlay({ remaining, onRetry, onClose, accent, loseData }) {
             <button onClick={onRetry} style={{
               flex:2, background:'linear-gradient(135deg,#ef4444,#dc2626)',
               color:'#fff', border:'none', borderRadius:12, padding:'13px',
-              fontSize:14, fontWeight:700, fontFamily:'Inter, sans-serif', cursor:'pointer',
+              fontSize:14, fontWeight:700, fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", cursor:'pointer',
               boxShadow:'0 0 24px rgba(239,68,68,0.4)',
             }}>
               🔄 Thử lại ({remaining} lượt)
@@ -200,7 +200,7 @@ function LoseOverlay({ remaining, onRetry, onClose, accent, loseData }) {
           <button onClick={onClose} style={{
             flex:1, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)',
             borderRadius:12, padding:'13px', fontSize:14, fontWeight:600,
-            color:'#8888aa', fontFamily:'Inter, sans-serif', cursor:'pointer',
+            color:'#8888aa', fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", cursor:'pointer',
           }}>
             Đóng
           </button>
@@ -218,13 +218,13 @@ function MaxedOverlay({ onClose }) {
       position:'fixed', inset:0, zIndex:300,
       background:'rgba(0,0,0,0.88)', backdropFilter:'blur(12px)',
       display:'flex', alignItems:'center', justifyContent:'center',
-      padding:24, fontFamily:'Inter, sans-serif',
+      padding:24, fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif",
     }}>
       <div style={{ background:'rgba(10,5,25,0.97)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:24, padding:'40px 36px', maxWidth:360, textAlign:'center' }}>
         <div style={{ fontSize:56, marginBottom:16 }}>🔒</div>
         <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:22, fontWeight:800, color:'#f0f0ff', marginBottom:10 }}>Hết lượt chơi</h2>
         <p style={{ color:'#8888aa', fontSize:14, lineHeight:1.7, marginBottom:24 }}>Link này đã dùng đủ 3 lượt. Liên hệ Kevin để xin thêm nhé!</p>
-        <button onClick={onClose} style={{ background:'linear-gradient(135deg,#8B5CF6,#22d3ee)', color:'#fff', border:'none', borderRadius:12, padding:'12px 28px', fontSize:14, fontWeight:700, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>
+        <button onClick={onClose} style={{ background:'linear-gradient(135deg,#8B5CF6,#22d3ee)', color:'#fff', border:'none', borderRadius:12, padding:'12px 28px', fontSize:14, fontWeight:700, fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", cursor:'pointer' }}>
           OK, tôi hiểu
         </button>
       </div>

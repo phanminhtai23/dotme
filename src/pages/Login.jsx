@@ -23,13 +23,13 @@ export default function Login() {
   const inputStyle = {
     width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)',
     borderRadius:12, padding:'13px 18px', color:'#f0f0ff', fontSize:15,
-    fontFamily:'Inter, sans-serif', outline:'none', boxSizing:'border-box', transition:'all 0.2s ease',
+    fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", outline:'none', boxSizing:'border-box', transition:'all 0.2s ease',
   }
 
   return (
     <div style={{
       minHeight:'100vh', background:'#06060f', display:'flex', alignItems:'center',
-      justifyContent:'center', fontFamily:'Inter, sans-serif', padding:24, position:'relative', overflow:'hidden',
+      justifyContent:'center', fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", padding:24, position:'relative', overflow:'hidden',
     }}>
       <div style={{ position:'fixed', top:'20%', left:'10%', width:400, height:400, background:'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)', borderRadius:'50%', filter:'blur(40px)', pointerEvents:'none' }} />
       <div style={{ position:'fixed', bottom:'20%', right:'10%', width:300, height:300, background:'radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 70%)', borderRadius:'50%', filter:'blur(40px)', pointerEvents:'none' }} />
@@ -91,7 +91,7 @@ export default function Login() {
             <button type="submit" disabled={loading} style={{
               background:'linear-gradient(135deg,#8B5CF6,#22D3EE)', color:'#fff', border:'none',
               borderRadius:12, padding:'14px', fontSize:15, fontWeight:700,
-              fontFamily:'Inter, sans-serif', cursor: loading ? 'default' : 'pointer',
+              fontFamily:"'Inter','Be Vietnam Pro',system-ui,sans-serif", cursor: loading ? 'default' : 'pointer',
               marginTop:6, transition:'all 0.3s ease', boxShadow:'0 0 30px rgba(139,92,246,0.3)',
               display:'flex', alignItems:'center', justifyContent:'center', gap:10,
             }}

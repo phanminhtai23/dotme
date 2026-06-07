@@ -7,7 +7,7 @@ function ErrorScreen({ emoji, title, msg }) {
     <div style={{
       minHeight: '100vh', background: '#06060f',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'Inter, sans-serif', color: '#f0f0ff', textAlign: 'center', padding: '40px',
+      fontFamily: 'Inter','Be Vietnam Pro',system-ui,sans-serif, color: '#f0f0ff', textAlign: 'center', padding: '40px',
     }}>
       <div style={{ fontSize: 80, marginBottom: 24 }}>{emoji}</div>
       <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>{title}</h2>
@@ -25,7 +25,7 @@ const inputStyle = {
   width: '100%', boxSizing: 'border-box',
   background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
   borderRadius: '12px', padding: '13px 18px', color: '#f0f0ff',
-  fontSize: '15px', fontFamily: 'Inter, sans-serif', outline: 'none', transition: 'all 0.2s',
+  fontSize: '15px', fontFamily: 'Inter','Be Vietnam Pro',system-ui,sans-serif, outline: 'none', transition: 'all 0.2s',
 }
 
 export default function ProtectedPage({ linkId, renderPage, accent = '#ff6b9d', bgEmoji = '🔒' }) {
@@ -82,7 +82,7 @@ export default function ProtectedPage({ linkId, renderPage, accent = '#ff6b9d', 
       minHeight: '100vh',
       background: `linear-gradient(135deg, ${accent}18 0%, #06060f 50%, ${accent}10 100%)`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'Inter, sans-serif', padding: '24px', position: 'relative', overflow: 'hidden',
+      fontFamily: 'Inter','Be Vietnam Pro',system-ui,sans-serif, padding: '24px', position: 'relative', overflow: 'hidden',
     }}>
       {/* Floating decorations */}
       {[...Array(6)].map((_, i) => (
@@ -159,7 +159,7 @@ export default function ProtectedPage({ linkId, renderPage, accent = '#ff6b9d', 
             <button type="submit" disabled={loading} style={{
               background: `linear-gradient(135deg, ${accent}, ${accent}bb)`,
               color: '#fff', border: 'none', borderRadius: '12px', padding: '14px',
-              fontSize: '15px', fontWeight: 700, fontFamily: 'Inter, sans-serif',
+              fontSize: '15px', fontWeight: 700, fontFamily: 'Inter','Be Vietnam Pro',system-ui,sans-serif,
               cursor: loading ? 'default' : 'pointer', transition: 'all 0.3s',
               boxShadow: `0 0 24px ${accent}44`,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
