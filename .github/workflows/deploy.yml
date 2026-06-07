@@ -1,0 +1,52 @@
+name: Deploy dotme → kevinphan.me
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install & build frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            cd /var/www/dotme
+
+            # Pull latest
+            git pull origin main
+
+            # Install deps
+            npm ci --omit=dev
+
+            # Build frontend
+            npm run build
+
+            # Restart API server via PM2
+            pm2 reload dotme-api --update-env || pm2 start server/index.js \
+              --name dotme-api \
+              --interpreter node \
+              --node-args="--env-file=/var/www/dotme/.env" \
+              --cwd /var/www/dotme
+
+            pm2 save
+            echo "✅ Deploy done"

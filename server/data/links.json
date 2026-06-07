@@ -1,0 +1,41 @@
+[
+  {
+    "id": "ryrb7jes5",
+    "ownerUsername": "test",
+    "type": "birthday",
+    "name": "kho",
+    "path": "/birthday/ryrb7jes5",
+    "created": "2026-06-07",
+    "expiresAt": null,
+    "difficulty": "hard",
+    "images": [],
+    "plays": [
+      {
+        "ip": "::1",
+        "won": false,
+        "at": "2026-06-07T09:06:54.764Z"
+      },
+      {
+        "ip": "::1",
+        "won": false,
+        "at": "2026-06-07T09:08:28.057Z"
+      },
+      {
+        "ip": "::1",
+        "won": false,
+        "at": "2026-06-07T09:11:46.393Z"
+      }
+    ]
+  },
+  {
+    "id": "habgnwnj4",
+    "ownerUsername": "test",
+    "type": "motivation",
+    "name": "kho - dong luc",
+    "path": "/motivation/habgnwnj4",
+    "created": "2026-06-07",
+    "expiresAt": null,
+    "images": [],
+    "plays": []
+  }
+]
