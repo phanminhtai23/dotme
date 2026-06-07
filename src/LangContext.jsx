@@ -3,7 +3,7 @@ import { createContext, useContext, useState } from 'react'
 const LangCtx = createContext({ lang: 'vi', setLang: () => {} })
 
 export function LangProvider({ children }) {
-  const [lang, setLang] = useState(() => localStorage.getItem('dotme_lang') || 'vi')
+  const [lang, setLang] = useState(() => localStorage.getItem('dotme_lang') || 'en')
 
   const changeLang = (l) => {
     setLang(l)
