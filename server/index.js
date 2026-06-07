@@ -3,7 +3,7 @@ import cors from 'cors'
 import multer from 'multer'
 import bcrypt from 'bcryptjs'
 import { Resend } from 'resend'
-import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join, extname } from 'path'
 
@@ -214,6 +214,39 @@ app.delete('/api/messages/:idx', (req, res) => {
 app.delete('/api/messages', (_, res) => { wj(MESSAGES_FILE, []); res.json({ ok: true }) })
 
 app.get('/api/health', (_, res) => res.json({ ok: true }))
+
+app.get('/api/storage', (_, res) => {
+  try {
+    const accounts = rj(ACCOUNTS_FILE)
+    const links    = rj(LINKS_FILE)
+    const messages = rj(MESSAGES_FILE)
+
+    let uploadBytes = 0, uploadCount = 0
+    try {
+      const files = readdirSync(UPLOADS_DIR)
+      uploadCount = files.length
+      files.forEach(f => { try { uploadBytes += statSync(join(UPLOADS_DIR, f)).size } catch {} })
+    } catch {}
+
+    const jsonBytes =
+      Buffer.byteLength(JSON.stringify(accounts)) +
+      Buffer.byteLength(JSON.stringify(links)) +
+      Buffer.byteLength(JSON.stringify(messages))
+
+    const totalBytes = uploadBytes + jsonBytes
+    const fmt = b => b > 1024*1024 ? `${(b/1024/1024).toFixed(2)} MB`
+                   : b > 1024       ? `${(b/1024).toFixed(1)} KB`
+                   :                  `${b} B`
+    res.json({
+      accounts: accounts.length,
+      links: links.length,
+      messages: messages.length,
+      uploads: { count: uploadCount, size: fmt(uploadBytes) },
+      json: { size: fmt(jsonBytes) },
+      total: { size: fmt(totalBytes), bytes: totalBytes },
+    })
+  } catch (err) { res.status(500).json({ error: err.message }) }
+})
 
 const PORT = process.env.PORT || 3001
 initData().then(() => app.listen(PORT, () => console.log(`✅ dotme API → http://localhost:${PORT}`)))

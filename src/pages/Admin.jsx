@@ -7,6 +7,7 @@ import { getAnalytics, trackVisit } from '../analytics'
 import { api } from '../api'
 import ImageUploader from '../components/ImageUploader'
 import { LangProvider, useLang } from '../LangContext'
+import { t } from '../i18n'
 
 function LangToggleAdmin() {
   const { lang, setLang } = useLang()
@@ -371,14 +372,6 @@ function LinkModal({ accounts, onSave, onClose }) {
 
 // ─── Main Admin ─────────────────────────────────────────────────────────────
 
-const TABS = [
-  { id:'dashboard', label:'Dashboard', icon:'📊' },
-  { id:'analytics', label:'Analytics', icon:'📈' },
-  { id:'accounts',  label:'Tài khoản', icon:'👥' },
-  { id:'links',     label:'Quyền truy cập', icon:'🔑' },
-  { id:'messages',  label:'Tin nhắn', icon:'💬' },
-]
-
 function AdminInner() {
   const navigate = useNavigate()
   const [tab, setTab]           = useState('dashboard')
@@ -389,11 +382,22 @@ function AdminInner() {
   const [modal, setModal]       = useState(null)
   const [editTarget, setEditTarget] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
-  const [serverOnline, setServerOnline] = useState(null) // null=checking, true, false
+  const [serverOnline, setServerOnline] = useState(null)
+  const [storage, setStorage] = useState(null)
   const session = getSession()
+  const { lang } = useLang()
+  const tr = t[lang].admin
+  const TABS = [
+    { id:'dashboard', label:tr.tabs.dashboard, icon:'📊' },
+    { id:'analytics', label:tr.tabs.analytics, icon:'📈' },
+    { id:'accounts',  label:tr.tabs.accounts,  icon:'👥' },
+    { id:'links',     label:tr.tabs.links,     icon:'🔑' },
+    { id:'messages',  label:tr.tabs.messages,  icon:'💬' },
+  ]
 
   const refresh = useCallback(() => {
     fetch('/api/health').then(r => r.ok ? setServerOnline(true) : setServerOnline(false)).catch(() => setServerOnline(false))
+    fetch('/api/storage').then(r => r.json()).then(setStorage).catch(() => {})
     api.getAccounts().then(setAccounts).catch(() => {})
     api.getLinks().then(setLinks).catch(() => {})
     api.getMessages().then(setMessages).catch(() => {
@@ -515,7 +519,7 @@ function AdminInner() {
           <a href="/" style={{ display:'flex', alignItems:'center', gap:8, color:'#555577', fontSize:13, textDecoration:'none', padding:'8px 12px', borderRadius:8, transition:'all 0.2s' }}
             onMouseEnter={e => { e.currentTarget.style.color='#f0f0ff'; e.currentTarget.style.background='rgba(255,255,255,0.05)' }}
             onMouseLeave={e => { e.currentTarget.style.color='#555577'; e.currentTarget.style.background='transparent' }}
-          >← Trang chủ</a>
+          >{tr.home}</a>
           <button onClick={() => { logout(); navigate('/login') }} style={{
             background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:10,
             padding:'10px 14px', color:'#fca5a5', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer',
@@ -523,7 +527,7 @@ function AdminInner() {
           }}
           onMouseEnter={e => e.currentTarget.style.background='rgba(239,68,68,0.16)'}
           onMouseLeave={e => e.currentTarget.style.background='rgba(239,68,68,0.08)'}
-          >🚪 Đăng xuất</button>
+          >{tr.logout}</button>
         </div>
       </aside>
 
@@ -543,10 +547,10 @@ function AdminInner() {
           <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
               {[
-                { label:'Lượt xem', value:analytics.total, color:'#8B5CF6', icon:'👁' },
-                { label:'Hôm nay', value:analytics.today, color:'#22d3ee', icon:'📅' },
-                { label:'Tài khoản', value:accounts.length, color:'#10b981', icon:'👥' },
-                { label:'Tin nhắn', value:messages.length, color:'#ec4899', icon:'💬' },
+                { label:tr.stats.views,    value:analytics.total,    color:'#8B5CF6', icon:'👁' },
+                { label:tr.stats.today,    value:analytics.today,    color:'#22d3ee', icon:'📅' },
+                { label:tr.stats.accounts, value:accounts.length,    color:'#10b981', icon:'👥' },
+                { label:tr.stats.messages, value:messages.length,    color:'#ec4899', icon:'💬' },
               ].map((k, i) => (
                 <Card key={i} style={{ position:'relative', overflow:'hidden', border:`1px solid ${k.color}20` }}>
                   <div style={{ position:'absolute', top:0, right:0, width:100, height:100, background:`radial-gradient(circle at top right, ${k.color}12, transparent 70%)` }} />
@@ -556,13 +560,31 @@ function AdminInner() {
                 </Card>
               ))}
             </div>
+            {storage && (
+              <Card style={{ border:'1px solid rgba(139,92,246,0.2)' }}>
+                <SectionTitle>💾 {tr.storage}</SectionTitle>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
+                  {[
+                    { label:tr.storageLabels.total,   value: storage.total.size, color:'#8B5CF6' },
+                    { label:tr.storageLabels.uploads,  value: `${storage.uploads.size} (${storage.uploads.count})`, color:'#22d3ee' },
+                    { label:tr.storageLabels.json,     value: storage.json.size, color:'#10b981' },
+                    { label:tr.storageLabels.counts,   value: `${storage.links} / ${storage.accounts} / ${storage.messages}`, color:'#f59e0b' },
+                  ].map((s, i) => (
+                    <div key={i} style={{ background:'rgba(255,255,255,0.03)', border:`1px solid ${s.color}20`, borderRadius:12, padding:'14px 16px' }}>
+                      <div style={{ fontSize:13, color:'#8888aa', marginBottom:6 }}>{s.label}</div>
+                      <div style={{ fontSize:15, fontWeight:700, color:s.color }}>{s.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
             <Card>
-              <SectionTitle>Lượt xem 7 ngày qua</SectionTitle>
+              <SectionTitle>{tr.chart}</SectionTitle>
               <BarChart data={analytics.days} />
             </Card>
             {links.length > 0 && (
               <Card>
-                <SectionTitle>Links gần đây</SectionTitle>
+                <SectionTitle>{tr.recentLinks}</SectionTitle>
                 {links.slice(-4).reverse().map(link => (
                   <div key={link.id} style={{
                     display:'flex', alignItems:'center', gap:12, padding:'10px 0',
