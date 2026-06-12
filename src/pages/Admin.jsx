@@ -405,7 +405,7 @@ function AdminInner() {
     api.getMessages().then(setMessages).catch(() => {
       try { setMessages(JSON.parse(localStorage.getItem('dotme_messages') || '[]')) } catch { setMessages([]) }
     })
-    setAnalytics(getAnalytics())
+    getAnalytics().then(setAnalytics).catch(() => {})
   }, [])
 
   useEffect(() => {

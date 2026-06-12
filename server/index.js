@@ -13,9 +13,12 @@ const UPLOADS_DIR = join(__dirname, 'uploads')
 try { mkdirSync(DATA_DIR, { recursive: true }) } catch {}
 try { mkdirSync(UPLOADS_DIR, { recursive: true }) } catch {}
 
-const ACCOUNTS_FILE = join(DATA_DIR, 'accounts.json')
-const LINKS_FILE    = join(DATA_DIR, 'links.json')
-const MESSAGES_FILE = join(DATA_DIR, 'messages.json')
+const ACCOUNTS_FILE  = join(DATA_DIR, 'accounts.json')
+const LINKS_FILE     = join(DATA_DIR, 'links.json')
+const MESSAGES_FILE  = join(DATA_DIR, 'messages.json')
+const ANALYTICS_FILE = join(DATA_DIR, 'analytics.json')
+
+const EMPTY_ANALYTICS = { visits: {}, pages: {}, total: 0, lastVisit: null }
 
 const CONTENT_SECTIONS = ['experience', 'projects', 'certificates', 'publications']
 const CONTENT_FILES = Object.fromEntries(CONTENT_SECTIONS.map(s => [s, join(DATA_DIR, `${s}.json`)]))
@@ -94,8 +97,9 @@ async function initData() {
     console.log(`✅ Created default admin — username: admin`)
     console.log(`   ⚠️  Đổi mật khẩu sau khi đăng nhập lần đầu!`)
   }
-  if (!existsSync(LINKS_FILE))    wj(LINKS_FILE, [])
-  if (!existsSync(MESSAGES_FILE)) wj(MESSAGES_FILE, [])
+  if (!existsSync(LINKS_FILE))     wj(LINKS_FILE, [])
+  if (!existsSync(MESSAGES_FILE))  wj(MESSAGES_FILE, [])
+  if (!existsSync(ANALYTICS_FILE)) wj(ANALYTICS_FILE, EMPTY_ANALYTICS)
   for (const s of CONTENT_SECTIONS) {
     if (!existsSync(CONTENT_FILES[s])) wj(CONTENT_FILES[s], INITIAL_CONTENT[s])
   }
@@ -288,6 +292,24 @@ app.delete('/api/content/:section/:id', (req, res) => {
   wj(CONTENT_FILES[req.params.section], remaining)
   res.json({ ok: true })
 })
+
+// ── Visitor Analytics ───────────────────────────────────────────────────────
+// Lượt truy cập của admin/superadmin được loại trừ ở phía client (analytics.js)
+app.post('/api/visit', (req, res) => {
+  const store = rj(ANALYTICS_FILE, { ...EMPTY_ANALYTICS })
+  store.visits ||= {}
+  store.pages  ||= {}
+  const today = new Date().toISOString().slice(0, 10)
+  store.visits[today] = (store.visits[today] || 0) + 1
+  const page = String(req.body?.page || '/').slice(0, 200)
+  store.pages[page] = (store.pages[page] || 0) + 1
+  store.total = (store.total || 0) + 1
+  store.lastVisit = new Date().toISOString()
+  wj(ANALYTICS_FILE, store)
+  res.json({ ok: true })
+})
+
+app.get('/api/analytics', (_, res) => res.json(rj(ANALYTICS_FILE, { ...EMPTY_ANALYTICS })))
 
 app.get('/api/health', (_, res) => res.json({ ok: true }))
 

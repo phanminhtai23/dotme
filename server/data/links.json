@@ -1,41 +1,30 @@
 [
   {
-    "id": "ryrb7jes5",
-    "ownerUsername": "test",
-    "type": "birthday",
-    "name": "kho",
-    "path": "/birthday/ryrb7jes5",
-    "created": "2026-06-07",
-    "expiresAt": null,
-    "difficulty": "hard",
-    "images": [],
-    "plays": [
-      {
-        "ip": "::1",
-        "won": false,
-        "at": "2026-06-07T09:06:54.764Z"
-      },
-      {
-        "ip": "::1",
-        "won": false,
-        "at": "2026-06-07T09:08:28.057Z"
-      },
-      {
-        "ip": "::1",
-        "won": false,
-        "at": "2026-06-07T09:11:46.393Z"
-      }
-    ]
-  },
-  {
-    "id": "habgnwnj4",
-    "ownerUsername": "test",
+    "id": "9bgggxgk6",
+    "ownerUsername": "chikaka",
     "type": "motivation",
-    "name": "kho - dong luc",
-    "path": "/motivation/habgnwnj4",
+    "name": "Chi cute",
+    "path": "/motivation/9bgggxgk6",
     "created": "2026-06-07",
     "expiresAt": null,
-    "images": [],
+    "images": [
+      {
+        "url": "/uploads/1780844761225-a1ng4i.webp",
+        "filename": "1780844761225-a1ng4i.webp",
+        "name": "hinh-dai-dien-loopy-meme-hai-huoc-lay-loi-20.webp"
+      },
+      {
+        "url": "/uploads/1780844761320-j9l3ka.webp",
+        "filename": "1780844761320-j9l3ka.webp",
+        "name": "Anh-avatar-Loopy-hai-nhay-mat-tinh-nghich-vo-cung-dang-yeu.webp"
+      },
+      {
+        "url": "/uploads/1780844761411-ute6wd.jpg",
+        "filename": "1780844761411-ute6wd.jpg",
+        "name": "meme-loopy-12.jpg"
+      }
+    ],
+    "difficulty": "hard",
     "plays": []
   }
 ]

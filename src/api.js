@@ -30,6 +30,10 @@ export const api = {
   getPlays: (id) => req('GET', `/links/${id}/plays`),
   recordPlay: (id, won) => req('POST', `/links/${id}/play`, { won }),
 
+  // Analytics
+  recordVisit: (page) => req('POST', '/visit', { page }),
+  getAnalytics: () => req('GET', '/analytics'),
+
   // Messages
   getMessages: () => req('GET', '/messages'),
   deleteMessage: (idx) => req('DELETE', `/messages/${idx}`),
