@@ -3,3 +3,7 @@ dist
 .env
 .env.local
 README.local.md
+*.webp
+*.jpg
+*.png
+*.nginx
