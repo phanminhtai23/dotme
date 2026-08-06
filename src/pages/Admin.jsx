@@ -102,25 +102,40 @@ function GradBtn({ children, onClick, color = 'purple', disabled = false, style 
 // ─── Bar Chart ─────────────────────────────────────────────────────────────
 
 function BarChart({ data }) {
+  if (!data.length) {
+    return <div style={{ color:'#555577', fontSize:13 }}>Chưa có dữ liệu truy cập.</div>
+  }
+
   const max = Math.max(...data.map(d => d.visits), 1)
   return (
-    <div style={{ display:'flex', alignItems:'flex-end', gap:8, height:110 }}>
-      {data.map((d, i) => (
-        <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
-          <div style={{ fontSize:11, color:'#a78bfa', fontWeight:600, minHeight:16 }}>
-            {d.visits > 0 ? d.visits : ''}
+    <div style={{ overflowX:'auto', paddingBottom:6 }}>
+      <div style={{
+        display:'grid',
+        gridAutoFlow:'column',
+        gridAutoColumns:'minmax(22px, 1fr)',
+        alignItems:'end',
+        gap:8,
+        minWidth: Math.max(data.length * 30, 560),
+        height:170,
+      }}>
+        {data.map((d, i) => (
+          <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'end', gap:6, minHeight:150 }}>
+            <div style={{ fontSize:11, color:'#a78bfa', fontWeight:600, minHeight:16 }}>
+              {d.visits > 0 ? d.visits : ''}
+            </div>
+            <div style={{
+              width:'100%',
+              height:`${Math.max((d.visits / max) * 100, 2)}px`,
+              background: d.visits > 0 ? 'linear-gradient(180deg,#8B5CF6,#22D3EE)' : 'rgba(255,255,255,0.06)',
+              borderRadius:'4px 4px 0 0', transition:'height 0.5s cubic-bezier(0.16,1,0.3,1)',
+              boxShadow: d.visits > 0 ? '0 0 12px rgba(139,92,246,0.2)' : 'none',
+            }} />
+            <span style={{ fontSize:10, color:'#555577', whiteSpace:'nowrap' }}>
+              {d.label}
+            </span>
           </div>
-          <div style={{
-            width:'100%',
-            height:`${Math.max((d.visits / max) * 80, 2)}px`,
-            background: d.visits > 0 ? 'linear-gradient(180deg,#8B5CF6,#22D3EE)' : 'rgba(255,255,255,0.06)',
-            borderRadius:'4px 4px 0 0', transition:'height 0.5s cubic-bezier(0.16,1,0.3,1)',
-          }} />
-          <span style={{ fontSize:10, color:'#555577', whiteSpace:'nowrap' }}>
-            {d.label.split(' ').slice(-1)[0]}
-          </span>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }
@@ -612,9 +627,25 @@ function AdminInner() {
 
         {/* ── ANALYTICS ── */}
         {tab === 'analytics' && (
-          <div style={{ display:'flex', flexDirection:'column', gap:20, maxWidth:780 }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:20, maxWidth:980 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
+              {[
+                { label:'Tổng lượt xem', value:analytics.total, color:'#8B5CF6', icon:'👁' },
+                { label:'Người dùng duy nhất', value:analytics.uniqueVisitors, color:'#22d3ee', icon:'🧑' },
+                { label:'Lần đầu ghé', value:analytics.firstVisit ? new Date(analytics.firstVisit).toLocaleDateString('vi-VN') : '—', color:'#10b981', icon:'📅' },
+                { label:'Lần ghé cuối', value:analytics.lastVisit ? new Date(analytics.lastVisit).toLocaleDateString('vi-VN') : '—', color:'#ec4899', icon:'🕒' },
+              ].map((k, i) => (
+                <Card key={i} style={{ position:'relative', overflow:'hidden', border:`1px solid ${k.color}20` }}>
+                  <div style={{ position:'absolute', top:0, right:0, width:100, height:100, background:`radial-gradient(circle at top right, ${k.color}12, transparent 70%)` }} />
+                  <div style={{ fontSize:22, marginBottom:10 }}>{k.icon}</div>
+                  <div style={{ fontFamily:'Syne, sans-serif', fontSize:30, fontWeight:800, color:k.color, lineHeight:1, marginBottom:4, wordBreak:'break-word' }}>{k.value}</div>
+                  <div style={{ fontSize:13, color:'#8888aa' }}>{k.label}</div>
+                </Card>
+              ))}
+            </div>
+
             <Card>
-              <SectionTitle>Lượt xem 7 ngày qua</SectionTitle>
+              <SectionTitle>{tr.chart}</SectionTitle>
               <BarChart data={analytics.days} />
             </Card>
             <Card>
@@ -637,6 +668,24 @@ function AdminInner() {
                 ))}
               </Card>
             )}
+
+            <Card>
+              <SectionTitle>Toàn bộ lịch sử truy cập</SectionTitle>
+              {analytics.history.length === 0 ? (
+                <div style={{ color:'#555577', fontSize:13 }}>Chưa có lượt truy cập nào.</div>
+              ) : (
+                <div style={{ display:'flex', flexDirection:'column', gap:8, maxHeight:420, overflowY:'auto', paddingRight:4 }}>
+                  {analytics.history.map((item, index) => (
+                    <div key={`${item.createdAt}-${index}`} style={{ display:'grid', gridTemplateColumns:'190px 1fr 140px 1fr', gap:12, alignItems:'center', padding:'10px 14px', background:'rgba(255,255,255,0.02)', borderRadius:10, fontSize:13 }}>
+                      <span style={{ color:'#8888aa' }}>{new Date(item.createdAt).toLocaleString('vi-VN')}</span>
+                      <span style={{ color:'#f0f0ff', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis' }}>{item.page}</span>
+                      <span style={{ color:'#22d3ee' }}>{item.visitorId ? item.visitorId.slice(0, 8) : 'anon'}</span>
+                      <span style={{ color:'#555577', overflow:'hidden', textOverflow:'ellipsis' }}>{item.referrer || item.userAgent || item.ip || '—'}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
           </div>
         )}
 

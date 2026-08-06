@@ -36,7 +36,7 @@ export const api = {
     recordPlay: (id, won) => req("POST", `/links/${id}/play`, { won }),
 
     // Analytics
-    recordVisit: (page) => req("POST", "/visit", { page }),
+    recordVisit: (payload) => req("POST", "/visit", payload),
     getAnalytics: () => req("GET", "/analytics"),
 
     // Messages

@@ -3,6 +3,7 @@ import cors from "cors";
 import multer from "multer";
 import bcrypt from "bcryptjs";
 import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
 import {
     readFileSync,
     writeFileSync,
@@ -30,7 +31,179 @@ const LINKS_FILE = join(DATA_DIR, "links.json");
 const MESSAGES_FILE = join(DATA_DIR, "messages.json");
 const ANALYTICS_FILE = join(DATA_DIR, "analytics.json");
 
-const EMPTY_ANALYTICS = { visits: {}, pages: {}, total: 0, lastVisit: null };
+const EMPTY_ANALYTICS = {
+    visits: {},
+    pages: {},
+    history: [],
+    total: 0,
+    lastVisit: null,
+};
+
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_DOCS_TABLE = process.env.SUPABASE_DOCS_TABLE || "documents";
+const SUPABASE_VISITS_TABLE = process.env.SUPABASE_VISITS_TABLE || "visits";
+
+const supabase =
+    SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
+        ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+        : null;
+
+function normalizeAnalyticsStore(store = {}) {
+    return {
+        visits: store.visits || {},
+        pages: store.pages || {},
+        history: Array.isArray(store.history) ? store.history : [],
+        total: store.total || 0,
+        lastVisit: store.lastVisit || null,
+    };
+}
+
+function formatVisitRow(row) {
+    const createdAt = row.created_at || row.createdAt || new Date().toISOString();
+    return {
+        id: row.id,
+        createdAt,
+        page: row.page || "/",
+        ip: row.ip || "unknown",
+        userAgent: row.user_agent || row.userAgent || "",
+        visitorId: row.visitor_id || row.visitorId || "",
+        referrer: row.referrer || "",
+    };
+}
+
+function buildAnalyticsFromHistory(history) {
+    const visits = {};
+    const pages = {};
+    const normalizedHistory = history
+        .map(formatVisitRow)
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    for (const item of normalizedHistory) {
+        const day = new Date(item.createdAt).toISOString().slice(0, 10);
+        visits[day] = (visits[day] || 0) + 1;
+        pages[item.page] = (pages[item.page] || 0) + 1;
+    }
+
+    return {
+        visits,
+        pages,
+        history: normalizedHistory,
+        total: normalizedHistory.length,
+        lastVisit: normalizedHistory.at(-1)?.createdAt || null,
+    };
+}
+
+async function readCollection(collection, file) {
+    const localItems = rj(file, []);
+
+    if (!supabase) return localItems;
+
+    const { data, error } = await supabase
+        .from(SUPABASE_DOCS_TABLE)
+        .select("payload")
+        .eq("collection", collection)
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        console.error(`Supabase read ${collection} failed:`, error.message);
+        return localItems;
+    }
+
+    if (!data?.length) return localItems;
+    return data.map((row) => row.payload).filter(Boolean);
+}
+
+async function writeCollection(collection, file, items) {
+    wj(file, items);
+    if (!supabase) return;
+
+    const { error: deleteError } = await supabase
+        .from(SUPABASE_DOCS_TABLE)
+        .delete()
+        .eq("collection", collection);
+
+    if (deleteError) {
+        console.error(`Supabase delete ${collection} failed:`, deleteError.message);
+        return;
+    }
+
+    if (!items.length) return;
+
+    const rows = items.map((item, index) => ({
+        collection,
+        item_key: item.id || item.username || `${collection}-${index}`,
+        payload: item,
+        sort_order: index,
+    }));
+
+    const { error: insertError } = await supabase
+        .from(SUPABASE_DOCS_TABLE)
+        .insert(rows);
+
+    if (insertError) {
+        console.error(`Supabase write ${collection} failed:`, insertError.message);
+    }
+}
+
+async function seedCollectionFromLocal(collection, file) {
+    if (!supabase) return;
+
+    const { data, error } = await supabase
+        .from(SUPABASE_DOCS_TABLE)
+        .select("id")
+        .eq("collection", collection)
+        .limit(1);
+
+    if (error) {
+        console.error(`Supabase seed check ${collection} failed:`, error.message);
+        return;
+    }
+
+    if (data?.length) return;
+
+    const localItems = rj(file, []);
+    if (localItems.length) await writeCollection(collection, file, localItems);
+}
+
+async function readAnalyticsStore() {
+    if (supabase) {
+        const { data, error } = await supabase
+            .from(SUPABASE_VISITS_TABLE)
+            .select("id, created_at, page, ip, user_agent, visitor_id, referrer")
+            .order("created_at", { ascending: true });
+
+        if (!error) {
+            return buildAnalyticsFromHistory((data || []).map(formatVisitRow));
+        }
+
+        console.error("Supabase read analytics failed:", error.message);
+    }
+
+    return normalizeAnalyticsStore(rj(ANALYTICS_FILE, { ...EMPTY_ANALYTICS }));
+}
+
+async function saveVisitRecord(record) {
+    if (supabase) {
+        const { error } = await supabase.from(SUPABASE_VISITS_TABLE).insert({
+            created_at: record.createdAt,
+            page: record.page,
+            ip: record.ip,
+            user_agent: record.userAgent,
+            visitor_id: record.visitorId,
+            referrer: record.referrer,
+        });
+
+        if (!error) return true;
+        console.error("Supabase save analytics failed:", error.message);
+    }
+
+    const store = normalizeAnalyticsStore(rj(ANALYTICS_FILE, { ...EMPTY_ANALYTICS }));
+    const next = buildAnalyticsFromHistory([...store.history, record]);
+    wj(ANALYTICS_FILE, next);
+    return false;
+}
 
 const CONTENT_SECTIONS = [
     "experience",
@@ -298,6 +471,13 @@ async function initData() {
         if (!existsSync(CONTENT_FILES[s]))
             wj(CONTENT_FILES[s], INITIAL_CONTENT[s]);
     }
+
+    await seedCollectionFromLocal("accounts", ACCOUNTS_FILE);
+    await seedCollectionFromLocal("links", LINKS_FILE);
+    await seedCollectionFromLocal("messages", MESSAGES_FILE);
+    for (const s of CONTENT_SECTIONS) {
+        await seedCollectionFromLocal(`content:${s}`, CONTENT_FILES[s]);
+    }
 }
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
@@ -324,14 +504,14 @@ app.post("/api/auth/login", async (req, res) => {
 });
 
 // ── Accounts ──────────────────────────────────────────────────────────────────
-app.get("/api/accounts", (req, res) => {
-    const accounts = rj(ACCOUNTS_FILE).map(({ passwordHash, ...rest }) => rest);
-    res.json(accounts);
+app.get("/api/accounts", async (req, res) => {
+    const accounts = await readCollection("accounts", ACCOUNTS_FILE);
+    res.json(accounts.map(({ passwordHash, ...rest }) => rest));
 });
 
 app.post("/api/accounts", async (req, res) => {
     const { username, password, displayName, role, expiresAt } = req.body;
-    const accounts = rj(ACCOUNTS_FILE);
+    const accounts = await readCollection("accounts", ACCOUNTS_FILE);
     if (accounts.find((a) => a.username === username))
         return res.status(400).json({ error: "Username đã tồn tại" });
     if (!username || !password)
@@ -345,43 +525,43 @@ app.post("/api/accounts", async (req, res) => {
         created: new Date().toISOString().slice(0, 10),
         expiresAt: expiresAt || null,
     };
-    wj(ACCOUNTS_FILE, [...accounts, newAcc]);
+    await writeCollection("accounts", ACCOUNTS_FILE, [...accounts, newAcc]);
     const { passwordHash: _, ...safe } = newAcc;
     res.json(safe);
 });
 
 app.put("/api/accounts/:username", async (req, res) => {
     const { password, displayName, role, expiresAt } = req.body;
-    const accounts = rj(ACCOUNTS_FILE);
+    const accounts = await readCollection("accounts", ACCOUNTS_FILE);
     const idx = accounts.findIndex((a) => a.username === req.params.username);
     if (idx === -1) return res.status(404).json({ error: "Không tìm thấy" });
     if (password) accounts[idx].passwordHash = await bcrypt.hash(password, 10);
     if (displayName !== undefined) accounts[idx].displayName = displayName;
     if (role !== undefined) accounts[idx].role = role;
     if (expiresAt !== undefined) accounts[idx].expiresAt = expiresAt || null;
-    wj(ACCOUNTS_FILE, accounts);
+    await writeCollection("accounts", ACCOUNTS_FILE, accounts);
     const { passwordHash: _, ...safe } = accounts[idx];
     res.json(safe);
 });
 
-app.delete("/api/accounts/:username", (req, res) => {
+app.delete("/api/accounts/:username", async (req, res) => {
     if (req.params.username === "admin")
         return res.status(403).json({ error: "Không thể xóa admin gốc" });
-    const accounts = rj(ACCOUNTS_FILE).filter(
+    const accounts = (await readCollection("accounts", ACCOUNTS_FILE)).filter(
         (a) => a.username !== req.params.username,
     );
-    wj(ACCOUNTS_FILE, accounts);
-    const links = rj(LINKS_FILE).filter(
+    await writeCollection("accounts", ACCOUNTS_FILE, accounts);
+    const links = (await readCollection("links", LINKS_FILE)).filter(
         (l) => l.ownerUsername !== req.params.username,
     );
-    wj(LINKS_FILE, links);
+    await writeCollection("links", LINKS_FILE, links);
     res.json({ ok: true });
 });
 
 // ── Links ─────────────────────────────────────────────────────────────────────
-app.get("/api/links", (req, res) => res.json(rj(LINKS_FILE)));
+app.get("/api/links", async (req, res) => res.json(await readCollection("links", LINKS_FILE)));
 
-app.post("/api/links", (req, res) => {
+app.post("/api/links", async (req, res) => {
     const {
         ownerUsername,
         type,
@@ -405,30 +585,35 @@ app.post("/api/links", (req, res) => {
         difficulty,
         plays: [],
     };
-    const links = rj(LINKS_FILE);
-    wj(LINKS_FILE, [...links, link]);
+    const links = await readCollection("links", LINKS_FILE);
+    await writeCollection("links", LINKS_FILE, [...links, link]);
     res.json(link);
 });
 
-app.put("/api/links/:id", (req, res) => {
-    const links = rj(LINKS_FILE);
+app.put("/api/links/:id", async (req, res) => {
+    const links = await readCollection("links", LINKS_FILE);
     const idx = links.findIndex((l) => l.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: "Không tìm thấy" });
     links[idx] = { ...links[idx], ...req.body, id: links[idx].id };
-    wj(LINKS_FILE, links);
+    await writeCollection("links", LINKS_FILE, links);
     res.json(links[idx]);
 });
 
-app.delete("/api/links/:id", (req, res) => {
-    wj(
+app.delete("/api/links/:id", async (req, res) => {
+    await writeCollection(
+        "links",
         LINKS_FILE,
-        rj(LINKS_FILE).filter((l) => l.id !== req.params.id),
+        (await readCollection("links", LINKS_FILE)).filter(
+            (l) => l.id !== req.params.id,
+        ),
     );
     res.json({ ok: true });
 });
 
-app.get("/api/links/:id", (req, res) => {
-    const link = rj(LINKS_FILE).find((l) => l.id === req.params.id);
+app.get("/api/links/:id", async (req, res) => {
+    const link = (await readCollection("links", LINKS_FILE)).find(
+        (l) => l.id === req.params.id,
+    );
     if (!link) return res.status(404).json({ error: "Không tìm thấy" });
     res.json(link);
 });
@@ -436,8 +621,10 @@ app.get("/api/links/:id", (req, res) => {
 // ── Game Plays ────────────────────────────────────────────────────────────────
 const MAX_PLAYS = 3;
 
-app.get("/api/links/:id/plays", (req, res) => {
-    const link = rj(LINKS_FILE).find((l) => l.id === req.params.id);
+app.get("/api/links/:id/plays", async (req, res) => {
+    const link = (await readCollection("links", LINKS_FILE)).find(
+        (l) => l.id === req.params.id,
+    );
     if (!link) return res.status(404).json({ error: "Không tìm thấy" });
     const plays = link.plays || [];
     res.json({
@@ -447,8 +634,8 @@ app.get("/api/links/:id/plays", (req, res) => {
     });
 });
 
-app.post("/api/links/:id/play", (req, res) => {
-    const links = rj(LINKS_FILE);
+app.post("/api/links/:id/play", async (req, res) => {
+    const links = await readCollection("links", LINKS_FILE);
     const idx = links.findIndex((l) => l.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: "Không tìm thấy" });
     const plays = links[idx].plays || [];
@@ -464,7 +651,7 @@ app.post("/api/links/:id/play", (req, res) => {
         at: new Date().toISOString(),
     };
     links[idx].plays = [...plays, play];
-    wj(LINKS_FILE, links);
+    await writeCollection("links", LINKS_FILE, links);
     res.json({
         ok: true,
         remaining: Math.max(0, MAX_PLAYS - links[idx].plays.length),
@@ -520,9 +707,10 @@ app.post("/api/messages", async (req, res) => {
         message: message.trim(),
         ip,
         createdAt: new Date().toISOString(),
+        id: genId(),
     };
-    const msgs = rj(MESSAGES_FILE);
-    wj(MESSAGES_FILE, [...msgs, entry]);
+    const msgs = await readCollection("messages", MESSAGES_FILE);
+    await writeCollection("messages", MESSAGES_FILE, [...msgs, entry]);
     try {
         await resend.emails.send({
             from: FROM,
@@ -536,82 +724,124 @@ app.post("/api/messages", async (req, res) => {
     res.json({ ok: true });
 });
 
-app.get("/api/messages", (_, res) => res.json(rj(MESSAGES_FILE)));
+app.get("/api/messages", async (_, res) =>
+    res.json(await readCollection("messages", MESSAGES_FILE)),
+);
 
-app.delete("/api/messages/:idx", (req, res) => {
-    const msgs = rj(MESSAGES_FILE);
+app.delete("/api/messages/:idx", async (req, res) => {
+    const msgs = await readCollection("messages", MESSAGES_FILE);
     msgs.splice(Number(req.params.idx), 1);
-    wj(MESSAGES_FILE, msgs);
+    await writeCollection("messages", MESSAGES_FILE, msgs);
     res.json({ ok: true });
 });
 
-app.delete("/api/messages", (_, res) => {
-    wj(MESSAGES_FILE, []);
+app.delete("/api/messages", async (_, res) => {
+    await writeCollection("messages", MESSAGES_FILE, []);
     res.json({ ok: true });
 });
 
 // ── Content CRUD ──────────────────────────────────────────────────────────────
-app.get("/api/content/:section", (req, res) => {
+app.get("/api/content/:section", async (req, res) => {
     if (!CONTENT_SECTIONS.includes(req.params.section))
         return res.status(400).json({ error: "Invalid section" });
-    res.json(rj(CONTENT_FILES[req.params.section]));
+    res.json(
+        await readCollection(
+            `content:${req.params.section}`,
+            CONTENT_FILES[req.params.section],
+        ),
+    );
 });
 
-app.post("/api/content/:section", (req, res) => {
+app.post("/api/content/:section", async (req, res) => {
     if (!CONTENT_SECTIONS.includes(req.params.section))
         return res.status(400).json({ error: "Invalid section" });
-    const items = rj(CONTENT_FILES[req.params.section]);
+    const items = await readCollection(
+        `content:${req.params.section}`,
+        CONTENT_FILES[req.params.section],
+    );
     const item = { ...req.body, id: genId() };
-    wj(CONTENT_FILES[req.params.section], [...items, item]);
+    await writeCollection(
+        `content:${req.params.section}`,
+        CONTENT_FILES[req.params.section],
+        [...items, item],
+    );
     res.json(item);
 });
 
-app.put("/api/content/:section/:id", (req, res) => {
+app.put("/api/content/:section/:id", async (req, res) => {
     if (!CONTENT_SECTIONS.includes(req.params.section))
         return res.status(400).json({ error: "Invalid section" });
-    const items = rj(CONTENT_FILES[req.params.section]);
+    const items = await readCollection(
+        `content:${req.params.section}`,
+        CONTENT_FILES[req.params.section],
+    );
     const idx = items.findIndex((i) => i.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: "Not found" });
     items[idx] = { ...items[idx], ...req.body, id: req.params.id };
-    wj(CONTENT_FILES[req.params.section], items);
+    await writeCollection(
+        `content:${req.params.section}`,
+        CONTENT_FILES[req.params.section],
+        items,
+    );
     res.json(items[idx]);
 });
 
-app.delete("/api/content/:section/:id", (req, res) => {
+app.delete("/api/content/:section/:id", async (req, res) => {
     if (!CONTENT_SECTIONS.includes(req.params.section))
         return res.status(400).json({ error: "Invalid section" });
-    const remaining = rj(CONTENT_FILES[req.params.section]).filter(
+    const remaining = (await readCollection(
+        `content:${req.params.section}`,
+        CONTENT_FILES[req.params.section],
+    )).filter(
         (i) => i.id !== req.params.id,
     );
-    wj(CONTENT_FILES[req.params.section], remaining);
+    await writeCollection(
+        `content:${req.params.section}`,
+        CONTENT_FILES[req.params.section],
+        remaining,
+    );
     res.json({ ok: true });
 });
 
 // ── Visitor Analytics ───────────────────────────────────────────────────────
 // Lượt truy cập của admin/superadmin được loại trừ ở phía client (analytics.js)
-app.post("/api/visit", (req, res) => {
-    const store = rj(ANALYTICS_FILE, { ...EMPTY_ANALYTICS });
-    store.visits ||= {};
-    store.pages ||= {};
-    const today = new Date().toISOString().slice(0, 10);
-    store.visits[today] = (store.visits[today] || 0) + 1;
+app.post("/api/visit", async (req, res) => {
     const page = String(req.body?.page || "/").slice(0, 200);
-    store.pages[page] = (store.pages[page] || 0) + 1;
-    store.total = (store.total || 0) + 1;
-    store.lastVisit = new Date().toISOString();
-    wj(ANALYTICS_FILE, store);
-    res.json({ ok: true });
+    const record = {
+        createdAt: new Date().toISOString(),
+        page,
+        ip:
+            req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+            req.socket?.remoteAddress ||
+            "unknown",
+        userAgent: String(req.headers["user-agent"] || ""),
+        visitorId: String(req.body?.visitorId || ""),
+        referrer: String(req.body?.referrer || ""),
+    };
+
+    try {
+        await saveVisitRecord(record);
+        res.json({ ok: true, createdAt: record.createdAt });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-app.get("/api/analytics", (_, res) =>
-    res.json(rj(ANALYTICS_FILE, { ...EMPTY_ANALYTICS })),
-);
+app.get("/api/analytics", async (_, res) => {
+    try {
+        res.json(await readAnalyticsStore());
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 app.get("/api/health", (_, res) => res.json({ ok: true }));
+app.head("/api/health", (_, res) => res.status(200).end());
 
 app.get("/api/ping", (_, res) => {
     res.json({ ok: true, message: "pong", uptime: process.uptime() });
 });
+app.head("/api/ping", (_, res) => res.status(200).end());
 
 app.get("/api/storage", (_, res) => {
     try {
