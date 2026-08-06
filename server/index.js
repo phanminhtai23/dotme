@@ -64,7 +64,12 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM   = process.env.RESEND_FROM || 'inbox-resume@finsightagent.tech'
 const TO     = process.env.RESEND_TO   || 'phanminhtai23@gmail.com'
 
-app.use(cors({ origin: ['http://localhost:5173','http://localhost:5174','http://localhost:5175'], credentials: true }))
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174,http://localhost:5175')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean)
+
+app.use(cors({ origin: allowedOrigins, credentials: true }))
 app.use(express.json())
 app.use('/uploads', express.static(UPLOADS_DIR))
 
@@ -290,6 +295,10 @@ app.delete('/api/content/:section/:id', (req, res) => {
 })
 
 app.get('/api/health', (_, res) => res.json({ ok: true }))
+
+app.get('/api/ping', (_, res) => {
+  res.json({ ok: true, message: 'pong', uptime: process.uptime() })
+})
 
 app.get('/api/storage', (_, res) => {
   try {
