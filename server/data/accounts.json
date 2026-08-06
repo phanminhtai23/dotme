@@ -1,7 +1,7 @@
 [
   {
     "username": "admin",
-    "passwordHash": "$2b$10$44P8EiQ2/6loK0QyUx8knOhfKG/k6F/SxnACFyzPYmbCoWXfOaG8G",
+    "passwordHash": "$2b$10$6DI9Zfar7SNb32/jMO7KruRW4VqDGAtz0DE1i.1Wioui9/g9IU.K2",
     "role": "superadmin",
     "displayName": "admin",
     "created": "2026-06-07",
@@ -19,6 +19,14 @@
     "username": "test",
     "passwordHash": "$2b$10$WOdV/oXnL522rtPhLoC48ukAZzQ1gsGtqAcyL1LbdHbUHYso.oIV.",
     "displayName": "test",
+    "role": "user",
+    "created": "2026-06-07",
+    "expiresAt": null
+  },
+  {
+    "username": "chikaka",
+    "passwordHash": "$2b$10$LUrr7jiBLlDoeH.owqzDcuxRRjYDNX0fa50ecjwAMzoCl3H.ssZDC",
+    "displayName": "Chi cute",
     "role": "user",
     "created": "2026-06-07",
     "expiresAt": null

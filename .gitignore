@@ -3,4 +3,7 @@ dist
 .env
 .env.local
 README.local.md
-nginx.nginx
+*.webp
+*.jpg
+*.png
+*.nginx

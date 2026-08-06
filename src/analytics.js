@@ -1,35 +1,17 @@
-// Lightweight in-memory analytics (resets on refresh — no backend needed)
-const KEY = 'dotme_analytics'
+// Visitor analytics — lưu ở backend (server/data/analytics.json)
+import { isAdmin } from './auth'
+import { api } from './api'
 
-function getStore() {
-  try {
-    return JSON.parse(localStorage.getItem(KEY) || '{}')
-  } catch {
-    return {}
-  }
+export async function trackVisit() {
+  // Đừng đếm lượt truy cập của admin/superadmin
+  if (isAdmin()) return
+  try { await api.recordVisit(window.location.pathname) } catch {}
 }
 
-function save(store) {
-  localStorage.setItem(KEY, JSON.stringify(store))
-}
+export async function getAnalytics() {
+  let store = { visits: {}, pages: {}, total: 0, lastVisit: null }
+  try { store = await api.getAnalytics() } catch {}
 
-export function trackVisit() {
-  const store = getStore()
-  const today = new Date().toISOString().slice(0, 10)
-  if (!store.visits) store.visits = {}
-  store.visits[today] = (store.visits[today] || 0) + 1
-
-  const page = window.location.pathname
-  if (!store.pages) store.pages = {}
-  store.pages[page] = (store.pages[page] || 0) + 1
-
-  store.total = (store.total || 0) + 1
-  store.lastVisit = new Date().toISOString()
-  save(store)
-}
-
-export function getAnalytics() {
-  const store = getStore()
   const today = new Date().toISOString().slice(0, 10)
 
   // Build last 7 days
