@@ -99,42 +99,181 @@ function GradBtn({ children, onClick, color = 'purple', disabled = false, style 
   )
 }
 
-// ─── Bar Chart ─────────────────────────────────────────────────────────────
+// ─── Timeline Chart ─────────────────────────────────────────────────────────
 
-function BarChart({ data }) {
+function TimelineChart({ data }) {
+  const [hovered, setHovered] = useState(null)
+  const [range, setRange] = useState('all')
+
   if (!data.length) {
     return <div style={{ color:'#555577', fontSize:13 }}>Chưa có dữ liệu truy cập.</div>
   }
 
-  const max = Math.max(...data.map(d => d.visits), 1)
+  const series = range === '7d' ? data.slice(-7) : range === '30d' ? data.slice(-30) : data
+  const rangeLabel = range === '7d' ? '7 ngày gần nhất' : range === '30d' ? '30 ngày gần nhất' : 'Toàn bộ lịch sử'
+
+  const widthPerPoint = 52
+  const chartHeight = 220
+  const chartWidth = Math.max(series.length * widthPerPoint, 720)
+  const max = Math.max(...series.map(d => d.visits), 1)
+  const total = series.reduce((sum, d) => sum + d.visits, 0)
+  const totalAll = data.reduce((sum, d) => sum + d.visits, 0)
+  const average = total / series.length
+  const peak = series.reduce((best, item) => (item.visits > best.visits ? item : best), series[0])
+  const latest = series[series.length - 1]
+
+  const points = series.map((d, i) => {
+    const x = series.length === 1 ? chartWidth / 2 : (i / (series.length - 1)) * (chartWidth - 24) + 12
+    const y = chartHeight - 24 - ((d.visits / max) * (chartHeight - 64))
+    return { ...d, x, y }
+  })
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+  const areaPath = `${linePath} L ${points.at(-1).x} ${chartHeight - 20} L ${points[0].x} ${chartHeight - 20} Z`
+  const labelStep = series.length > 14 ? Math.ceil(series.length / 7) : Math.max(1, Math.ceil(series.length / 4))
+
+  const metricCards = [
+    { label:'Tổng kỳ chọn', value:total, color:'#8B5CF6' },
+    { label:'Tổng all', value:totalAll, color:'#7c3aed' },
+    { label:'Trung bình/ngày', value:average.toFixed(1), color:'#22D3EE' },
+    { label:'Cao nhất', value:peak.visits, color:'#10B981' },
+    { label:'Hôm gần nhất', value:latest.visits, color:'#EC4899' },
+  ]
+
+  const RANGE_OPTIONS = [
+    { id:'7d', label:'7D' },
+    { id:'30d', label:'30D' },
+    { id:'all', label:'ALL' },
+  ]
+
   return (
-    <div style={{ overflowX:'auto', paddingBottom:6 }}>
-      <div style={{
-        display:'grid',
-        gridAutoFlow:'column',
-        gridAutoColumns:'minmax(22px, 1fr)',
-        alignItems:'end',
-        gap:8,
-        minWidth: Math.max(data.length * 30, 560),
-        height:170,
-      }}>
-        {data.map((d, i) => (
-          <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'end', gap:6, minHeight:150 }}>
-            <div style={{ fontSize:11, color:'#a78bfa', fontWeight:600, minHeight:16 }}>
-              {d.visits > 0 ? d.visits : ''}
-            </div>
-            <div style={{
-              width:'100%',
-              height:`${Math.max((d.visits / max) * 100, 2)}px`,
-              background: d.visits > 0 ? 'linear-gradient(180deg,#8B5CF6,#22D3EE)' : 'rgba(255,255,255,0.06)',
-              borderRadius:'4px 4px 0 0', transition:'height 0.5s cubic-bezier(0.16,1,0.3,1)',
-              boxShadow: d.visits > 0 ? '0 0 12px rgba(139,92,246,0.2)' : 'none',
-            }} />
-            <span style={{ fontSize:10, color:'#555577', whiteSpace:'nowrap' }}>
-              {d.label}
-            </span>
+    <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(120px, 1fr))', gap:10 }}>
+        {metricCards.map(card => (
+          <div key={card.label} style={{
+            background:'linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))',
+            border:`1px solid ${card.color}22`, borderRadius:14, padding:'12px 14px',
+          }}>
+            <div style={{ fontSize:11, color:'#8888aa', marginBottom:6 }}>{card.label}</div>
+            <div style={{ fontSize:24, lineHeight:1, fontWeight:800, color:card.color, fontFamily:'Syne, sans-serif' }}>{card.value}</div>
           </div>
         ))}
+      </div>
+
+      <div style={{
+        background:'linear-gradient(180deg, rgba(139,92,246,0.12), rgba(255,255,255,0.03))',
+        border:'1px solid rgba(139,92,246,0.18)', borderRadius:18, padding:16,
+      }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12, gap:12, flexWrap:'wrap' }}>
+          <div>
+            <div style={{ fontSize:13, color:'#f0f0ff', fontWeight:700 }}>Biểu đồ lượt xem theo ngày</div>
+            <div style={{ fontSize:12, color:'#8888aa', marginTop:4 }}>{rangeLabel} • cuộn ngang nếu dữ liệu dài.</div>
+          </div>
+          <div style={{ display:'flex', gap:10, flexWrap:'wrap', fontSize:12, color:'#8888aa', alignItems:'center' }}>
+            <span style={{ display:'inline-flex', alignItems:'center', gap:6 }}><i style={{ width:10, height:10, borderRadius:'50%', background:'#22D3EE', display:'inline-block' }} /> Hôm nay</span>
+            <span style={{ display:'inline-flex', alignItems:'center', gap:6 }}><i style={{ width:10, height:10, borderRadius:'50%', background:'#8B5CF6', display:'inline-block' }} /> Xu hướng</span>
+            <div style={{ display:'inline-flex', gap:6, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:99, padding:4 }}>
+              {RANGE_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => { setRange(opt.id); setHovered(null) }}
+                  style={{
+                    border:'none', borderRadius:99, padding:'5px 10px', cursor:'pointer',
+                    fontSize:11, fontWeight:700, fontFamily:'Inter, sans-serif', letterSpacing:'0.04em',
+                    background: range === opt.id ? 'linear-gradient(135deg,#8B5CF6,#22D3EE)' : 'transparent',
+                    color: range === opt.id ? '#fff' : '#8888aa', transition:'all 0.2s',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ overflowX:'auto', paddingBottom:8 }}>
+          <svg width={chartWidth} height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ display:'block' }}>
+            <defs>
+              <linearGradient id="timelineArea" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.38" />
+                <stop offset="55%" stopColor="#22D3EE" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#22D3EE" stopOpacity="0.02" />
+              </linearGradient>
+              <linearGradient id="timelineLine" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#8B5CF6" />
+                <stop offset="50%" stopColor="#22D3EE" />
+                <stop offset="100%" stopColor="#EC4899" />
+              </linearGradient>
+              <filter id="timelineGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.55 0 1 0 0 0.35 0 0 1 0 0.98 0 0 0 0.4 0" />
+              </filter>
+            </defs>
+
+            {[0.25, 0.5, 0.75].map((ratio, i) => {
+              const y = 20 + ratio * (chartHeight - 50)
+              return <line key={i} x1={12} y1={y} x2={chartWidth - 12} y2={y} stroke="rgba(255,255,255,0.06)" strokeDasharray="6 8" />
+            })}
+
+            <path d={areaPath} fill="url(#timelineArea)" />
+            <path d={linePath} fill="none" stroke="url(#timelineLine)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" filter="url(#timelineGlow)" />
+
+            {hovered && (
+              <g pointerEvents="none">
+                <line x1={hovered.x} y1={20} x2={hovered.x} y2={chartHeight - 20} stroke="rgba(34,211,238,0.5)" strokeDasharray="4 6" />
+                <rect
+                  x={Math.max(10, Math.min(hovered.x - 62, chartWidth - 130))}
+                  y={Math.max(8, hovered.y - 58)}
+                  width={124}
+                  height={42}
+                  rx={10}
+                  fill="rgba(9,9,22,0.92)"
+                  stroke="rgba(34,211,238,0.45)"
+                />
+                <text x={Math.max(22, Math.min(hovered.x - 50, chartWidth - 118))} y={Math.max(25, hovered.y - 38)} fill="#a78bfa" fontSize="10" fontWeight="700" fontFamily="Inter, sans-serif">
+                  {hovered.label}
+                </text>
+                <text x={Math.max(22, Math.min(hovered.x - 50, chartWidth - 118))} y={Math.max(42, hovered.y - 21)} fill="#22D3EE" fontSize="13" fontWeight="800" fontFamily="Syne, sans-serif">
+                  {hovered.visits} views
+                </text>
+              </g>
+            )}
+
+            {points.map((point, i) => {
+              const showLabel = i === 0 || i === points.length - 1 || i % labelStep === 0
+              const isPeak = point.visits === peak.visits && peak.visits > 0
+              const isLatest = i === points.length - 1
+              return (
+                <g key={point.date}>
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={isPeak || isLatest ? 7 : 5}
+                    fill={isLatest ? '#22D3EE' : '#8B5CF6'}
+                    stroke="rgba(6,6,15,0.95)"
+                    strokeWidth="2"
+                    style={{ cursor:'pointer' }}
+                    onMouseEnter={() => setHovered(point)}
+                    onMouseLeave={() => setHovered(curr => (curr?.date === point.date ? null : curr))}
+                    onClick={() => setHovered(point)}
+                  />
+                  {isPeak && <circle cx={point.x} cy={point.y} r={12} fill="#8B5CF6" opacity="0.14" />}
+                  {showLabel && (
+                    <text x={point.x} y={chartHeight - 4} textAnchor="middle" fill="#555577" fontSize="10" fontFamily="Inter, sans-serif">
+                      {point.label}
+                    </text>
+                  )}
+                  {point.visits > 0 && (isPeak || isLatest || i % labelStep === 0) && (
+                    <text x={point.x} y={point.y - 12} textAnchor="middle" fill={isLatest ? '#22D3EE' : '#a78bfa'} fontSize="11" fontWeight="700" fontFamily="Inter, sans-serif">
+                      {point.visits}
+                    </text>
+                  )}
+                </g>
+              )
+            })}
+          </svg>
+        </div>
       </div>
     </div>
   )
@@ -459,6 +598,9 @@ function AdminInner() {
   if (!analytics) return null
 
   const origin = window.location.origin
+  const uniqueViewers = new Set(
+    analytics.history.map(item => item.visitorId || item.ip || `anon-${item.createdAt || ''}`)
+  ).size
 
   return (
     <div style={{ minHeight:'100vh', background:'#06060f', display:'flex', fontFamily:'Inter, sans-serif', color:'#f0f0ff' }}>
@@ -597,7 +739,7 @@ function AdminInner() {
             )}
             <Card>
               <SectionTitle>{tr.chart}</SectionTitle>
-              <BarChart data={analytics.days} />
+              <TimelineChart data={analytics.days} />
             </Card>
             {links.length > 0 && (
               <Card>
@@ -628,58 +770,66 @@ function AdminInner() {
         {/* ── ANALYTICS ── */}
         {tab === 'analytics' && (
           <div style={{ display:'flex', flexDirection:'column', gap:20, maxWidth:980 }}>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
+            <div style={{
+              background:'linear-gradient(160deg, rgba(139,92,246,0.12), rgba(34,211,238,0.05), rgba(236,72,153,0.06))',
+              border:'1px solid rgba(139,92,246,0.22)', borderRadius:18, padding:16,
+            }}>
+              <div style={{ fontSize:12, color:'#a78bfa', letterSpacing:'0.08em', marginBottom:10 }}>ANALYTICS SNAPSHOT</div>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(170px, 1fr))', gap:12 }}>
               {[
                 { label:'Tổng lượt xem', value:analytics.total, color:'#8B5CF6', icon:'👁' },
                 { label:'Lần đầu ghé', value:analytics.firstVisit ? new Date(analytics.firstVisit).toLocaleDateString('vi-VN') : '—', color:'#10b981', icon:'📅' },
                 { label:'Lần ghé cuối', value:analytics.lastVisit ? new Date(analytics.lastVisit).toLocaleDateString('vi-VN') : '—', color:'#ec4899', icon:'🕒' },
-                { label:'Trang theo dõi', value:'/', color:'#22d3ee', icon:'🏠' },
+                { label:'Viewer unique', value:uniqueViewers, color:'#22d3ee', icon:'🧑‍🤝‍🧑' },
               ].map((k, i) => (
-                <Card key={i} style={{ position:'relative', overflow:'hidden', border:`1px solid ${k.color}20` }}>
+                <Card key={i} style={{ position:'relative', overflow:'hidden', border:`1px solid ${k.color}20`, background:'rgba(10,10,24,0.55)', padding:18 }}>
                   <div style={{ position:'absolute', top:0, right:0, width:100, height:100, background:`radial-gradient(circle at top right, ${k.color}12, transparent 70%)` }} />
                   <div style={{ fontSize:22, marginBottom:10 }}>{k.icon}</div>
-                  <div style={{ fontFamily:'Syne, sans-serif', fontSize:30, fontWeight:800, color:k.color, lineHeight:1, marginBottom:4, wordBreak:'break-word' }}>{k.value}</div>
-                  <div style={{ fontSize:13, color:'#8888aa' }}>{k.label}</div>
+                  <div style={{ fontFamily:'Syne, sans-serif', fontSize:30, fontWeight:800, color:k.color, lineHeight:1, marginBottom:6, wordBreak:'break-word' }}>{k.value}</div>
+                  <div style={{ fontSize:12, color:'#8888aa', letterSpacing:'0.03em' }}>{k.label}</div>
                 </Card>
               ))}
+              </div>
             </div>
 
             <Card>
               <SectionTitle>{tr.chart}</SectionTitle>
-              <BarChart data={analytics.days} />
+              <TimelineChart data={analytics.days} />
             </Card>
-            <Card>
+            <Card style={{ border:'1px solid rgba(139,92,246,0.16)', background:'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))' }}>
               <SectionTitle>Chi tiết theo ngày</SectionTitle>
-              {analytics.days.map((d, i) => (
-                <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'rgba(255,255,255,0.02)', borderRadius:10, marginBottom:8, fontSize:14 }}>
-                  <span style={{ color:'#8888aa' }}>{d.label}</span>
-                  <span style={{ color: d.visits > 0 ? '#a78bfa' : '#555577', fontWeight:600 }}>{d.visits} lượt xem</span>
-                </div>
-              ))}
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(170px, 1fr))', gap:8 }}>
+                {analytics.days.map((d, i) => (
+                  <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 12px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:10, fontSize:13 }}>
+                    <span style={{ color:'#8888aa' }}>{d.label}</span>
+                    <span style={{ color: d.visits > 0 ? '#a78bfa' : '#555577', fontWeight:700 }}>{d.visits}</span>
+                  </div>
+                ))}
+              </div>
             </Card>
             {Object.keys(analytics.pages).length > 0 && (
-              <Card>
+              <Card style={{ border:'1px solid rgba(34,211,238,0.18)' }}>
                 <SectionTitle>Trang được xem</SectionTitle>
                 {Object.entries(analytics.pages).map(([page, count]) => (
-                  <div key={page} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'rgba(255,255,255,0.02)', borderRadius:10, marginBottom:8, fontSize:14 }}>
-                    <span style={{ color:'#8888aa', fontFamily:'monospace' }}>{page || '/'}</span>
-                    <span style={{ color:'#22d3ee', fontWeight:600 }}>{count}</span>
+                  <div key={page} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background:'rgba(34,211,238,0.04)', border:'1px solid rgba(34,211,238,0.16)', borderRadius:10, marginBottom:8, fontSize:14 }}>
+                    <span style={{ color:'#9ca3af', fontFamily:'monospace' }}>{page || '/'}</span>
+                    <span style={{ color:'#22d3ee', fontWeight:700 }}>{count}</span>
                   </div>
                 ))}
               </Card>
             )}
 
-            <Card>
+            <Card style={{ border:'1px solid rgba(236,72,153,0.16)' }}>
               <SectionTitle>Toàn bộ lịch sử truy cập</SectionTitle>
               {analytics.history.length === 0 ? (
                 <div style={{ color:'#555577', fontSize:13 }}>Chưa có lượt truy cập nào.</div>
               ) : (
-                <div style={{ display:'flex', flexDirection:'column', gap:8, maxHeight:420, overflowY:'auto', paddingRight:4 }}>
+                <div style={{ display:'flex', flexDirection:'column', gap:8, maxHeight:420, overflowY:'auto', overflowX:'auto', paddingRight:4 }}>
                   {analytics.history.map((item, index) => (
-                    <div key={`${item.createdAt}-${index}`} style={{ display:'grid', gridTemplateColumns:'190px 1fr 140px 1fr', gap:12, alignItems:'center', padding:'10px 14px', background:'rgba(255,255,255,0.02)', borderRadius:10, fontSize:13 }}>
-                      <span style={{ color:'#8888aa' }}>{new Date(item.createdAt).toLocaleString('vi-VN')}</span>
+                    <div key={`${item.createdAt}-${index}`} style={{ display:'grid', gridTemplateColumns:'minmax(180px,1.2fr) minmax(90px,1fr) minmax(90px,0.8fr) minmax(140px,1.4fr)', gap:12, alignItems:'center', padding:'10px 14px', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:10, fontSize:13, minWidth:680 }}>
+                      <span style={{ color:'#8888aa', whiteSpace:'nowrap' }}>{new Date(item.createdAt).toLocaleString('vi-VN')}</span>
                       <span style={{ color:'#f0f0ff', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis' }}>{item.page}</span>
-                      <span style={{ color:'#22d3ee' }}>{item.visitorId ? item.visitorId.slice(0, 8) : 'anon'}</span>
+                      <span style={{ color:'#22d3ee', fontWeight:700 }}>{item.visitorId ? item.visitorId.slice(0, 8) : 'anon'}</span>
                       <span style={{ color:'#555577', overflow:'hidden', textOverflow:'ellipsis' }}>{item.referrer || item.userAgent || item.ip || '—'}</span>
                     </div>
                   ))}
