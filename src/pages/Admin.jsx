@@ -631,9 +631,9 @@ function AdminInner() {
             <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
               {[
                 { label:'Tổng lượt xem', value:analytics.total, color:'#8B5CF6', icon:'👁' },
-                { label:'Người dùng duy nhất', value:analytics.uniqueVisitors, color:'#22d3ee', icon:'🧑' },
                 { label:'Lần đầu ghé', value:analytics.firstVisit ? new Date(analytics.firstVisit).toLocaleDateString('vi-VN') : '—', color:'#10b981', icon:'📅' },
                 { label:'Lần ghé cuối', value:analytics.lastVisit ? new Date(analytics.lastVisit).toLocaleDateString('vi-VN') : '—', color:'#ec4899', icon:'🕒' },
+                { label:'Trang theo dõi', value:'/', color:'#22d3ee', icon:'🏠' },
               ].map((k, i) => (
                 <Card key={i} style={{ position:'relative', overflow:'hidden', border:`1px solid ${k.color}20` }}>
                   <div style={{ position:'absolute', top:0, right:0, width:100, height:100, background:`radial-gradient(circle at top right, ${k.color}12, transparent 70%)` }} />

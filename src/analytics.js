@@ -2,17 +2,13 @@
 import { isAdmin } from './auth'
 import { api } from './api'
 
-const VISITOR_ID_KEY = 'dotme_visitor_id'
+const TRACKABLE_HOSTS = ['kevinphan.me', 'www.kevinphan.me']
 
-function getVisitorId() {
-  let id = localStorage.getItem(VISITOR_ID_KEY)
-  if (!id) {
-    id = typeof crypto?.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-    localStorage.setItem(VISITOR_ID_KEY, id)
-  }
-  return id
+function shouldTrackVisit() {
+  if (typeof window === 'undefined') return false
+  if (window.location.pathname === '/admin') return false
+  if (window.location.pathname !== '/') return false
+  return TRACKABLE_HOSTS.some(host => window.location.hostname === host || window.location.hostname.endsWith(`.${host}`))
 }
 
 function buildDays(history) {
@@ -49,10 +45,10 @@ function buildDays(history) {
 export async function trackVisit() {
   // Đừng đếm lượt truy cập của admin/superadmin
   if (isAdmin()) return
+  if (!shouldTrackVisit()) return
   try {
     await api.recordVisit({
-      page: window.location.pathname,
-      visitorId: getVisitorId(),
+      page: '/',
       referrer: document.referrer || '',
     })
   } catch {}
@@ -66,15 +62,12 @@ export async function getAnalytics() {
   history.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
 
   const today = new Date().toISOString().slice(0, 10)
-  const uniqueVisitors = new Set(history.map(item => item.visitorId || item.ip || item.userAgent || item.createdAt)).size
-
   const days = buildDays(history)
   const historyRows = [...history].reverse()
 
   return {
     total: store.total || history.length || 0,
     today: store.visits?.[today] || 0,
-    uniqueVisitors,
     pages: store.pages || {},
     days,
     history: historyRows,
