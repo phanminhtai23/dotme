@@ -109,7 +109,12 @@ async function readCollection(collection, file) {
         return [];
     }
 
-    return (data || []).map((row) => row.payload).filter(Boolean);
+    return (data || []).map((row) => {
+        if (!row.payload) return null;
+        try {
+            return typeof row.payload === "string" ? JSON.parse(row.payload) : row.payload;
+        } catch { return null; }
+    }).filter(Boolean);
 }
 
 async function writeCollection(collection, file, items) {
@@ -133,7 +138,7 @@ async function writeCollection(collection, file, items) {
     const rows = items.map((item, index) => ({
         collection,
         item_key: item.id || item.username || `${collection}-${index}`,
-        payload: item,
+        payload: JSON.stringify(item),
         sort_order: index,
     }));
 
@@ -836,6 +841,18 @@ app.get("/api/analytics", async (_, res) => {
 
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 app.head("/api/health", (_, res) => res.status(200).end());
+
+app.post("/api/admin/reseed-content", async (_, res) => {
+    if (!supabase) return res.status(400).json({ error: "Supabase not configured" });
+    try {
+        for (const s of CONTENT_SECTIONS) {
+            await writeCollection(`content:${s}`, CONTENT_FILES[s], INITIAL_CONTENT[s]);
+        }
+        res.json({ ok: true, seeded: CONTENT_SECTIONS });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 app.get("/api/ping", (_, res) => {
     res.json({ ok: true, message: "pong", uptime: process.uptime() });
