@@ -96,9 +96,7 @@ function buildAnalyticsFromHistory(history) {
 }
 
 async function readCollection(collection, file) {
-    const localItems = rj(file, []);
-
-    if (!supabase) return localItems;
+    if (!supabase) return rj(file, []);
 
     const { data, error } = await supabase
         .from(SUPABASE_DOCS_TABLE)
@@ -108,16 +106,17 @@ async function readCollection(collection, file) {
 
     if (error) {
         console.error(`Supabase read ${collection} failed:`, error.message);
-        return localItems;
+        return [];
     }
 
-    if (!data?.length) return localItems;
-    return data.map((row) => row.payload).filter(Boolean);
+    return (data || []).map((row) => row.payload).filter(Boolean);
 }
 
 async function writeCollection(collection, file, items) {
-    wj(file, items);
-    if (!supabase) return;
+    if (!supabase) {
+        wj(file, items);
+        return;
+    }
 
     const { error: deleteError } = await supabase
         .from(SUPABASE_DOCS_TABLE)

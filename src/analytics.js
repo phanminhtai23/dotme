@@ -30,8 +30,8 @@ function buildDays(history) {
     }
 
     const days = [];
-    const cursor = new Date(`${first}T00:00:00`);
-    const end = new Date(`${last}T00:00:00`);
+    const cursor = new Date(`${first}T00:00:00Z`);
+    const end = new Date(`${last}T00:00:00Z`);
 
     while (cursor <= end) {
         const key = cursor.toISOString().slice(0, 10);
@@ -40,10 +40,11 @@ function buildDays(history) {
             label: cursor.toLocaleDateString("vi-VN", {
                 month: "numeric",
                 day: "numeric",
+                timeZone: "UTC",
             }),
             visits: counts.get(key) || 0,
         });
-        cursor.setDate(cursor.getDate() + 1);
+        cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
 
     return days;
