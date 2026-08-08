@@ -18,7 +18,7 @@ export default function Experience() {
   const tr = t[lang].experience
 
   useEffect(() => {
-    fetch('/api/content/experience').then(r => r.json()).then(setJobs).catch(() => {})
+    fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/content/experience').then(r => r.json()).then(setJobs).catch(() => {})
   }, [])
 
   useEffect(() => {

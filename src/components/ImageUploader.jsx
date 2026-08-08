@@ -13,7 +13,7 @@ export default function ImageUploader({ images = [], onChange, label = 'Album แบ
       const fd = new FormData()
       fd.append('image', file)
       try {
-        const res = await fetch('/api/upload', { method: 'POST', body: fd })
+        const res = await fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/upload', { method: 'POST', body: fd })
         const data = await res.json()
         if (data.url) added.push({ url: data.url, filename: data.filename, name: file.name })
       } catch {

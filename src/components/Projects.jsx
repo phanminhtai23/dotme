@@ -143,7 +143,7 @@ export default function Projects() {
   const tr = t[lang].projects
 
   useEffect(() => {
-    fetch('/api/content/projects').then(r => r.json()).then(data => setProjectList(data.map(apiToProject))).catch(() => {})
+    fetch((import.meta.env.VITE_API_BASE_URL || '/api') + '/content/projects').then(r => r.json()).then(data => setProjectList(data.map(apiToProject))).catch(() => {})
   }, [])
 
   useEffect(() => {

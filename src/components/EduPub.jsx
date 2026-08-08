@@ -13,8 +13,9 @@ export default function EduPub() {
   const tr = t[lang].edupub
 
   useEffect(() => {
-    fetch('/api/content/certificates').then(r => r.json()).then(setCerts).catch(() => {})
-    fetch('/api/content/publications').then(r => r.json()).then(setPubs).catch(() => {})
+    const base = import.meta.env.VITE_API_BASE_URL || '/api'
+    fetch(`${base}/content/certificates`).then(r => r.json()).then(setCerts).catch(() => {})
+    fetch(`${base}/content/publications`).then(r => r.json()).then(setPubs).catch(() => {})
   }, [])
 
   useEffect(() => {
