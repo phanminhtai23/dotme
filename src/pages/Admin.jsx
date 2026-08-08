@@ -552,8 +552,9 @@ function AdminInner() {
   ]
 
   const refresh = useCallback(() => {
-    fetch('/api/health').then(r => r.ok ? setServerOnline(true) : setServerOnline(false)).catch(() => setServerOnline(false))
-    fetch('/api/storage').then(r => r.json()).then(setStorage).catch(() => {})
+    const apiBase = import.meta.env.VITE_API_BASE_URL || '/api'
+    fetch(`${apiBase}/health`).then(r => r.ok ? setServerOnline(true) : setServerOnline(false)).catch(() => setServerOnline(false))
+    fetch(`${apiBase}/storage`).then(r => r.json()).then(setStorage).catch(() => {})
     api.getAccounts().then(setAccounts).catch(() => {})
     api.getLinks().then(setLinks).catch(() => {})
     api.getMessages().then(setMessages).catch(() => {

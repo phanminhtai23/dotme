@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const BASE = '/api/content'
+const BASE = (import.meta.env.VITE_API_BASE_URL || '/api') + '/content'
 
 const INPUT = {
   width:'100%', boxSizing:'border-box',
