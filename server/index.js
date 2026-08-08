@@ -487,7 +487,7 @@ async function initData() {
 // ── Auth ─────────────────────────────────────────────────────────────────────
 app.post("/api/auth/login", async (req, res) => {
     const { username, password } = req.body;
-    const accounts = rj(ACCOUNTS_FILE);
+    const accounts = await readCollection("accounts", ACCOUNTS_FILE);
     const acc = accounts.find((a) => a.username === username);
     if (!acc)
         return res
