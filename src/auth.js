@@ -5,7 +5,7 @@ const SESSION_KEY = 'dotme_session'
 export async function login(username, password) {
   try {
     const session = await api.login(username, password)
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
     return { ok: true, session }
   } catch (err) {
     return { error: err.message }
@@ -13,11 +13,11 @@ export async function login(username, password) {
 }
 
 export function logout() {
-  sessionStorage.removeItem(SESSION_KEY)
+  localStorage.removeItem(SESSION_KEY)
 }
 
 export function getSession() {
-  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null') }
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null') }
   catch { return null }
 }
 
