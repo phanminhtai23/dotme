@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL || '/api') + '/content'
 
@@ -33,10 +34,11 @@ function GradBtn({ children, onClick, color='purple', style={}, type='button' })
 }
 
 function Modal({ title, onClose, children }) {
+  const { isMobile } = useBreakpoint()
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
+    <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 12 : 20 }}
       onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{ background:'#0d0d1a', border:'1px solid rgba(255,255,255,0.1)', borderRadius:20, padding:32, width:'100%', maxWidth:560, maxHeight:'90vh', overflowY:'auto', fontFamily:'Inter, sans-serif' }}
+      <div style={{ background:'#0d0d1a', border:'1px solid rgba(255,255,255,0.1)', borderRadius:20, padding: isMobile ? 20 : 32, width:'100%', maxWidth:560, maxHeight:'90vh', overflowY:'auto', fontFamily:'Inter, sans-serif' }}
         onMouseDown={e => e.stopPropagation()}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
           <h3 style={{ fontWeight:800, fontSize:18, color:'#f0f0ff' }}>{title}</h3>
@@ -54,6 +56,7 @@ function ExperienceForm({ initial, onSave, onClose }) {
   const blank = { company:'', role:'', period:'', location:'', current:false, bullets:'' }
   const [form, setForm] = useState(() => initial ? { ...initial, bullets: (initial.bullets||[]).join('\n') } : blank)
   const [saving, setSaving] = useState(false)
+  const { isMobile } = useBreakpoint()
 
   const handle = async e => {
     e.preventDefault(); setSaving(true)
@@ -70,7 +73,7 @@ function ExperienceForm({ initial, onSave, onClose }) {
 
   return (
     <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
         <Field label="Công ty"><input style={INPUT} value={form.company} required onChange={e => setForm(f=>({...f,company:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
         <Field label="Chức vụ"><input style={INPUT} value={form.role} required onChange={e => setForm(f=>({...f,role:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
         <Field label="Thời gian (vd: Jan 2026 – Present)"><input style={INPUT} value={form.period} onChange={e => setForm(f=>({...f,period:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
@@ -100,6 +103,7 @@ function ProjectForm({ initial, onSave, onClose }) {
   const blank = { title:'', subtitleVi:'', subtitleEn:'', descVi:'', descEn:'', tags:'', color:'#8B5CF6', icon:'📦', status:'In Progress', year:new Date().getFullYear().toString(), liveUrl:'', githubUrl:'' }
   const [form, setForm] = useState(() => initial ? { ...initial, tags: Array.isArray(initial.tags) ? initial.tags.join(', ') : initial.tags || '' } : blank)
   const [saving, setSaving] = useState(false)
+  const { isMobile } = useBreakpoint()
 
   const handle = async e => {
     e.preventDefault(); setSaving(true)
@@ -116,7 +120,7 @@ function ProjectForm({ initial, onSave, onClose }) {
 
   return (
     <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
         <Field label="Tên dự án"><input style={INPUT} value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
         <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
           <Label>Icon (emoji)</Label>
@@ -128,7 +132,7 @@ function ProjectForm({ initial, onSave, onClose }) {
       <Field label="Mô tả (VI)"><textarea style={TEXTAREA} value={form.descVi} onChange={e => setForm(f=>({...f,descVi:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
       <Field label="Mô tả (EN)"><textarea style={TEXTAREA} value={form.descEn} onChange={e => setForm(f=>({...f,descEn:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
       <Field label="Tags (phân cách bằng dấu phẩy)"><input style={INPUT} value={form.tags} onChange={e => setForm(f=>({...f,tags:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="React, FastAPI, Docker" /></Field>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap:12 }}>
         <div>
           <Label>Màu</Label>
           <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
@@ -144,7 +148,7 @@ function ProjectForm({ initial, onSave, onClose }) {
         </Field>
         <Field label="Năm"><input style={INPUT} value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} onFocus={focus} onBlur={blur} maxLength={4} /></Field>
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
         <Field label="GitHub URL"><input style={INPUT} value={form.githubUrl} onChange={e => setForm(f=>({...f,githubUrl:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="https://github.com/..." /></Field>
         <Field label="Live URL"><input style={INPUT} value={form.liveUrl} onChange={e => setForm(f=>({...f,liveUrl:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="https://..." /></Field>
       </div>
@@ -161,6 +165,7 @@ function ProjectForm({ initial, onSave, onClose }) {
 function CertForm({ initial, onSave, onClose }) {
   const [form, setForm] = useState(initial || { name:'', issuer:'', icon:'🏅', color:'#8B5CF6' })
   const [saving, setSaving] = useState(false)
+  const { isMobile } = useBreakpoint()
 
   const handle = async e => {
     e.preventDefault(); setSaving(true)
@@ -176,7 +181,7 @@ function CertForm({ initial, onSave, onClose }) {
 
   return (
     <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
         <Field label="Tên chứng chỉ"><input style={INPUT} value={form.name} required onChange={e => setForm(f=>({...f,name:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
         <Field label="Tổ chức cấp"><input style={INPUT} value={form.issuer} onChange={e => setForm(f=>({...f,issuer:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
         <Field label="Icon (emoji)"><input style={INPUT} value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} onFocus={focus} onBlur={blur} maxLength={4} /></Field>
@@ -211,6 +216,7 @@ function PubForm({ initial, onSave, onClose }) {
 
   const [form, setForm] = useState(initial ? { ...initial, authorsRaw: toRaw(initial.authors) } : blank)
   const [saving, setSaving] = useState(false)
+  const { isMobile } = useBreakpoint()
 
   const handle = async e => {
     e.preventDefault(); setSaving(true)
@@ -232,7 +238,7 @@ function PubForm({ initial, onSave, onClose }) {
       <Field label="Tác giả (mỗi dòng 1 người, *Tên = highlight)">
         <textarea style={TEXTAREA} value={form.authorsRaw} onChange={e => setForm(f=>({...f,authorsRaw:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="Tran Van A&#10;*Nguyen Van B (tác giả chính)&#10;Le Van C" />
       </Field>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 3fr', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 3fr', gap:12 }}>
         <Field label="Năm"><input style={INPUT} value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} onFocus={focus} onBlur={blur} maxLength={4} /></Field>
         <Field label="Hội nghị / Journal"><input style={INPUT} value={form.conference} onChange={e => setForm(f=>({...f,conference:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
       </div>

@@ -9,6 +9,7 @@ import ImageUploader from '../components/ImageUploader'
 import AdminContent from '../components/AdminContent'
 import { LangProvider, useLang } from '../LangContext'
 import { t } from '../i18n'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 function LangToggleAdmin() {
   const { lang, setLang } = useLang()
@@ -282,8 +283,9 @@ function TimelineChart({ data }) {
 // ─── Account Modal ──────────────────────────────────────────────────────────
 
 function AccountModal({ mode, initial, onSave, onClose }) {
-  const [form, setForm] = useState(initial || { username:'', password:'', displayName:'', role:'user', expiresAt:'' })
+  const [form, setForm] = useState(initial ? { ...initial, password:'' } : { username:'', password:'', displayName:'', role:'user', expiresAt:'' })
   const [err, setErr] = useState('')
+  const { isMobile } = useBreakpoint()
 
   const handle = async (e) => {
     e.preventDefault(); setErr('')
@@ -303,12 +305,13 @@ function AccountModal({ mode, initial, onSave, onClose }) {
     <div style={{
       position:'fixed', inset:0, zIndex:200,
       background:'rgba(0,0,0,0.75)', backdropFilter:'blur(8px)',
-      display:'flex', alignItems:'center', justifyContent:'center', padding:24,
+      display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 12 : 24,
     }}
     onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div style={{
         background:'#0d0d1a', border:'1px solid rgba(255,255,255,0.1)',
-        borderRadius:20, padding:36, width:'100%', maxWidth:440,
+        borderRadius:20, padding: isMobile ? 22 : 36, width:'100%', maxWidth:440,
+        maxHeight:'90vh', overflowY:'auto',
         fontFamily:'Inter, sans-serif',
       }}
       onMouseDown={(e) => e.stopPropagation()}
@@ -365,6 +368,7 @@ function LinkModal({ accounts, onSave, onClose }) {
   const [images, setImages] = useState([])
   const [created, setCreated] = useState(null)
   const [copied, setCopied] = useState(false)
+  const { isMobile } = useBreakpoint()
 
   const handle = async (e) => {
     e.preventDefault()
@@ -387,12 +391,12 @@ function LinkModal({ accounts, onSave, onClose }) {
     <div style={{
       position:'fixed', inset:0, zIndex:200,
       background:'rgba(0,0,0,0.75)', backdropFilter:'blur(8px)',
-      display:'flex', alignItems:'center', justifyContent:'center', padding:24,
+      display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 12 : 24,
     }}
     onMouseDown={(e) => { if (!created && e.target === e.currentTarget) onClose() }}>
       <div style={{
         background:'#0d0d1a', border:'1px solid rgba(255,255,255,0.1)',
-        borderRadius:20, padding:36, width:'100%', maxWidth:500,
+        borderRadius:20, padding: isMobile ? 20 : 36, width:'100%', maxWidth:500,
         fontFamily:'Inter, sans-serif', maxHeight:'90vh', overflowY:'auto',
       }}
       onMouseDown={(e) => e.stopPropagation()}
@@ -451,10 +455,10 @@ function LinkModal({ accounts, onSave, onClose }) {
 
               <div>
                 <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:10, letterSpacing:'0.05em' }}>LOẠI TRANG</label>
-                <div style={{ display:'flex', gap:10 }}>
+                <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
                   {Object.entries(PAGE_TYPES).map(([key, meta]) => (
                     <button key={key} type="button" onClick={() => setForm(f => ({ ...f, type:key }))} style={{
-                      flex:1, background: form.type === key ? `${meta.color}18` : 'rgba(255,255,255,0.04)',
+                      flex: isMobile ? '1 1 30%' : 1, background: form.type === key ? `${meta.color}18` : 'rgba(255,255,255,0.04)',
                       border:`1px solid ${form.type === key ? meta.color + '55' : 'rgba(255,255,255,0.1)'}`,
                       borderRadius:12, padding:'12px 8px', cursor:'pointer',
                       color: form.type === key ? meta.color : '#8888aa', fontFamily:'Inter, sans-serif',
@@ -470,10 +474,10 @@ function LinkModal({ accounts, onSave, onClose }) {
               {/* Difficulty picker */}
               <div>
                 <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:10, letterSpacing:'0.05em' }}>ĐỘ KHÓ TRÒ CHƠI</label>
-                <div style={{ display:'flex', gap:8 }}>
+                <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
                   {Object.entries(DIFFICULTY[form.type] || DIFFICULTY.birthday).map(([key, meta]) => (
                     <button key={key} type="button" onClick={() => setForm(f => ({ ...f, difficulty:key }))} style={{
-                      flex:1, background: form.difficulty === key ? `${meta.color}20` : 'rgba(255,255,255,0.04)',
+                      flex: isMobile ? '1 1 30%' : 1, background: form.difficulty === key ? `${meta.color}20` : 'rgba(255,255,255,0.04)',
                       border:`1px solid ${form.difficulty === key ? meta.color+'66' : 'rgba(255,255,255,0.1)'}`,
                       borderRadius:10, padding:'10px 6px', cursor:'pointer',
                       color: form.difficulty === key ? meta.color : '#8888aa', fontFamily:'Inter, sans-serif',
@@ -539,7 +543,9 @@ function AdminInner() {
   const [copiedId, setCopiedId] = useState(null)
   const [serverOnline, setServerOnline] = useState(null)
   const [storage, setStorage] = useState(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const session = getSession()
+  const { isMobile } = useBreakpoint()
   const { lang } = useLang()
   const tr = t[lang].admin
   const TABS = [
@@ -587,10 +593,10 @@ function AdminInner() {
     await api.deleteLink(id).catch(() => {}); refresh()
   }
 
-  const handleDeleteMsg = async (idx) => {
-    const serverIdx = messages.length - 1 - idx
+  const handleDeleteMsg = async (displayIdx) => {
+    const serverIdx = messages.length - 1 - displayIdx
     await api.deleteMessage(serverIdx).catch(() => {
-      const msgs = [...messages]; msgs.splice(idx, 1)
+      const msgs = [...messages]; msgs.splice(serverIdx, 1)
       localStorage.setItem('dotme_messages', JSON.stringify(msgs))
     })
     refresh()
@@ -604,12 +610,41 @@ function AdminInner() {
   ).size
 
   return (
-    <div style={{ minHeight:'100vh', background:'#06060f', display:'flex', fontFamily:'Inter, sans-serif', color:'#f0f0ff' }}>
+    <div style={{ minHeight:'100vh', background:'#06060f', display:'flex', flexDirection: isMobile ? 'column' : 'row', fontFamily:'Inter, sans-serif', color:'#f0f0ff' }}>
+      {/* Mobile top bar */}
+      {isMobile && (
+        <div style={{
+          position:'sticky', top:0, zIndex:120, display:'flex', alignItems:'center', justifyContent:'space-between',
+          padding:'12px 16px', background:'rgba(6,6,15,0.95)', backdropFilter:'blur(10px)',
+          borderBottom:'1px solid rgba(255,255,255,0.07)', flexShrink:0,
+        }}>
+          <button onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu" style={{
+            background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8,
+            width:38, height:38, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', color:'#f0f0ff', cursor:'pointer',
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+          <div style={{ fontFamily:'Syne, sans-serif', fontSize:15, fontWeight:800, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', padding:'0 10px' }}>
+            {TABS.find(t => t.id === tab)?.icon} {TABS.find(t => t.id === tab)?.label}
+          </div>
+          <div style={{ width:38, flexShrink:0 }} />
+        </div>
+      )}
+
+      {/* Drawer backdrop */}
+      {isMobile && mobileMenuOpen && (
+        <div onClick={() => setMobileMenuOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:130 }} />
+      )}
+
       {/* Sidebar */}
       <aside style={{
-        width:240, flexShrink:0, background:'rgba(255,255,255,0.02)',
+        width:240, flexShrink:0, background: isMobile ? '#0a0a16' : 'rgba(255,255,255,0.02)',
         borderRight:'1px solid rgba(255,255,255,0.07)',
         display:'flex', flexDirection:'column', padding:'28px 14px 20px', gap:4,
+        ...(isMobile ? {
+          position:'fixed', top:0, bottom:0, left: mobileMenuOpen ? 0 : -260, zIndex:140,
+          transition:'left 0.25s ease', overflowY:'auto',
+        } : {}),
       }}>
         <div style={{ paddingLeft:12, marginBottom:28 }}>
           <div style={{
@@ -654,7 +689,7 @@ function AdminInner() {
         )}
 
         {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
+          <button key={t.id} onClick={() => { setTab(t.id); setMobileMenuOpen(false) }} style={{
             background: tab === t.id ? 'rgba(139,92,246,0.15)' : 'transparent',
             border: tab === t.id ? '1px solid rgba(139,92,246,0.3)' : '1px solid transparent',
             borderRadius:10, padding:'11px 14px', color: tab === t.id ? '#a78bfa' : '#8888aa',
@@ -692,11 +727,13 @@ function AdminInner() {
       </aside>
 
       {/* Main */}
-      <main style={{ flex:1, padding:36, overflowY:'auto' }}>
-        <div style={{ marginBottom:32 }}>
-          <h1 style={{ fontFamily:'Syne, sans-serif', fontSize:26, fontWeight:800, marginBottom:4 }}>
-            {TABS.find(t => t.id === tab)?.icon} {TABS.find(t => t.id === tab)?.label}
-          </h1>
+      <main style={{ flex:1, minWidth:0, padding: isMobile ? '18px 14px 40px' : 36, overflowY:'auto', overflowX:'hidden' }}>
+        <div style={{ marginBottom: isMobile ? 20 : 32 }}>
+          {!isMobile && (
+            <h1 style={{ fontFamily:'Syne, sans-serif', fontSize:26, fontWeight:800, marginBottom:4 }}>
+              {TABS.find(t => t.id === tab)?.icon} {TABS.find(t => t.id === tab)?.label}
+            </h1>
+          )}
           <p style={{ color:'#555577', fontSize:13 }}>
             {new Date().toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}
           </p>
@@ -705,7 +742,7 @@ function AdminInner() {
         {/* ── DASHBOARD ── */}
         {tab === 'dashboard' && (
           <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
+            <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: isMobile ? 10 : 16 }}>
               {[
                 { label:tr.stats.views,    value:analytics.total,    color:'#8B5CF6', icon:'👁' },
                 { label:tr.stats.today,    value:analytics.today,    color:'#22d3ee', icon:'📅' },
@@ -723,7 +760,7 @@ function AdminInner() {
             {storage && (
               <Card style={{ border:'1px solid rgba(139,92,246,0.2)' }}>
                 <SectionTitle>💾 {tr.storage}</SectionTitle>
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
+                <div style={{ display:'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap:12 }}>
                   {[
                     { label:tr.storageLabels.total,   value: storage.total.size, color:'#8B5CF6' },
                     { label:tr.storageLabels.uploads,  value: `${storage.uploads.size} (${storage.uploads.count})`, color:'#22d3ee' },
@@ -848,7 +885,8 @@ function AdminInner() {
               <GradBtn onClick={() => setModal('add-account')}>+ Thêm tài khoản</GradBtn>
             </div>
             <Card style={{ padding:0, overflow:'hidden' }}>
-              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
+              <div style={{ overflowX:'auto' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14, minWidth: isMobile ? 640 : 'auto' }}>
                 <thead>
                   <tr style={{ borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
                     {['Tài khoản','Vai trò','Trạng thái','Tạo ngày','Hết hạn',''].map(h => (
@@ -893,6 +931,7 @@ function AdminInner() {
                   })}
                 </tbody>
               </table>
+              </div>
             </Card>
           </div>
         )}
@@ -911,7 +950,8 @@ function AdminInner() {
               </Card>
             ) : (
               <Card style={{ padding:0, overflow:'hidden' }}>
-                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14 }}>
+                <div style={{ overflowX:'auto' }}>
+                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14, minWidth: isMobile ? 760 : 'auto' }}>
                   <thead>
                     <tr style={{ borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
                       {['Loại','Tên','Tài khoản','Hết hạn','Link',''].map(h => (
@@ -962,6 +1002,7 @@ function AdminInner() {
                     })}
                   </tbody>
                 </table>
+                </div>
               </Card>
             )}
           </div>
@@ -1010,7 +1051,7 @@ function AdminInner() {
                           </div>
                         </div>
                       </div>
-                      <button onClick={() => handleDeleteMsg(messages.length - 1 - i)} style={{
+                      <button onClick={() => handleDeleteMsg(i)} style={{
                         background:'none', border:'none', cursor:'pointer', color:'#555577', padding:4,
                         fontSize:16, transition:'color 0.2s',
                       }}
@@ -1042,7 +1083,8 @@ function AdminInner() {
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Inter:wght@400;600;700;800&display=swap');
-        * { scrollbar-width: thin; scrollbar-color: #8B5CF6 transparent; }
+        * { scrollbar-width: thin; scrollbar-color: #8B5CF6 transparent; box-sizing: border-box; }
+        html, body { overflow-x: hidden; }
       `}</style>
     </div>
   )

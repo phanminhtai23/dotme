@@ -33,7 +33,7 @@ export default function ImageUploader({ images = [], onChange, label = 'Album แบ
   const remove = (i) => {
     const img = images[i]
     if (img.filename) {
-      fetch(`/api/upload/${img.filename}`, { method: 'DELETE' }).catch(() => {})
+      fetch(`${(import.meta.env.VITE_API_BASE_URL || '/api')}/upload/${img.filename}`, { method: 'DELETE' }).catch(() => {})
     }
     onChange(images.filter((_, j) => j !== i))
   }
