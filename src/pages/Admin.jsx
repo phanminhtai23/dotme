@@ -593,10 +593,9 @@ function AdminInner() {
     await api.deleteLink(id).catch(() => {}); refresh()
   }
 
-  const handleDeleteMsg = async (displayIdx) => {
-    const serverIdx = messages.length - 1 - displayIdx
-    await api.deleteMessage(serverIdx).catch(() => {
-      const msgs = [...messages]; msgs.splice(serverIdx, 1)
+  const handleDeleteMsg = async (id) => {
+    await api.deleteMessage(id).catch(() => {
+      const msgs = messages.filter(m => m.id !== id)
       localStorage.setItem('dotme_messages', JSON.stringify(msgs))
     })
     refresh()
@@ -1037,7 +1036,7 @@ function AdminInner() {
             ) : (
               <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
                 {[...messages].reverse().map((msg, i) => (
-                  <Card key={i} style={{ position:'relative' }}>
+                  <Card key={msg.id || i} style={{ position:'relative' }}>
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
                       <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                         <div style={{ width:40, height:40, borderRadius:12, background:'rgba(139,92,246,0.15)', border:'1px solid rgba(139,92,246,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>
@@ -1051,7 +1050,7 @@ function AdminInner() {
                           </div>
                         </div>
                       </div>
-                      <button onClick={() => handleDeleteMsg(i)} style={{
+                      <button onClick={() => handleDeleteMsg(msg.id)} style={{
                         background:'none', border:'none', cursor:'pointer', color:'#555577', padding:4,
                         fontSize:16, transition:'color 0.2s',
                       }}

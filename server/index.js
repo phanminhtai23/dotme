@@ -732,9 +732,10 @@ app.get("/api/messages", async (_, res) =>
     res.json(await readCollection("messages", MESSAGES_FILE)),
 );
 
-app.delete("/api/messages/:idx", async (req, res) => {
-    const msgs = await readCollection("messages", MESSAGES_FILE);
-    msgs.splice(Number(req.params.idx), 1);
+app.delete("/api/messages/:id", async (req, res) => {
+    const msgs = (await readCollection("messages", MESSAGES_FILE)).filter(
+        (m) => m.id !== req.params.id,
+    );
     await writeCollection("messages", MESSAGES_FILE, msgs);
     res.json({ ok: true });
 });

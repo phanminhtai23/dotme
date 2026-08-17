@@ -41,7 +41,7 @@ export const api = {
 
     // Messages
     getMessages: () => req("GET", "/messages"),
-    deleteMessage: (idx) => req("DELETE", `/messages/${idx}`),
+    deleteMessage: (id) => req("DELETE", `/messages/${id}`),
     deleteAllMessages: () => req("DELETE", "/messages"),
     sendMessage: (name, message) => req("POST", "/messages", { name, message }),
 };
