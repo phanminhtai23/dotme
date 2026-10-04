@@ -488,6 +488,7 @@ function genId() {
 
 // ── Init default data ────────────────────────────────────────────────────────
 async function initData() {
+    await ensureStorageBucket();
     if (!existsSync(ACCOUNTS_FILE)) {
         const defaultPass = process.env.ADMIN_DEFAULT_PASS;
         if (!defaultPass) {
@@ -704,18 +705,33 @@ app.post("/api/links/:id/play", async (req, res) => {
 });
 
 // ── Image Upload ──────────────────────────────────────────────────────────────
-const storage = multer.diskStorage({
-    destination: UPLOADS_DIR,
-    filename: (_, file, cb) => {
-        const ext = extname(file.originalname).toLowerCase() || ".jpg";
-        cb(
-            null,
-            `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`,
-        );
-    },
-});
+// On ephemeral hosts (Render et al.) `server/uploads/` is wiped on every
+// restart/redeploy, so persist into Supabase Storage when configured —
+// falls back to local disk only for offline/no-Supabase local dev.
+const UPLOAD_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "uploads";
+
+function genUploadKey(originalname) {
+    const ext = extname(originalname).toLowerCase() || ".jpg";
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+}
+
+async function ensureStorageBucket() {
+    if (!supabase) return;
+    const { data } = await supabase.storage.getBucket(UPLOAD_BUCKET);
+    if (data) return;
+    const { error } = await supabase.storage.createBucket(UPLOAD_BUCKET, { public: true });
+    if (error && !/already exists/i.test(error.message)) {
+        console.error("Supabase bucket create failed:", error.message);
+    }
+}
+
 const upload = multer({
-    storage,
+    storage: supabase
+        ? multer.memoryStorage()
+        : multer.diskStorage({
+              destination: UPLOADS_DIR,
+              filename: (_, file, cb) => cb(null, genUploadKey(file.originalname)),
+          }),
     limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (_, file, cb) =>
         file.mimetype.startsWith("image/") || file.mimetype === "application/pdf"
@@ -723,19 +739,46 @@ const upload = multer({
             : cb(new Error("Chỉ hỗ trợ ảnh hoặc PDF")),
 });
 
-app.post("/api/upload", upload.single("image"), (req, res) => {
+app.post("/api/upload", upload.single("image"), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "No file" });
+
+    if (!supabase) {
+        return res.json({
+            url: `/uploads/${req.file.filename}`,
+            filename: req.file.filename,
+            mimetype: req.file.mimetype,
+            originalName: req.file.originalname,
+        });
+    }
+
+    const key = genUploadKey(req.file.originalname);
+    const { error } = await supabase.storage
+        .from(UPLOAD_BUCKET)
+        .upload(key, req.file.buffer, { contentType: req.file.mimetype });
+
+    if (error) {
+        console.error("Supabase storage upload failed:", error.message);
+        return res.status(500).json({ error: "Tải file thất bại" });
+    }
+
+    const { data } = supabase.storage.from(UPLOAD_BUCKET).getPublicUrl(key);
     res.json({
-        url: `/uploads/${req.file.filename}`,
-        filename: req.file.filename,
+        url: data.publicUrl,
+        filename: key,
         mimetype: req.file.mimetype,
         originalName: req.file.originalname,
     });
 });
-app.delete("/api/upload/:filename", (req, res) => {
-    try {
-        unlinkSync(join(UPLOADS_DIR, req.params.filename));
-    } catch {}
+
+app.delete("/api/upload/:filename", async (req, res) => {
+    if (supabase) {
+        const { error } = await supabase.storage.from(UPLOAD_BUCKET).remove([req.params.filename]);
+        if (error) console.error("Supabase storage delete failed:", error.message);
+    } else {
+        try {
+            unlinkSync(join(UPLOADS_DIR, req.params.filename));
+        } catch {}
+    }
     res.json({ ok: true });
 });
 

@@ -8,6 +8,7 @@ export default function EduPub() {
   const [visible, setVisible] = useState(false)
   const [certs, setCerts] = useState(null)
   const [pubs, setPubs] = useState(null)
+  const [lightbox, setLightbox] = useState(null)
   const { isMobile } = useBreakpoint()
   const { lang } = useLang()
   const tr = t[lang].edupub
@@ -159,26 +160,44 @@ export default function EduPub() {
 
           <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4,1fr)', gap: isMobile ? '12px' : '16px' }}>
             {certList.map((cert, i) => (
-              <div key={i} style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--radius-md)', padding:'20px 18px', display:'flex', flexDirection:'column', gap:10, transition:'all 0.2s ease', cursor:'default' }}
+              <div key={i} style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:'var(--radius-md)', padding:'20px 18px', display:'flex', flexDirection:'column', gap:12, transition:'all 0.2s ease', cursor:'default' }}
               onMouseEnter={e => { e.currentTarget.style.borderColor=cert.color+'55'; e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow=`0 16px 40px ${cert.color}18` }}
               onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none' }}
               >
-                <div style={{ width:38, height:38, borderRadius:10, overflow:'hidden', background:`${cert.color}18`, border:`1px solid ${cert.color}30`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>
-                  {cert.image?.url ? <img src={cert.image.url} alt={cert.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : cert.icon}
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <div style={{ width:38, height:38, borderRadius:10, background:`${cert.color}18`, border:`1px solid ${cert.color}30`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>
+                    {cert.icon}
+                  </div>
+                  <div style={{ minWidth:0 }}>
+                    <p style={{ fontSize:13, fontWeight:700, color:'var(--text-primary)', lineHeight:1.4, marginBottom:3 }}>{cert.name}</p>
+                    <p style={{ fontSize:11, color:cert.color, fontWeight:600, display:'flex', alignItems:'center', gap:6 }}>
+                      {cert.issuer}
+                      {cert.file?.url && (
+                        <a href={cert.file.url} target="_blank" rel="noreferrer" title="Xem chứng chỉ (PDF)" style={{ color:cert.color, textDecoration:'none' }}>📄</a>
+                      )}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p style={{ fontSize:13, fontWeight:700, color:'var(--text-primary)', lineHeight:1.4, marginBottom:3 }}>{cert.name}</p>
-                  <p style={{ fontSize:11, color:cert.color, fontWeight:600, display:'flex', alignItems:'center', gap:6 }}>
-                    {cert.issuer}
-                    {cert.file?.url && (
-                      <a href={cert.file.url} target="_blank" rel="noreferrer" title="Xem chứng chỉ (PDF)" style={{ color:cert.color, textDecoration:'none' }}>📄</a>
-                    )}
-                  </p>
-                </div>
+
+                {cert.image?.url && (
+                  <div onClick={() => setLightbox(cert.image.url)} style={{ width:'100%', aspectRatio:'4 / 3', borderRadius:10, overflow:'hidden', border:`1px solid ${cert.color}30`, cursor:'zoom-in' }}>
+                    <img src={cert.image.url} alt={cert.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform 0.3s ease' }}
+                      onMouseEnter={e => e.currentTarget.style.transform='scale(1.05)'}
+                      onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
+
+        {/* Certificate image lightbox */}
+        {lightbox && (
+          <div onClick={() => setLightbox(null)} style={{ position:'fixed', inset:0, zIndex:9999, background:'rgba(0,0,0,0.92)', backdropFilter:'blur(12px)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'zoom-out', padding:20 }}>
+            <img src={lightbox} alt="" style={{ maxWidth:'92vw', maxHeight:'92vh', borderRadius:14, objectFit:'contain' }} />
+          </div>
+        )}
 
       </div>
     </section>
