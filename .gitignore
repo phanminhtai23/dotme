@@ -7,3 +7,9 @@ README.local.md
 *.jpg
 *.png
 *.nginx
+
+# Runtime data & uploads — must NEVER be in git, otherwise `git reset --hard`
+# on deploy overwrites live data (messages, accounts, etc.) with stale commits.
+server/data/*.json
+server/uploads/*
+!server/uploads/.gitkeep

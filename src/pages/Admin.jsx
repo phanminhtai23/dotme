@@ -609,7 +609,7 @@ function AdminInner() {
   ).size
 
   return (
-    <div style={{ minHeight:'100vh', background:'#06060f', display:'flex', flexDirection: isMobile ? 'column' : 'row', fontFamily:'Inter, sans-serif', color:'#f0f0ff' }}>
+    <div style={{ height: isMobile ? 'auto' : '100vh', minHeight:'100vh', background:'#06060f', display:'flex', flexDirection: isMobile ? 'column' : 'row', fontFamily:'Inter, sans-serif', color:'#f0f0ff' }}>
       {/* Mobile top bar */}
       {isMobile && (
         <div style={{

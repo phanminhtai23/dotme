@@ -163,12 +163,17 @@ export default function EduPub() {
               onMouseEnter={e => { e.currentTarget.style.borderColor=cert.color+'55'; e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow=`0 16px 40px ${cert.color}18` }}
               onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none' }}
               >
-                <div style={{ width:38, height:38, borderRadius:10, background:`${cert.color}18`, border:`1px solid ${cert.color}30`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>
-                  {cert.icon}
+                <div style={{ width:38, height:38, borderRadius:10, overflow:'hidden', background:`${cert.color}18`, border:`1px solid ${cert.color}30`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>
+                  {cert.image?.url ? <img src={cert.image.url} alt={cert.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : cert.icon}
                 </div>
                 <div>
                   <p style={{ fontSize:13, fontWeight:700, color:'var(--text-primary)', lineHeight:1.4, marginBottom:3 }}>{cert.name}</p>
-                  <p style={{ fontSize:11, color:cert.color, fontWeight:600 }}>{cert.issuer}</p>
+                  <p style={{ fontSize:11, color:cert.color, fontWeight:600, display:'flex', alignItems:'center', gap:6 }}>
+                    {cert.issuer}
+                    {cert.file?.url && (
+                      <a href={cert.file.url} target="_blank" rel="noreferrer" title="Xem chứng chỉ (PDF)" style={{ color:cert.color, textDecoration:'none' }}>📄</a>
+                    )}
+                  </p>
                 </div>
               </div>
             ))}

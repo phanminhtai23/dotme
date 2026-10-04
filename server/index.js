@@ -133,6 +133,8 @@ async function writeCollection(collection, file, items) {
         return;
     }
 
+    wj(file, items);
+
     if (!items.length) return;
 
     const rows = items.map((item, index) => ({
@@ -151,8 +153,45 @@ async function writeCollection(collection, file, items) {
     }
 }
 
+// Seeding from the local JSON mirror must happen AT MOST ONCE per collection,
+// ever — otherwise an intentionally-emptied collection (e.g. all messages
+// deleted) looks indistinguishable from "never seeded" and gets repopulated
+// from stale local data on every server restart.
+//
+// This marker is stored IN SUPABASE (collection "_seed_state"), not on local
+// disk — Render (and most PaaS hosts) run on an ephemeral filesystem that's
+// rebuilt from the git repo on every deploy/restart, so a local marker file
+// would itself get wiped and defeat the point. Supabase is the only thing
+// that actually survives a restart here.
+const SEED_MARKER_COLLECTION = "_seed_state";
+async function hasSeedMarker(collection) {
+    const { data, error } = await supabase
+        .from(SUPABASE_DOCS_TABLE)
+        .select("id")
+        .eq("collection", SEED_MARKER_COLLECTION)
+        .eq("item_key", collection)
+        .limit(1);
+    if (error) {
+        console.error(`Supabase seed-marker check ${collection} failed:`, error.message);
+        return false;
+    }
+    return !!data?.length;
+}
+async function setSeedMarker(collection) {
+    const { error } = await supabase.from(SUPABASE_DOCS_TABLE).insert({
+        collection: SEED_MARKER_COLLECTION,
+        item_key: collection,
+        payload: JSON.stringify({ seededAt: new Date().toISOString() }),
+        sort_order: 0,
+    });
+    if (error) {
+        console.error(`Supabase seed-marker write ${collection} failed:`, error.message);
+    }
+}
+
 async function seedCollectionFromLocal(collection, file) {
     if (!supabase) return;
+    if (await hasSeedMarker(collection)) return;
 
     const { data, error } = await supabase
         .from(SUPABASE_DOCS_TABLE)
@@ -165,10 +204,11 @@ async function seedCollectionFromLocal(collection, file) {
         return;
     }
 
-    if (data?.length) return;
-
-    const localItems = rj(file, []);
-    if (localItems.length) await writeCollection(collection, file, localItems);
+    if (!data?.length) {
+        const localItems = rj(file, []);
+        if (localItems.length) await writeCollection(collection, file, localItems);
+    }
+    await setSeedMarker(collection);
 }
 
 async function readAnalyticsStore() {
@@ -678,9 +718,9 @@ const upload = multer({
     storage,
     limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (_, file, cb) =>
-        file.mimetype.startsWith("image/")
+        file.mimetype.startsWith("image/") || file.mimetype === "application/pdf"
             ? cb(null, true)
-            : cb(new Error("Images only")),
+            : cb(new Error("Chỉ hỗ trợ ảnh hoặc PDF")),
 });
 
 app.post("/api/upload", upload.single("image"), (req, res) => {
@@ -688,6 +728,8 @@ app.post("/api/upload", upload.single("image"), (req, res) => {
     res.json({
         url: `/uploads/${req.file.filename}`,
         filename: req.file.filename,
+        mimetype: req.file.mimetype,
+        originalName: req.file.originalname,
     });
 });
 app.delete("/api/upload/:filename", (req, res) => {
@@ -728,9 +770,20 @@ app.post("/api/messages", async (req, res) => {
     res.json({ ok: true });
 });
 
-app.get("/api/messages", async (_, res) =>
-    res.json(await readCollection("messages", MESSAGES_FILE)),
-);
+app.get("/api/messages", async (_, res) => {
+    const msgs = await readCollection("messages", MESSAGES_FILE);
+    // Backfill legacy messages created before `id` existed — otherwise the
+    // delete button targets `/messages/undefined`, matches nothing, and
+    // silently no-ops.
+    let changed = false;
+    const fixed = msgs.map((m) => {
+        if (m.id) return m;
+        changed = true;
+        return { ...m, id: genId() };
+    });
+    if (changed) await writeCollection("messages", MESSAGES_FILE, fixed);
+    res.json(fixed);
+});
 
 app.delete("/api/messages/:id", async (req, res) => {
     const msgs = (await readCollection("messages", MESSAGES_FILE)).filter(
@@ -901,6 +954,12 @@ app.get("/api/storage", (_, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    console.error(err.message);
+    res.status(400).json({ error: err.message || "Upload thất bại" });
 });
 
 const PORT = process.env.PORT || 3001;

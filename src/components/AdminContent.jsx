@@ -162,8 +162,55 @@ function ProjectForm({ initial, onSave, onClose }) {
 
 // ── CERTIFICATES ──────────────────────────────────────────────────────────────
 
+const UPLOAD_BASE = (import.meta.env.VITE_API_BASE_URL || '/api')
+
+function SingleUpload({ label, value, onChange, accept, kind }) {
+  const [uploading, setUploading] = useState(false)
+
+  const handleFile = async (file) => {
+    if (!file) return
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('image', file)
+      const res = await fetch(`${UPLOAD_BASE}/upload`, { method:'POST', body: fd })
+      const data = await res.json()
+      if (data.url) onChange({ url: data.url, filename: data.filename, name: file.name })
+      else alert(data.error || 'Tải file thất bại')
+    } catch {
+      alert('Tải file thất bại')
+    } finally { setUploading(false) }
+  }
+
+  const remove = () => {
+    if (value?.filename) fetch(`${UPLOAD_BASE}/upload/${value.filename}`, { method:'DELETE' }).catch(() => {})
+    onChange(null)
+  }
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      {value ? (
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:4 }}>
+          {kind === 'image' ? (
+            <img src={value.url} alt="" style={{ width:48, height:48, borderRadius:10, objectFit:'cover', border:'1px solid rgba(255,255,255,0.1)' }} />
+          ) : (
+            <a href={value.url} target="_blank" rel="noreferrer" style={{ fontSize:12, color:'#22d3ee', textDecoration:'none', maxWidth:160, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>📄 {value.name || 'Xem file'}</a>
+          )}
+          <button type="button" onClick={remove} style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:8, padding:'5px 10px', color:'#fca5a5', fontSize:11, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Xóa</button>
+        </div>
+      ) : (
+        <label style={{ display:'inline-flex', alignItems:'center', gap:6, marginTop:4, background: uploading ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.04)', border:'1px dashed rgba(139,92,246,0.3)', borderRadius:10, padding:'8px 14px', fontSize:12, color: uploading ? '#a78bfa' : '#8888aa', cursor:'pointer', transition:'all 0.2s' }}>
+          {uploading ? '⏳ Đang tải...' : (kind === 'image' ? '📤 Tải ảnh' : '📤 Tải PDF')}
+          <input type="file" accept={accept} hidden onChange={e => handleFile(e.target.files[0])} />
+        </label>
+      )}
+    </div>
+  )
+}
+
 function CertForm({ initial, onSave, onClose }) {
-  const [form, setForm] = useState(initial || { name:'', issuer:'', icon:'🏅', color:'#8B5CF6' })
+  const [form, setForm] = useState(initial ? { image:null, file:null, ...initial } : { name:'', issuer:'', icon:'🏅', color:'#8B5CF6', image:null, file:null })
   const [saving, setSaving] = useState(false)
   const { isMobile } = useBreakpoint()
 
@@ -193,6 +240,10 @@ function CertForm({ initial, onSave, onClose }) {
             ))}
           </div>
         </div>
+      </div>
+      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
+        <SingleUpload label="Ảnh chứng chỉ (hiện cạnh tên)" kind="image" accept="image/*" value={form.image} onChange={image => setForm(f => ({ ...f, image }))} />
+        <SingleUpload label="File PDF chứng chỉ" kind="pdf" accept="application/pdf" value={form.file} onChange={file => setForm(f => ({ ...f, file }))} />
       </div>
       <div style={{ display:'flex', gap:10 }}>
         <GradBtn type="submit" style={{ flex:1 }}>{saving ? '⏳...' : '💾 Lưu'}</GradBtn>
