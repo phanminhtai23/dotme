@@ -33,7 +33,9 @@ Each started round reserves one of the link's three default attempts. Admins
 can grant additional attempts from the link list; retries go through the same
 server-side reservation, and in-game restart buttons are intentionally omitted
 so they cannot bypass the limit. The win screen can be dismissed to return to
-the link page after taking a screenshot.
+the link page after taking a screenshot. Admins can also change the selected
+game for an existing link from the links table; changing games resets its
+difficulty to medium.
 
 Admins can also add an optional personal note of up to 500 characters when
 creating a link. The note is displayed as plain text on the Motivation,

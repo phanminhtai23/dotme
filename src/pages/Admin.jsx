@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { isAuthenticated, isAdmin, logout, getSession } from '../auth'
 import { PAGE_TYPES } from '../store'
 import { DIFFICULTY } from '../games/difficulty'
-import { DEFAULT_GAME_BY_TYPE, GAME_OPTIONS } from '../games/catalog'
+import { DEFAULT_GAME_BY_TYPE, GAME_OPTIONS, resolveGameId } from '../games/catalog'
 import { getAnalytics, trackVisit } from '../analytics'
 import { api } from '../api'
 import ImageUploader from '../components/ImageUploader'
@@ -606,6 +606,7 @@ function AdminInner() {
   const [editTarget, setEditTarget] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
   const [grantingPlaysId, setGrantingPlaysId] = useState(null)
+  const [updatingGameId, setUpdatingGameId] = useState(null)
   const [linkNotice, setLinkNotice] = useState(null)
   const [serverOnline, setServerOnline] = useState(null)
   const [storage, setStorage] = useState(null)
@@ -673,6 +674,23 @@ function AdminInner() {
       setLinkNotice({ type:'error', text:`Cấp lượt chơi thất bại: ${error.message}` })
     } finally {
       setGrantingPlaysId(null)
+    }
+  }
+
+  const handleChangeGame = async (link, gameId) => {
+    if (updatingGameId) return
+    const game = GAME_OPTIONS.find((option) => option.id === gameId)
+    if (!game) return
+    setUpdatingGameId(link.id)
+    setLinkNotice(null)
+    try {
+      const updatedLink = await api.updateLink(link.id, { gameId, difficulty:'medium' })
+      setLinks(current => current.map(item => item.id === link.id ? updatedLink : item))
+      setLinkNotice({ type:'success', text:`Đã đổi trò chơi của link "${link.name}" thành ${game.name}.` })
+    } catch (error) {
+      setLinkNotice({ type:'error', text:`Đổi trò chơi thất bại: ${error.message}` })
+    } finally {
+      setUpdatingGameId(null)
     }
   }
 
@@ -1059,10 +1077,10 @@ function AdminInner() {
             ) : (
               <Card style={{ padding:0, overflow:'hidden' }}>
                 <div style={{ overflowX:'auto' }}>
-                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14, minWidth: isMobile ? 760 : 'auto' }}>
+                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14, minWidth: isMobile ? 900 : 'auto' }}>
                   <thead>
                     <tr style={{ borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
-                      {['Loại','Tên','Tài khoản','Hết hạn','Link','Lượt chơi',''].map(h => (
+                      {['Loại','Tên','Tài khoản','Hết hạn','Link','Trò chơi','Lượt chơi',''].map(h => (
                         <th key={h} style={{ padding:'14px 20px', textAlign:'left', fontSize:12, fontWeight:600, color:'#555577', letterSpacing:'0.05em', whiteSpace:'nowrap' }}>{h}</th>
                       ))}
                     </tr>
@@ -1097,6 +1115,33 @@ function AdminInner() {
                             }}>
                               {copiedId === link.id ? '✓ Đã copy' : '📋 Copy link'}
                             </button>
+                          </td>
+                          <td style={{ padding:'14px 20px' }}>
+                            <select
+                              aria-label={`Đổi trò chơi cho link ${link.name}`}
+                              value={resolveGameId(link.gameId, link.type)}
+                              disabled={updatingGameId !== null}
+                              onChange={event => handleChangeGame(link, event.target.value)}
+                              style={{
+                                ...INPUT,
+                                minWidth:175,
+                                padding:'8px 10px',
+                                background:'#1a1a2e',
+                                color:'#f0f0ff',
+                                colorScheme:'dark',
+                                fontSize:12,
+                                opacity:updatingGameId !== null ? 0.6 : 1,
+                              }}
+                            >
+                              {GAME_OPTIONS.map(game => (
+                                <option key={game.id} value={game.id} style={{ background:'#1a1a2e', color:'#f0f0ff' }}>
+                                  {game.emoji} {game.name}
+                                </option>
+                              ))}
+                            </select>
+                            {updatingGameId === link.id && (
+                              <div role="status" style={{ marginTop:5, color:'#8888aa', fontSize:11 }}>Đang cập nhật...</div>
+                            )}
                           </td>
                           <td style={{ padding:'14px 20px', whiteSpace:'nowrap' }}>
                             {(() => {
