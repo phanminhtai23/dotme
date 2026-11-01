@@ -490,7 +490,13 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
       )}
 
       {gameState === 'won' && (
-        <WinScreen winTime={winTime} remaining={remaining} accent={effectiveAccent} apiWarning={apiWarning} />
+        <WinScreen
+          winTime={winTime}
+          remaining={remaining}
+          accent={effectiveAccent}
+          apiWarning={apiWarning}
+          onClose={() => setGameState('idle')}
+        />
       )}
 
       {gameState === 'lost' && (

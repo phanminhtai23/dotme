@@ -1,4 +1,4 @@
-export default function WinScreen({ winTime, remaining, accent = '#8B5CF6', apiWarning }) {
+export default function WinScreen({ winTime, remaining, accent = '#8B5CF6', apiWarning, onClose }) {
   return (
     <div style={{
       position:'fixed', inset:0, zIndex:500,
@@ -28,6 +28,24 @@ export default function WinScreen({ winTime, remaining, accent = '#8B5CF6', apiW
         textAlign:'center', position:'relative', overflow:'hidden',
         boxShadow:`0 0 100px ${accent}33`,
       }}>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Đóng màn hình chiến thắng"
+          style={{
+            position:'absolute', top:12, right:12,
+            width:44, height:44,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            border:'1px solid rgba(255,255,255,0.18)',
+            borderRadius:'50%',
+            background:'rgba(255,255,255,0.08)',
+            color:'#fff', fontSize:22, lineHeight:1,
+            cursor:'pointer',
+          }}
+        >
+          ×
+        </button>
+
         {/* Glow top */}
         <div style={{ position:'absolute', top:-60, left:'50%', transform:'translateX(-50%)', width:200, height:200, background:`radial-gradient(circle, ${accent}30, transparent 70%)`, pointerEvents:'none' }} />
 
@@ -80,6 +98,25 @@ export default function WinScreen({ winTime, remaining, accent = '#8B5CF6', apiW
             Link này còn {remaining} lượt chơi
           </p>
         )}
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            minHeight:44,
+            marginTop:8,
+            padding:'10px 24px',
+            border:`1px solid ${accent}66`,
+            borderRadius:12,
+            background:`${accent}20`,
+            color:'#fff',
+            fontSize:14,
+            fontWeight:700,
+            fontFamily:'Inter, sans-serif',
+            cursor:'pointer',
+          }}
+        >
+          Đóng
+        </button>
       </div>
 
       <style>{`
