@@ -421,6 +421,9 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
     }
   }
 
+  const handleWin = () => recordGameResult(true)
+  const handleLose = (data) => recordGameResult(false, data)
+
   const retryCheck = () => {
     if (gameLoadError) {
       window.location.reload()
