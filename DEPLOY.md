@@ -18,16 +18,15 @@ ADMIN_DEFAULT_PASS=<strong-unique-password>
 RESEND_API_KEY=<resend-api-key>
 RESEND_FROM=<verified-sender>
 RESEND_TO=<notification-recipient>
-SUPABASE_URL=<current-supabase-project-url>
-SUPABASE_SERVICE_ROLE_KEY=<current-supabase-service-role-key>
 ```
 
-The Supabase credentials are only needed for the initial server-side import.
-The deployment script imports the Supabase collections, visit history, and
-`uploads` bucket into SQLite before starting the API. It records a migration
-marker, skips the import on subsequent deploys, and does not delete Supabase
-data. Remove the Supabase credentials from the server `.env` after confirming
-the initial deployment if they are no longer needed.
+Supabase credentials are not needed when deploying an SQLite database that has
+already been migrated. If the server has no migrated SQLite database, the first
+deployment must either import the old Supabase data using temporary
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` variables, or restore a migrated
+SQLite database to the server first. The migration records a marker and skips
+future imports. Do not remove the only copy of the old data until the SQLite
+database is confirmed to contain it.
 
 The SQLite database and uploaded files are stored in
 `server/data/dotme.sqlite`; this path is git-ignored and is preserved by deploys.
