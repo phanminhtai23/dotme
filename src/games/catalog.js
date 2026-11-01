@@ -9,7 +9,7 @@ export const GAME_OPTIONS = [
   { id:'cat-runner', name:'Mèo vượt chướng ngại', emoji:'🐱', description:'Nhảy và cúi để né chướng ngại' },
   { id:'heart-memory', name:'Lật bài đôi', emoji:'💕', description:'Tìm các cặp hình giống nhau' },
   { id:'snake', name:'Rắn săn mồi', emoji:'🐍', description:'Điều khiển rắn ăn mồi, tránh va chạm' },
-  { id:'goose-forage', name:'Ngỗng nhặt hạt', emoji:'🪿', description:'Dẫn ngỗng đi nhặt hạt trong khu vườn' },
+  { id:'goose-forage', name:'Vịt nhặt hạt', emoji:'🦆', description:'Dẫn chú vịt đi nhặt hạt trong khu vườn' },
   { id:'star-catcher', name:'Hứng sao đêm', emoji:'🌠', description:'Di chuyển chiếc giỏ để hứng sao rơi' },
 ]
 

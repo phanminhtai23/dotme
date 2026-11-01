@@ -35,7 +35,7 @@ function chooseSeed(goose) {
   return free[Math.floor(Math.random() * free.length)]
 }
 
-function drawGoose(ctx, x, y, frame = 0) {
+function drawDuck(ctx, x, y, frame = 0) {
   const cx = x * CELL + CELL / 2
   const cy = y * CELL + CELL / 2
   const bob = Math.sin(frame * 0.006) * 1.2
@@ -43,68 +43,66 @@ function drawGoose(ctx, x, y, frame = 0) {
   ctx.translate(cx, cy + bob)
   ctx.rotate(Math.sin(frame * 0.003) * 0.035)
 
-  // Original baby-goose design: fluffy cheeks, a tiny neckerchief, and bright eyes.
   ctx.fillStyle = 'rgba(24, 50, 37, 0.18)'
   ctx.beginPath()
   ctx.ellipse(0, 9, 10, 3.5, 0, 0, Math.PI * 2)
   ctx.fill()
 
-  ctx.fillStyle = '#fffdf5'
-  ctx.strokeStyle = '#e9e2ca'
+  ctx.fillStyle = '#f3a712'
+  ctx.strokeStyle = '#d88908'
   ctx.lineWidth = 0.8
   ctx.beginPath()
   ctx.ellipse(-1, 2, 10, 7.5, -0.12, 0, Math.PI * 2)
   ctx.fill()
   ctx.stroke()
 
-  ctx.fillStyle = '#f6f0dc'
+  ctx.fillStyle = '#ffe08a'
   ctx.beginPath()
-  ctx.ellipse(-3, 1, 5, 4, -0.25, 0, Math.PI * 2)
+  ctx.ellipse(-1, 4, 6, 4.5, -0.12, 0, Math.PI * 2)
   ctx.fill()
 
   ctx.save()
-  ctx.translate(-5, 1)
-  ctx.rotate(Math.sin(frame * 0.018) * 0.14)
-  ctx.fillStyle = '#fff7e2'
+  ctx.translate(-4, 1)
+  ctx.rotate(Math.sin(frame * 0.018) * 0.2)
+  ctx.fillStyle = '#ffd05c'
   ctx.beginPath()
-  ctx.ellipse(0, 0, 3.8, 2.2 + Math.max(0, Math.sin(frame * 0.018)) * 0.8, -0.2, 0, Math.PI * 2)
+  ctx.ellipse(0, 0, 4.2, 2.8 + Math.max(0, Math.sin(frame * 0.018)) * 0.7, -0.2, 0, Math.PI * 2)
   ctx.fill()
   ctx.restore()
 
-  ctx.fillStyle = '#fffdf5'
+  ctx.fillStyle = '#ffc844'
   ctx.beginPath()
-  ctx.ellipse(3, -5, 6, 6.5, 0.12, 0, Math.PI * 2)
+  ctx.ellipse(3, -5, 6.5, 7, 0.12, 0, Math.PI * 2)
   ctx.fill()
   ctx.stroke()
 
-  ctx.fillStyle = '#fffdf5'
+  ctx.fillStyle = '#ffc844'
   ctx.beginPath()
-  ctx.moveTo(0, -10)
-  ctx.quadraticCurveTo(-3, -15, 1, -13)
-  ctx.quadraticCurveTo(3, -16, 4, -11)
-  ctx.quadraticCurveTo(7, -14, 7, -9)
+  ctx.moveTo(-1, -10)
+  ctx.quadraticCurveTo(-4, -16, 0, -14)
+  ctx.quadraticCurveTo(2, -17, 4, -11)
   ctx.closePath()
   ctx.fill()
 
-  ctx.fillStyle = '#30453a'
+  ctx.fillStyle = '#593d21'
   ctx.beginPath()
-  ctx.arc(5, -6, 1.65, 0, Math.PI * 2)
+  ctx.arc(5, -6, 1.7, 0, Math.PI * 2)
   ctx.fill()
   ctx.fillStyle = '#fff'
   ctx.beginPath()
-  ctx.arc(5.5, -6.6, 0.58, 0, Math.PI * 2)
+  ctx.arc(5.55, -6.6, 0.6, 0, Math.PI * 2)
   ctx.fill()
 
-  ctx.fillStyle = '#f6a8a0'
+  ctx.fillStyle = '#f69a8b'
   ctx.beginPath()
   ctx.ellipse(8, -2.5, 2.2, 1.3, 0, 0, Math.PI * 2)
   ctx.fill()
 
-  ctx.fillStyle = '#f59e0b'
+  ctx.fillStyle = '#f47b20'
   ctx.beginPath()
-  ctx.moveTo(8, -5)
+  ctx.moveTo(8, -4)
   ctx.quadraticCurveTo(14, -5, 15, -3)
-  ctx.quadraticCurveTo(13, -1.5, 8, -2)
+  ctx.quadraticCurveTo(14, -1, 8, -1)
   ctx.closePath()
   ctx.fill()
 
@@ -123,14 +121,16 @@ function drawGoose(ctx, x, y, frame = 0) {
   ctx.closePath()
   ctx.fill()
 
-  ctx.strokeStyle = '#e98618'
-  ctx.lineWidth = 1.6
+  ctx.strokeStyle = '#f47b20'
+  ctx.lineWidth = 1.8
   ctx.lineCap = 'round'
   ctx.beginPath()
   ctx.moveTo(-4, 7)
-  ctx.lineTo(-5, 9 + Math.sin(frame * 0.018))
+  ctx.lineTo(-7, 9 + Math.sin(frame * 0.018))
+  ctx.lineTo(-2, 9 + Math.sin(frame * 0.018))
   ctx.moveTo(2, 7)
   ctx.lineTo(3, 9 - Math.sin(frame * 0.018))
+  ctx.lineTo(7, 9 - Math.sin(frame * 0.018))
   ctx.stroke()
   ctx.restore()
 }
@@ -274,7 +274,7 @@ export default function GooseForage({ onWin, onLose, config = {} }) {
       ctx.ellipse(seedX - 1, seedY - 1, 1.4, 2.4, -0.55, 0, Math.PI * 2)
       ctx.fill()
 
-      drawGoose(ctx, goose.x, goose.y, phase === 'playing' ? frame : 0)
+      drawDuck(ctx, goose.x, goose.y, phase === 'playing' ? frame : 0)
     }
 
     render()
@@ -330,7 +330,7 @@ export default function GooseForage({ onWin, onLose, config = {} }) {
     }}>
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, maxWidth:'100%' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', width:'min(84vw, 400px)' }}>
-          <strong style={{ color:'#365b43', fontSize:13, letterSpacing:'0.08em' }}>NGỖNG NHẶT HẠT</strong>
+          <strong style={{ color:'#365b43', fontSize:13, letterSpacing:'0.08em' }}>VỊT NHẶT HẠT</strong>
           <div style={{ display:'flex', gap:14, color:'#365b43', fontSize:14, fontWeight:700 }}>
             <span aria-label="Thời gian còn lại">⏱️ {timeLeft} giây</span>
             <span>🌾 {score}/{targetScore}</span>
@@ -341,19 +341,19 @@ export default function GooseForage({ onWin, onLose, config = {} }) {
             ref={canvasRef}
             width={SIZE}
             height={SIZE}
-            aria-label={`Ngỗng nhặt hạt, điểm ${score} trên ${targetScore}`}
+            aria-label={`Vịt nhặt hạt, điểm ${score} trên ${targetScore}`}
             style={{ display:'block', width:'100%', height:'100%', border:'3px solid rgba(255,255,255,0.75)', borderRadius:18, boxShadow:'0 18px 48px rgba(37,76,45,0.18)' }}
           />
           {phase !== 'playing' && (
             <div style={overlayStyle}>
-              <span style={{ fontSize:48 }}>{phase === 'ended' ? '🌿' : '🪿'}</span>
+              <span style={{ fontSize:48 }}>{phase === 'ended' ? '🌿' : '🦆'}</span>
               <strong style={{ fontSize:22 }}>{phase === 'ended' ? 'Chuyến dạo vườn kết thúc' : 'Một vòng dạo vườn nhé?'}</strong>
               <p style={messageStyle}>
                 {phase === 'ended'
                   ? timeLeft === 0
                     ? `Hết giờ rồi! Ngỗng đã nhặt được ${score}/${targetScore} hạt.`
                     : `Ngỗng đã nhặt được ${score}/${targetScore} hạt.`
-                  : `Dẫn bạn ngỗng nhặt ${targetScore} hạt trong ${duration} giây, nhớ tránh các bụi cây nhé.`}
+                  : `Dẫn bạn vịt nhặt ${targetScore} hạt trong ${duration} giây, nhớ tránh các bụi cây nhé.`}
               </p>
               {phase === 'start' && (
                 <button type="button" onClick={startGame} style={buttonStyle}>Bắt đầu</button>
