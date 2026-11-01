@@ -48,8 +48,12 @@ export default function About() {
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'center', fontSize:96, padding:'40px 0' }}>👨‍💻</div>
               ) : (
                 <img
-                  src="/avatar.png"
+                  src="/avatar.webp"
                   alt="Kevin Phan"
+                  width="1024"
+                  height="1024"
+                  loading="lazy"
+                  decoding="async"
                   onError={() => setImgError(true)}
                   style={{
                     width:'100%', height:'auto', display:'block',

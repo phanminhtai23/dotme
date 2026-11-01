@@ -17,8 +17,11 @@ PORT=3002
 ADMIN_DEFAULT_PASS=<strong-unique-password>
 RESEND_API_KEY=<resend-api-key>
 RESEND_FROM=<verified-sender>
-RESEND_TO=<notification-recipient>
+RESEND_TO=kevinphan68.work@gmail.com
 ```
+
+`RESEND_TO` in the server's existing `.env` overrides the application default;
+update it there as well when changing the notification recipient.
 
 Supabase credentials are not needed when deploying an SQLite database that has
 already been migrated. If the server has no migrated SQLite database, the first

@@ -3,6 +3,11 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useLang } from '../LangContext'
 import { t } from '../i18n'
 
+function certificateThumbnailUrl(url) {
+  if (typeof url !== 'string' || !url.startsWith('/uploads/')) return url
+  return `${url}${url.includes('?') ? '&' : '?'}thumbnail=webp`
+}
+
 export default function EduPub() {
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
@@ -181,7 +186,7 @@ export default function EduPub() {
 
                 {cert.image?.url && (
                   <div onClick={() => setLightbox(cert.image.url)} style={{ width:'100%', aspectRatio:'4 / 3', borderRadius:10, overflow:'hidden', border:`1px solid ${cert.color}30`, cursor:'zoom-in' }}>
-                    <img src={cert.image.url} alt={cert.name} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform 0.3s ease' }}
+                    <img src={certificateThumbnailUrl(cert.image.url)} alt={cert.name} loading="lazy" decoding="async" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform 0.3s ease' }}
                       onMouseEnter={e => e.currentTarget.style.transform='scale(1.05)'}
                       onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
                     />

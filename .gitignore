@@ -4,6 +4,7 @@ dist
 .env.local
 README.local.md
 *.webp
+!public/avatar.webp
 *.jpg
 *.png
 *.nginx

@@ -3,6 +3,7 @@ import cors from "cors";
 import multer from "multer";
 import bcrypt from "bcryptjs";
 import { Resend } from "resend";
+import { getWebpThumbnail, invalidateThumbnail } from "./image-thumbnails.js";
 import {
     existsSync,
     mkdirSync,
@@ -309,7 +310,7 @@ const INITIAL_CONTENT = {
 const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.RESEND_FROM || "inbox-resume@finsightagent.tech";
-const TO = process.env.RESEND_TO || "phanminhtai23@gmail.com";
+const TO = process.env.RESEND_TO || "kevinphan68.work@gmail.com";
 
 const allowedOrigins = (
     process.env.CORS_ORIGIN ||
@@ -321,7 +322,7 @@ const allowedOrigins = (
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
-app.get("/uploads/:filename", (req, res, next) => {
+app.get("/uploads/:filename", async (req, res, next) => {
     const { filename } = req.params;
     if (!/^[A-Za-z0-9._-]+$/.test(filename)) {
         return res.status(400).json({ error: "Tên file không hợp lệ" });
@@ -332,6 +333,14 @@ app.get("/uploads/:filename", (req, res, next) => {
 
     res.set("X-Content-Type-Options", "nosniff");
     res.set("Cache-Control", "public, max-age=31536000, immutable");
+    if (req.query.thumbnail === "webp" && ["image/jpeg", "image/png", "image/webp"].includes(upload.mimetype)) {
+        try {
+            const thumbnail = await getWebpThumbnail(filename, upload.content);
+            return res.type("image/webp").send(thumbnail);
+        } catch {
+            // Keep the original available if a particular image cannot be converted.
+        }
+    }
     res.type(upload.mimetype).send(upload.content);
 });
 app.use("/uploads", express.static(UPLOADS_DIR));
@@ -679,6 +688,7 @@ app.delete("/api/upload/:filename", async (req, res) => {
     }
     try {
         deleteUpload(req.params.filename);
+        invalidateThumbnail(req.params.filename);
         unlinkSync(join(UPLOADS_DIR, req.params.filename));
     } catch (error) {
         if (error.code !== "ENOENT") throw error;
