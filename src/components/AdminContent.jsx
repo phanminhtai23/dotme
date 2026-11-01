@@ -1,7 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import AdminIconButton from './AdminIconButton'
+import './AdminSections.css'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL || '/api') + '/content'
+
+async function saveContent(section, initial, payload) {
+  const res = await fetch(`${BASE}/${section}${initial ? `/${initial.id}` : ''}`, {
+    method:initial ? 'PUT' : 'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.error || `HTTP ${res.status}`)
+  }
+}
 
 const INPUT = {
   width:'100%', boxSizing:'border-box',
@@ -21,12 +33,10 @@ function Field({ label, children }) {
   return <div style={{ display:'flex', flexDirection:'column', gap:4 }}><Label>{label}</Label>{children}</div>
 }
 
-function GradBtn({ children, onClick, color='purple', style={}, type='button' }) {
-  const bg = color==='red' ? 'linear-gradient(135deg,#ef4444,#dc2626)'
-           : color==='green' ? 'linear-gradient(135deg,#10b981,#22d3ee)'
-           : 'linear-gradient(135deg,#8B5CF6,#ec4899)'
+function GradBtn({ children, onClick, color='purple', style={}, type='button', disabled=false }) {
+  const bg = color==='red' ? '#a7404e' : color==='green' ? '#236f58' : '#7655d8'
   return (
-    <button type={type} onClick={onClick} style={{ background:bg, color:'#fff', border:'none', borderRadius:10, padding:'9px 18px', fontSize:13, fontWeight:700, fontFamily:'Inter, sans-serif', cursor:'pointer', transition:'all 0.2s', ...style }}
+    <button type={type} onClick={onClick} disabled={disabled} style={{ background:bg, color:'#fff', border:'none', borderRadius:10, padding:'9px 18px', fontSize:13, fontWeight:700, fontFamily:'Inter, sans-serif', cursor:disabled ? 'not-allowed' : 'pointer', opacity:disabled ? .65 : 1, transition:'all 0.2s', ...style }}
       onMouseEnter={e => e.currentTarget.style.transform='translateY(-1px)'}
       onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}
     >{children}</button>
@@ -56,19 +66,16 @@ function ExperienceForm({ initial, onSave, onClose }) {
   const blank = { company:'', role:'', period:'', location:'', current:false, bullets:'' }
   const [form, setForm] = useState(() => initial ? { ...initial, bullets: (initial.bullets||[]).join('\n') } : blank)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const { isMobile } = useBreakpoint()
 
   const handle = async e => {
-    e.preventDefault(); setSaving(true)
+    e.preventDefault(); setSaving(true); setError('')
     const payload = { ...form, bullets: form.bullets.split('\n').map(b => b.trim()).filter(Boolean) }
     try {
-      if (initial) {
-        await fetch(`${BASE}/experience/${initial.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
-      } else {
-        await fetch(`${BASE}/experience`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
-      }
+      await saveContent('experience', initial, payload)
       onSave()
-    } finally { setSaving(false) }
+    } catch (err) { setError(err.message) } finally { setSaving(false) }
   }
 
   return (
@@ -86,8 +93,9 @@ function ExperienceForm({ initial, onSave, onClose }) {
       <Field label="Bullets (mỗi dòng 1 mục, HTML được phép: <strong>text</strong>)">
         <textarea style={TEXTAREA} value={form.bullets} onChange={e => setForm(f=>({...f,bullets:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="Mô tả công việc 1&#10;Mô tả công việc 2" />
       </Field>
+      {error && <div role="alert" className="admin-section__notice is-error">Không thể lưu: {error}</div>}
       <div style={{ display:'flex', gap:10 }}>
-        <GradBtn type="submit" style={{ flex:1 }} color={saving ? 'green' : 'purple'}>{saving ? '⏳ Đang lưu...' : '💾 Lưu'}</GradBtn>
+        <GradBtn type="submit" disabled={saving} style={{ flex:1 }} color={saving ? 'green' : 'purple'}>{saving ? '⏳ Đang lưu...' : '💾 Lưu'}</GradBtn>
         <button type="button" onClick={onClose} style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#8888aa', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Huỷ</button>
       </div>
     </form>
@@ -103,19 +111,16 @@ function ProjectForm({ initial, onSave, onClose }) {
   const blank = { title:'', subtitleVi:'', subtitleEn:'', descVi:'', descEn:'', tags:'', color:'#8B5CF6', icon:'📦', status:'In Progress', year:new Date().getFullYear().toString(), liveUrl:'', githubUrl:'' }
   const [form, setForm] = useState(() => initial ? { ...initial, tags: Array.isArray(initial.tags) ? initial.tags.join(', ') : initial.tags || '' } : blank)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const { isMobile } = useBreakpoint()
 
   const handle = async e => {
-    e.preventDefault(); setSaving(true)
+    e.preventDefault(); setSaving(true); setError('')
     const payload = { ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) }
     try {
-      if (initial) {
-        await fetch(`${BASE}/projects/${initial.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
-      } else {
-        await fetch(`${BASE}/projects`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
-      }
+      await saveContent('projects', initial, payload)
       onSave()
-    } finally { setSaving(false) }
+    } catch (err) { setError(err.message) } finally { setSaving(false) }
   }
 
   return (
@@ -152,8 +157,9 @@ function ProjectForm({ initial, onSave, onClose }) {
         <Field label="GitHub URL"><input style={INPUT} value={form.githubUrl} onChange={e => setForm(f=>({...f,githubUrl:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="https://github.com/..." /></Field>
         <Field label="Live URL"><input style={INPUT} value={form.liveUrl} onChange={e => setForm(f=>({...f,liveUrl:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="https://..." /></Field>
       </div>
+      {error && <div role="alert" className="admin-section__notice is-error">Không thể lưu: {error}</div>}
       <div style={{ display:'flex', gap:10 }}>
-        <GradBtn type="submit" style={{ flex:1 }}>{saving ? '⏳ Đang lưu...' : '💾 Lưu'}</GradBtn>
+        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}>{saving ? '⏳ Đang lưu...' : '💾 Lưu'}</GradBtn>
         <button type="button" onClick={onClose} style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#8888aa', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Huỷ</button>
       </div>
     </form>
@@ -212,18 +218,15 @@ function SingleUpload({ label, value, onChange, accept, kind }) {
 function CertForm({ initial, onSave, onClose }) {
   const [form, setForm] = useState(initial ? { image:null, file:null, ...initial } : { name:'', issuer:'', icon:'🏅', color:'#8B5CF6', image:null, file:null })
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const { isMobile } = useBreakpoint()
 
   const handle = async e => {
-    e.preventDefault(); setSaving(true)
+    e.preventDefault(); setSaving(true); setError('')
     try {
-      if (initial) {
-        await fetch(`${BASE}/certificates/${initial.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
-      } else {
-        await fetch(`${BASE}/certificates`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(form) })
-      }
+      await saveContent('certificates', initial, form)
       onSave()
-    } finally { setSaving(false) }
+    } catch (err) { setError(err.message) } finally { setSaving(false) }
   }
 
   return (
@@ -245,8 +248,9 @@ function CertForm({ initial, onSave, onClose }) {
         <SingleUpload label="Ảnh chứng chỉ (hiện cạnh tên)" kind="image" accept="image/*" value={form.image} onChange={image => setForm(f => ({ ...f, image }))} />
         <SingleUpload label="File PDF chứng chỉ" kind="pdf" accept="application/pdf" value={form.file} onChange={file => setForm(f => ({ ...f, file }))} />
       </div>
+      {error && <div role="alert" className="admin-section__notice is-error">Không thể lưu: {error}</div>}
       <div style={{ display:'flex', gap:10 }}>
-        <GradBtn type="submit" style={{ flex:1 }}>{saving ? '⏳...' : '💾 Lưu'}</GradBtn>
+        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}>{saving ? '⏳...' : '💾 Lưu'}</GradBtn>
         <button type="button" onClick={onClose} style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#8888aa', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Huỷ</button>
       </div>
     </form>
@@ -267,20 +271,17 @@ function PubForm({ initial, onSave, onClose }) {
 
   const [form, setForm] = useState(initial ? { ...initial, authorsRaw: toRaw(initial.authors) } : blank)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const { isMobile } = useBreakpoint()
 
   const handle = async e => {
-    e.preventDefault(); setSaving(true)
+    e.preventDefault(); setSaving(true); setError('')
     const { authorsRaw, ...rest } = form
     const payload = { ...rest, authors: fromRaw(authorsRaw) }
     try {
-      if (initial) {
-        await fetch(`${BASE}/publications/${initial.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
-      } else {
-        await fetch(`${BASE}/publications`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
-      }
+      await saveContent('publications', initial, payload)
       onSave()
-    } finally { setSaving(false) }
+    } catch (err) { setError(err.message) } finally { setSaving(false) }
   }
 
   return (
@@ -294,8 +295,9 @@ function PubForm({ initial, onSave, onClose }) {
         <Field label="Hội nghị / Journal"><input style={INPUT} value={form.conference} onChange={e => setForm(f=>({...f,conference:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
       </div>
       <Field label="Link (tùy chọn)"><input style={INPUT} value={form.link} onChange={e => setForm(f=>({...f,link:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="https://..." /></Field>
+      {error && <div role="alert" className="admin-section__notice is-error">Không thể lưu: {error}</div>}
       <div style={{ display:'flex', gap:10 }}>
-        <GradBtn type="submit" style={{ flex:1 }}>{saving ? '⏳...' : '💾 Lưu'}</GradBtn>
+        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}>{saving ? '⏳...' : '💾 Lưu'}</GradBtn>
         <button type="button" onClick={onClose} style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#8888aa', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Huỷ</button>
       </div>
     </form>
@@ -306,14 +308,13 @@ function PubForm({ initial, onSave, onClose }) {
 
 function ItemRow({ label, sub, onEdit, onDelete }) {
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', background:'rgba(255,255,255,0.02)', borderRadius:12, marginBottom:8 }}>
-      <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ fontWeight:600, fontSize:14, color:'#f0f0ff', marginBottom:2 }}>{label}</div>
-        {sub && <div style={{ fontSize:12, color:'#8888aa' }}>{sub}</div>}
+    <article className="admin-content__item">
+      <div className="admin-content__item-text">
+        <h3>{label}</h3>
+        {sub && <p>{sub}</p>}
       </div>
-      <button onClick={onEdit} style={{ background:'rgba(139,92,246,0.1)', border:'1px solid rgba(139,92,246,0.25)', borderRadius:8, padding:'6px 12px', color:'#a78bfa', fontSize:12, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Sửa</button>
-      <button onClick={onDelete} style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:8, padding:'6px 12px', color:'#fca5a5', fontSize:12, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Xóa</button>
-    </div>
+      <div className="admin-content__actions"><AdminIconButton action="edit" label={`Sửa ${label}`} onClick={onEdit} /><AdminIconButton action="delete" label={`Xóa ${label}`} onClick={onDelete} /></div>
+    </article>
   )
 }
 
@@ -324,23 +325,40 @@ export default function AdminContent() {
   const [data, setData] = useState({ experience:[], projects:[], certificates:[], publications:[] })
   const [modal, setModal] = useState(null)
   const [editItem, setEditItem] = useState(null)
+  const [notice, setNotice] = useState(null)
+  const [loading, setLoading] = useState({ experience:true, projects:true, certificates:true, publications:true })
 
   const load = async (section) => {
-    const res = await fetch(`${BASE}/${section}`)
-    const items = await res.json()
-    setData(d => ({ ...d, [section]: items }))
+    try {
+      const res = await fetch(`${BASE}/${section}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const items = await res.json()
+      setData(d => ({ ...d, [section]: Array.isArray(items) ? items : [] }))
+      return true
+    } catch (error) {
+      setNotice({ type:'error', text:`Không tải được nội dung: ${error.message}` })
+      return false
+    } finally {
+      setLoading(current => ({ ...current, [section]:false }))
+    }
   }
 
   useEffect(() => { ['experience','projects','certificates','publications'].forEach(load) }, [])
 
   const handleDelete = async (section, id) => {
     if (!window.confirm('Xóa mục này?')) return
-    await fetch(`${BASE}/${section}/${id}`, { method:'DELETE' })
-    load(section)
+    setNotice(null)
+    try {
+      const res = await fetch(`${BASE}/${section}/${id}`, { method:'DELETE' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      if (await load(section)) setNotice({ type:'success', text:'Đã xóa nội dung.' })
+    } catch (error) {
+      setNotice({ type:'error', text:`Xóa nội dung thất bại: ${error.message}` })
+    }
   }
 
   const handleSave = (section) => {
-    setModal(null); setEditItem(null); load(section)
+    setModal(null); setEditItem(null); setNotice({ type:'success', text:'Đã lưu nội dung.' }); load(section)
   }
 
   const SUBS = [
@@ -354,28 +372,24 @@ export default function AdminContent() {
   const FormComp = FormMap[modal]
 
   return (
-    <div style={{ maxWidth:900, fontFamily:'Inter, sans-serif' }}>
+    <section className="admin-section admin-content" aria-label="Quản lý nội dung">
       {/* Sub-tabs */}
-      <div style={{ display:'flex', gap:8, marginBottom:28, flexWrap:'wrap' }}>
+      <div className="admin-content__tabs" role="group" aria-label="Loại nội dung">
         {SUBS.map(s => (
-          <button key={s.id} onClick={() => setSub(s.id)} style={{
-            background: sub===s.id ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${sub===s.id ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.08)'}`,
-            borderRadius:10, padding:'9px 18px', color: sub===s.id ? '#a78bfa' : '#8888aa',
-            fontSize:13, fontWeight: sub===s.id ? 700 : 400, fontFamily:'Inter, sans-serif', cursor:'pointer', transition:'all 0.2s',
-          }}>{s.label}</button>
+          <button key={s.id} type="button" aria-pressed={sub === s.id} onClick={() => { setSub(s.id); setNotice(null) }}>{s.label}<span>{data[s.id].length}</span></button>
         ))}
       </div>
 
       {/* List */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-        <span style={{ color:'#8888aa', fontSize:13 }}>{data[sub].length} mục</span>
-        <GradBtn onClick={() => { setEditItem(null); setModal(sub) }}>+ Thêm mới</GradBtn>
+      <div className="admin-section__toolbar">
+        <span className="admin-section__total">{loading[sub] ? 'Đang tải...' : `${data[sub].length} mục`}</span>
+        <button type="button" className="admin-section__primary" onClick={() => { setEditItem(null); setModal(sub) }}><span aria-hidden="true">+</span> Thêm mới</button>
       </div>
+      {notice && <div role={notice.type === 'error' ? 'alert' : 'status'} className={`admin-section__notice ${notice.type === 'error' ? 'is-error' : ''}`}>{notice.text}</div>}
 
-      {data[sub].length === 0 ? (
-        <div style={{ textAlign:'center', padding:'60px 20px', color:'#555577', fontSize:14 }}>Chưa có mục nào. Nhấn "+ Thêm mới" để bắt đầu.</div>
-      ) : sub === 'experience' ? (
+      {loading[sub] ? <div className="admin-section__empty is-compact">Đang tải nội dung...</div> : data[sub].length === 0 ? (
+        <div className="admin-section__empty"><strong>Chưa có nội dung</strong><p>Chọn “Thêm mới” để tạo mục đầu tiên.</p></div>
+      ) : <div className="admin-content__list">{sub === 'experience' ? (
         data.experience.map(job => (
           <ItemRow key={job.id} label={`${job.company} — ${job.role}`} sub={`${job.period} · ${job.location}${job.current ? ' · ● Hiện tại' : ''}`}
             onEdit={() => { setEditItem(job); setModal('experience') }}
@@ -399,7 +413,7 @@ export default function AdminContent() {
             onEdit={() => { setEditItem(p); setModal('publications') }}
             onDelete={() => handleDelete('publications', p.id)} />
         ))
-      )}
+      )}</div>}
 
       {/* Modal */}
       {modal && FormComp && (
@@ -410,6 +424,6 @@ export default function AdminContent() {
           <FormComp initial={editItem} onSave={() => handleSave(modal)} onClose={() => { setModal(null); setEditItem(null) }} />
         </Modal>
       )}
-    </div>
+    </section>
   )
 }

@@ -51,6 +51,7 @@ const ALLOWED_GAME_IDS = new Set([
     "goose-forage",
     "star-catcher",
 ]);
+const ALLOWED_DIFFICULTIES = new Set(["easy", "medium", "hard"]);
 
 function formatVisitRow(row) {
     const createdAt = row.created_at || row.createdAt || new Date().toISOString();
@@ -480,6 +481,9 @@ app.post("/api/links", async (req, res) => {
     if (gameId && !ALLOWED_GAME_IDS.has(gameId)) {
         return res.status(400).json({ error: "Trò chơi không hợp lệ" });
     }
+    if (!ALLOWED_DIFFICULTIES.has(difficulty)) {
+        return res.status(400).json({ error: "Độ khó không hợp lệ" });
+    }
     const id = genId();
     const link = {
         id,
@@ -510,6 +514,13 @@ app.put("/api/links/:id", async (req, res) => {
         !ALLOWED_GAME_IDS.has(req.body.gameId)
     ) {
         return res.status(400).json({ error: "Trò chơi không hợp lệ" });
+    }
+    if (
+        req.body &&
+        Object.hasOwn(req.body, "difficulty") &&
+        !ALLOWED_DIFFICULTIES.has(req.body.difficulty)
+    ) {
+        return res.status(400).json({ error: "Độ khó không hợp lệ" });
     }
     if (
         req.body &&
