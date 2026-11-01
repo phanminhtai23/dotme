@@ -456,9 +456,13 @@ app.post("/api/links", async (req, res) => {
         images = [],
         difficulty = "medium",
         gameId,
+        message = "",
     } = req.body;
     if (!ownerUsername || !type || !name)
         return res.status(400).json({ error: "Thiếu thông tin" });
+    if (typeof message !== "string" || message.length > 500) {
+        return res.status(400).json({ error: "Lời nhắn tối đa 500 ký tự" });
+    }
     const defaultGameByType = {
         birthday: "balloon-pop",
         motivation: "cat-runner",
@@ -469,6 +473,7 @@ app.post("/api/links", async (req, res) => {
         "cat-runner",
         "heart-memory",
         "snake",
+        "goose-forage",
     ]);
     if (gameId && !allowedGames.has(gameId)) {
         return res.status(400).json({ error: "Trò chơi không hợp lệ" });
@@ -485,6 +490,7 @@ app.post("/api/links", async (req, res) => {
         images,
         difficulty,
         gameId: gameId || defaultGameByType[type] || "balloon-pop",
+        message: message.trim(),
         plays: [],
     };
     const links = await readCollection("links", LINKS_FILE);
@@ -499,9 +505,16 @@ app.put("/api/links/:id", async (req, res) => {
     if (
         req.body &&
         Object.hasOwn(req.body, "gameId") &&
-        !["balloon-pop", "cat-runner", "heart-memory", "snake"].includes(req.body.gameId)
+        !["balloon-pop", "cat-runner", "heart-memory", "snake", "goose-forage"].includes(req.body.gameId)
     ) {
         return res.status(400).json({ error: "Trò chơi không hợp lệ" });
+    }
+    if (
+        req.body &&
+        Object.hasOwn(req.body, "message") &&
+        (typeof req.body.message !== "string" || req.body.message.length > 500)
+    ) {
+        return res.status(400).json({ error: "Lời nhắn tối đa 500 ký tự" });
     }
     links[idx] = { ...links[idx], ...req.body, id: links[idx].id };
     await writeCollection("links", LINKS_FILE, links);

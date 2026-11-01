@@ -8,6 +8,7 @@ without a `gameId` keep the game previously associated with their page type.
 | Balloon Pop | Birthday |
 | Cat Runner | Motivation |
 | Heart Memory | Love |
+| Goose Forage | Any page type |
 | Snake | Any page type |
 
 The Snake option was selected after reviewing
@@ -16,6 +17,14 @@ collection that includes Snake, Bounce, Defender, Pacman, Puzzle, and Spider.
 The app's Snake game is implemented as a native React component; no upstream
 source or assets are bundled.
 
+Goose Forage is an original grid game with a hand-drawn canvas goose. Guide it
+around the garden to collect seeds; movement is controlled by the arrow keys,
+WASD, or on-screen buttons.
+
 Each started round reserves one of the link's three attempts. Retries go
 through the same server-side reservation, and in-game restart buttons are
 intentionally omitted so they cannot bypass the limit.
+
+Admins can also add an optional personal note of up to 500 characters when
+creating a link. The note is displayed as plain text on the Motivation,
+Birthday, and Love pages.

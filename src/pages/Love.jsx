@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ProtectedPage from '../components/ProtectedPage'
 import GameWrapper from '../components/GameWrapper'
+import PersonalNote from '../components/PersonalNote'
 
 // ── Floating Hearts Canvas ───────────────────────────────────────────────────
 function HeartsCanvas() {
@@ -105,7 +106,7 @@ function Gallery({ images }) {
 }
 
 // ── Interactive Heart Button ─────────────────────────────────────────────────
-function HeartButton({ name }) {
+function HeartButton() {
   const [count, setCount] = useState(0)
   const [sparks, setSparks] = useState([])
 
@@ -145,7 +146,7 @@ function HeartButton({ name }) {
       </div>
       {count > 0 && (
         <p style={{ marginTop:16, fontSize:15, color:'#f9a8d4', fontWeight:600, animation:'fadeIn 0.3s ease' }}>
-          {count < 3 ? `${name} nhận được ${count} trái tim 💕` : count < 8 ? `${name} đang ngập tràn tình yêu 💖` : `${name} nhận được ${count} trái tim! Quá nhiều tình cảm! 💝`}
+          {count < 3 ? `Bạn đã thả ${count} trái tim 💕` : count < 8 ? `Bạn đã thả ${count} trái tim 💖` : `Bạn đã thả ${count} trái tim 💝`}
         </p>
       )}
     </div>
@@ -173,13 +174,13 @@ function Stars() {
 }
 
 // ── Things I notice ───────────────────────────────────────────────────────────
-const makeThings = (n) => [
-  `Cái cách ${n} cười — không cần lý do, chỉ thấy vui là cười`,
-  `${n} luôn nhớ những chi tiết nhỏ mà người khác hay quên`,
-  `Giọng nói của ${n} có cái gì đó rất bình yên`,
-  `${n} hay nghĩ đến người khác trước khi nghĩ đến bản thân`,
-  `Ánh mắt ${n} khi tập trung vào điều gì đó — rất cuốn`,
-  `${n} không ngại thừa nhận khi sai — điều đó cần rất nhiều can đảm`,
+const kindReminders = [
+  'Bạn xứng đáng được đối xử bằng sự tử tế và tôn trọng.',
+  'Cảm xúc của bạn quan trọng, kể cả những lúc chúng chưa rõ ràng.',
+  'Bạn có quyền nói “không” và có quyền đặt ra ranh giới của mình.',
+  'Bạn không cần phải thay đổi để xứng đáng được trân trọng.',
+  'Những ngày cần nghỉ ngơi không làm giảm giá trị của bạn.',
+  'Mong bạn luôn tìm thấy những mối quan hệ khiến mình cảm thấy an toàn.',
 ]
 
 // ── Main Content ──────────────────────────────────────────────────────────────
@@ -194,7 +195,6 @@ function LoveContent({ link }) {
     return () => obs.disconnect()
   }, [])
 
-  const things = makeThings(link.name)
   const section = { maxWidth:760, margin:'0 auto', padding:'0 24px' }
 
   return (
@@ -226,7 +226,7 @@ function LoveContent({ link }) {
         </div>
 
         <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(236,72,153,0.1)', border:'1px solid rgba(236,72,153,0.25)', borderRadius:99, padding:'8px 22px', marginBottom:24, fontSize:13, fontWeight:600, color:'#f9a8d4', letterSpacing:'0.06em' }}>
-          ✉️ Thư riêng · Gửi đến {link.name}
+          ✉️ Một lời nhắn nhỏ · Dành cho {link.name}
         </div>
 
         <h1 style={{
@@ -235,21 +235,22 @@ function LoveContent({ link }) {
           WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
           animation:'shimmer 4s linear infinite', marginBottom:16,
         }}>
-          Gửi {link.name}<br/>ơi...
+          Có điều muốn<br/>gửi {link.name}
         </h1>
 
         <p style={{ fontSize:17, color:'rgba(255,255,255,0.6)', maxWidth:480, lineHeight:1.8, marginBottom:48 }}>
-          Có những điều khó nói thành lời — nhưng trái tim thì không thể giữ mãi được.
+          Dù là tình bạn hay một tình cảm đặc biệt, lời nhắn này được gửi đi bằng sự trân trọng — và bạn không cần phải hồi đáp.
         </p>
 
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:'rgba(255,255,255,0.3)', fontSize:12, letterSpacing:'0.1em', animation:'bounce 2s ease-in-out infinite' }}>
-          <span>ĐỌC TIẾP</span>
-          <svg width="16" height="20" viewBox="0 0 16 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 2v16M2 12l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </div>
+        <a href="#love-letter" style={{ background:'linear-gradient(135deg,#ec4899,#be185d)', color:'#fff', textDecoration:'none', borderRadius:99, padding:'13px 24px', fontSize:14, fontWeight:800 }}>
+          💌 Đọc lời nhắn
+        </a>
       </section>
 
+      <PersonalNote message={link.message} accent="#ec4899" label={`Lời nhắn riêng dành cho ${link.name}`} />
+
       {/* ── LETTER ── */}
-      <section style={{ padding:'80px 0' }}>
+      <section id="love-letter" style={{ padding:'80px 0' }}>
         <div style={section}>
           <div style={{
             background:'linear-gradient(135deg, rgba(236,72,153,0.08), rgba(190,24,93,0.05))',
@@ -270,10 +271,9 @@ function LoveContent({ link }) {
             </h2>
 
             {[
-              `Mình đã nghĩ mãi không biết phải bắt đầu như thế nào. Có lẽ không có cách nào hoàn hảo để nói điều này — nên mình cứ nói thật lòng.`,
-              `Từ lần đầu tiên gặp ${link.name}, mình đã cảm thấy có điều gì đó khác. Không phải vì ${link.name} cố tình gây ấn tượng — mà chính vì ${link.name} không cần phải cố. Bạn chỉ cần là chính mình thôi.`,
-              `Mình không biết ${link.name} cảm thấy thế nào khi đọc những dòng này. Có thể ngạc nhiên, có thể bối rối, có thể... không biết nên phản ứng ra sao.`,
-              `Nhưng dù thế nào, mình chỉ muốn ${link.name} biết: bạn thật sự đặc biệt. Và mình may mắn vì được biết bạn. 💕`,
+              `Mình muốn gửi ${link.name} một lời nhắn nhỏ, không cần dịp đặc biệt và cũng không cần một câu trả lời hoàn hảo.`,
+              `Mong bạn biết rằng sự hiện diện của bạn có ý nghĩa. Hy vọng bạn luôn có thời gian cho những điều khiến mình vui, và có người bên cạnh trong những ngày không dễ dàng.`,
+              `Hãy đón nhận những dòng này theo cách khiến bạn thoải mái nhất. Nếu hôm nay bạn chỉ muốn mỉm cười rồi bước tiếp, vậy cũng đã đủ rồi.`,
             ].map((text, i) => (
               <p key={i} style={{ fontSize:16, color:'rgba(255,255,255,0.75)', lineHeight:1.9, marginBottom:18 }}>{text}</p>
             ))}
@@ -281,8 +281,8 @@ function LoveContent({ link }) {
             <div style={{ borderTop:'1px solid rgba(236,72,153,0.15)', paddingTop:24, marginTop:24, display:'flex', alignItems:'center', gap:16 }}>
               <LoveCat size={60} />
               <div>
-                <div style={{ fontSize:13, color:'rgba(255,255,255,0.4)', marginBottom:4 }}>Gửi với tất cả tình cảm,</div>
-                <div style={{ fontSize:16, fontWeight:700, color:'#f9a8d4' }}>Người thầm thương {link.name} 🌸</div>
+                <div style={{ fontSize:13, color:'rgba(255,255,255,0.4)', marginBottom:4 }}>Gửi bằng sự trân trọng,</div>
+                <div style={{ fontSize:16, fontWeight:700, color:'#f9a8d4' }}>Một người mong bạn luôn bình an 🌸</div>
               </div>
             </div>
           </div>
@@ -309,12 +309,12 @@ function LoveContent({ link }) {
         <div style={section}>
           <div style={{ textAlign:'center', marginBottom:44 }}>
             <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:'clamp(24px,4vw,44px)', fontWeight:800, marginBottom:10 }}>
-              ✨ Những điều mình để ý...
+              ✨ Những lời bạn xứng đáng được nghe
             </h2>
-            <p style={{ color:'rgba(255,255,255,0.4)', fontSize:14 }}>Những thứ nhỏ nhặt về {link.name} mà mình nhớ mãi</p>
+            <p style={{ color:'rgba(255,255,255,0.4)', fontSize:14 }}>Không cần chứng minh điều gì để được đối xử tử tế.</p>
           </div>
           <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-            {things.map((t, i) => (
+            {kindReminders.map((t, i) => (
               <div key={i} style={{
                 display:'flex', alignItems:'flex-start', gap:16,
                 background:'rgba(255,255,255,0.04)', border:'1px solid rgba(236,72,153,0.15)',
@@ -337,12 +337,12 @@ function LoveContent({ link }) {
       <section style={{ padding:'80px 0', background:'radial-gradient(ellipse at 50% 50%, rgba(236,72,153,0.07) 0%, transparent 70%)' }}>
         <div style={{ ...section, textAlign:'center' }}>
           <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:'clamp(22px,4vw,40px)', fontWeight:800, marginBottom:12 }}>
-            💝 Nhấn để gửi lại một trái tim
+            💝 Gửi một trái tim nếu bạn muốn
           </h2>
           <p style={{ color:'rgba(255,255,255,0.4)', fontSize:14, marginBottom:40 }}>
-            Mỗi lần nhấn là một trái tim được gửi đi... dù {link.name} có cảm thấy thế nào thì cũng được nhé 🥺
+            Đây chỉ là một hiệu ứng nhỏ trên trang — không gửi dữ liệu đi đâu và bạn có thể bỏ qua nếu không muốn.
           </p>
-          <HeartButton name={link.name} />
+          <HeartButton />
         </div>
       </section>
 
@@ -357,10 +357,10 @@ function LoveContent({ link }) {
               <LoveCat size={110} style={{ animation:'catPulse 3s ease-in-out infinite' }} />
             </div>
             <h3 style={{ fontFamily:'Syne, sans-serif', fontSize:'clamp(20px,4vw,36px)', fontWeight:800, marginBottom:16 }}>
-              Dù {link.name} có đáp lại hay không...
+              Một lời nhắn không cần hồi đáp
             </h3>
             <p style={{ fontSize:16, color:'rgba(255,255,255,0.65)', lineHeight:1.9, maxWidth:500, margin:'0 auto 28px' }}>
-              Mình vẫn sẽ trân trọng từng khoảnh khắc được biết đến bạn. Hạnh phúc của {link.name} luôn là điều quan trọng nhất. 🌸
+              Mong {link.name} luôn gặp những người khiến bạn cảm thấy được tôn trọng, an toàn và là chính mình. Hãy giữ lại điều gì khiến bạn vui — còn lại, cứ nhẹ nhàng bỏ qua nhé. 🌸
             </p>
             <div style={{ display:'flex', justifyContent:'center', gap:8 }}>
               {['💕','🌸','✨','💖','🌹','💫','🥺','💝'].map((e, i) => (

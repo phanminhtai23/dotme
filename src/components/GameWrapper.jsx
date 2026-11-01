@@ -304,6 +304,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
       'cat-runner': () => import('../games/CatRunner.jsx'),
       'heart-memory': () => import('../games/HeartMemory.jsx'),
       snake: () => import('../games/SnakeGame.jsx'),
+      'goose-forage': () => import('../games/GooseForage.jsx'),
     }
     const loadGame = map[effectiveGameId]
     if (!loadGame) {
@@ -433,6 +434,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
     'cat-runner': { surviveSecs: diffCfg?.surviveSecs, speedMult: diffCfg?.speedMult, spawnInterval: diffCfg?.spawnInterval, obstacleHeightMult: diffCfg?.obstacleHeightMult },
     'heart-memory': { pairs: diffCfg?.pairs, cols: diffCfg?.cols, time: diffCfg?.time, flipDelay: diffCfg?.flipDelay },
     snake: { tickMs: diffCfg?.tickMs, targetScore: diffCfg?.targetScore },
+    'goose-forage': { targetScore: diffCfg?.targetScore },
   }[effectiveGameId] || {}
 
   return (

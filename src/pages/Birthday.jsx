@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ProtectedPage from '../components/ProtectedPage'
 import GameWrapper from '../components/GameWrapper'
+import PersonalNote from '../components/PersonalNote'
 
 // ── Confetti Canvas ──────────────────────────────────────────────────────────
 function Confetti() {
@@ -176,12 +177,12 @@ function Candles({ name }) {
 
 // ── Wish Cards ───────────────────────────────────────────────────────────────
 const wishes = [
-  { emoji:'🌟', title:'Sức khỏe', text:'Mong bạn luôn khỏe mạnh, tràn đầy năng lượng mỗi ngày.' },
-  { emoji:'💫', title:'Hạnh phúc', text:'Chúc bạn luôn tìm thấy niềm vui trong những điều nhỏ nhặt nhất.' },
-  { emoji:'🚀', title:'Thành công', text:'Ước mơ của bạn không xa — hãy cứ tiến bước thật tự tin.' },
-  { emoji:'💖', title:'Tình yêu', text:'Xung quanh bạn là những người yêu thương bạn thật lòng.' },
-  { emoji:'🎯', title:'Ước mơ', text:'Sinh nhật này là cột mốc mới — hãy đặt ra những mục tiêu thật lớn!' },
-  { emoji:'🌈', title:'May mắn', text:'Mọi thứ tốt đẹp đều đang trên đường đến với bạn.' },
+  { emoji:'🌿', title:'Bình an', text:'Mong bạn có những ngày bình yên và đủ thời gian cho chính mình.' },
+  { emoji:'🍰', title:'Niềm vui', text:'Chúc bạn gặp nhiều khoảnh khắc nhỏ khiến mình bật cười.' },
+  { emoji:'🧭', title:'Những lựa chọn mới', text:'Mong chặng đường tới có nhiều cơ hội hợp với điều bạn thật sự mong muốn.' },
+  { emoji:'🫶', title:'Người đồng hành', text:'Chúc bạn luôn có những người lắng nghe và trân trọng bạn.' },
+  { emoji:'🌻', title:'Can đảm', text:'Mong bạn đủ tự tin để thử điều mới, và đủ dịu dàng với mình khi cần nghỉ.' },
+  { emoji:'✨', title:'Một năm đáng nhớ', text:'Hy vọng năm tuổi mới có nhiều điều đẹp đẽ theo cách riêng của bạn.' },
 ]
 
 // ── Main Birthday Content ────────────────────────────────────────────────────
@@ -236,7 +237,7 @@ function BirthdayContent({ link }) {
           animation:'shimmer 4s linear infinite',
           marginBottom:16,
         }}>
-          Happy<br/>Birthday!
+          Chúc mừng<br/>sinh nhật!
         </h1>
 
         {/* Name */}
@@ -245,15 +246,16 @@ function BirthdayContent({ link }) {
         </p>
 
         <p style={{ fontSize:17, color:'rgba(255,255,255,0.65)', maxWidth:520, lineHeight:1.8, marginBottom:48 }}>
-          Hôm nay là ngày thật đặc biệt — ngày mà cả thế giới vui mừng vì bạn đã xuất hiện! 🎂
+          Hôm nay là dịp để dừng lại một chút, nhìn lại những điều bạn đã đi qua và đón chờ những điều tốt đẹp phía trước. 🎂
         </p>
 
-        {/* Scroll cue */}
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:'rgba(255,255,255,0.3)', fontSize:12, letterSpacing:'0.1em', animation:'bounce 2s ease-in-out infinite' }}>
-          <span>SCROLL</span>
-          <svg width="16" height="20" viewBox="0 0 16 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 2v16M2 12l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <div style={{ display:'flex', justifyContent:'center', gap:12, flexWrap:'wrap' }}>
+          <a href="#birthday-wishes" style={{ background:'linear-gradient(135deg,#ff6b9d,#c44dff)', color:'#fff', textDecoration:'none', borderRadius:99, padding:'13px 22px', fontSize:14, fontWeight:800 }}>🎁 Nhận lời chúc</a>
+          <a href="#birthday-candles" style={{ background:'rgba(255,255,255,0.07)', color:'#ffe6f0', textDecoration:'none', border:'1px solid rgba(255,255,255,0.16)', borderRadius:99, padding:'13px 22px', fontSize:14, fontWeight:700 }}>🕯️ Thổi nến</a>
         </div>
       </section>
+
+      <PersonalNote message={link.message} accent="#ff6b9d" label={`Lời chúc dành cho ${link.name}`} />
 
       {/* ── PHOTOS ── */}
       {link.images?.length > 0 && (
@@ -271,7 +273,7 @@ function BirthdayContent({ link }) {
       )}
 
       {/* ── CANDLE SECTION ── */}
-      <section style={{ padding:'100px 0' }}>
+      <section id="birthday-candles" style={{ padding:'100px 0' }}>
         <div style={{ ...section, textAlign:'center' }}>
           <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(255,215,0,0.1)', border:'1px solid rgba(255,215,0,0.25)', borderRadius:99, padding:'8px 22px', marginBottom:40, fontSize:13, fontWeight:600, color:'#ffd700' }}>
             🕯️ Thổi nến sinh nhật
@@ -285,13 +287,13 @@ function BirthdayContent({ link }) {
       </section>
 
       {/* ── WISHES ── */}
-      <section ref={wishRef} style={{ padding:'80px 0', background:'radial-gradient(ellipse at 50% 50%, rgba(196,77,255,0.06) 0%, transparent 70%)' }}>
+      <section id="birthday-wishes" ref={wishRef} style={{ padding:'80px 0', background:'radial-gradient(ellipse at 50% 50%, rgba(196,77,255,0.06) 0%, transparent 70%)' }}>
         <div style={section}>
           <div style={{ textAlign:'center', marginBottom:52 }}>
             <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:'clamp(26px,4vw,48px)', fontWeight:800, marginBottom:12 }}>
               🎁 Những điều chúc tốt lành
             </h2>
-            <p style={{ color:'rgba(255,255,255,0.5)', fontSize:15 }}>Gửi đến {link.name} với tất cả tình cảm chân thành</p>
+            <p style={{ color:'rgba(255,255,255,0.5)', fontSize:15 }}>Chọn một lời chúc để mang theo trong năm mới của mình.</p>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px, 1fr))', gap:18 }}>
             {wishes.map((w, i) => (
@@ -317,6 +319,21 @@ function BirthdayContent({ link }) {
         </div>
       </section>
 
+      <section style={{ padding:'32px 0 84px' }}>
+        <div style={{ ...section, display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:16 }}>
+          {[
+            { emoji:'🌙', title:'Nhìn lại', text:'Hãy tự ghi nhận một điều bạn đã cố gắng trong năm vừa qua — dù nhỏ đến đâu.' },
+            { emoji:'🌅', title:'Bước tiếp', text:'Chọn một điều bạn muốn dành thêm thời gian cho mình trong năm mới.' },
+          ].map((item) => (
+            <article key={item.title} style={{ padding:'28px 26px', borderRadius:22, border:'1px solid rgba(255,107,157,0.18)', background:'rgba(255,255,255,0.035)' }}>
+              <div style={{ fontSize:32, marginBottom:14 }}>{item.emoji}</div>
+              <h3 style={{ margin:'0 0 8px', color:'#ffb2ca', fontSize:18 }}>{item.title}</h3>
+              <p style={{ margin:0, color:'rgba(255,255,255,0.65)', lineHeight:1.75, fontSize:14 }}>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       {/* ── FINAL MESSAGE ── */}
       <section style={{ padding:'100px 0' }}>
         <div style={{ ...section, textAlign:'center' }}>
@@ -334,7 +351,7 @@ function BirthdayContent({ link }) {
               {link.name} ơi, chúc mừng sinh nhật! 🎊
             </h2>
             <p style={{ fontSize:16, color:'rgba(255,255,255,0.7)', lineHeight:1.9, maxWidth:560, margin:'0 auto 28px' }}>
-              Mỗi năm qua là một hành trình đáng tự hào. Bạn đã lớn lên, trưởng thành hơn và trở nên đặc biệt hơn trong mắt tất cả mọi người. Hãy tận hưởng ngày hôm nay thật trọn vẹn nhé!
+              Mong năm tuổi mới có nhiều khoảnh khắc khiến bạn vui, những người khiến bạn thấy được trân trọng, và đủ thời gian cho các điều mình yêu thích.
             </p>
             <div style={{ display:'flex', justifyContent:'center', gap:8, flexWrap:'wrap' }}>
               {['🎂','🥳','🎊','🎉','✨','💫','🌟','🎈'].map((e, i) => (

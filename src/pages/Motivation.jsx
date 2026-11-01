@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import ProtectedPage from '../components/ProtectedPage'
 import GameWrapper from '../components/GameWrapper'
+import PersonalNote from '../components/PersonalNote'
 
 // ── Cat SVG (coach pose) ─────────────────────────────────────────────────────
 function CoachCat({ size = 160, style = {} }) {
@@ -61,56 +62,23 @@ function Gallery({ images }) {
 
 // ── Quotes ───────────────────────────────────────────────────────────────────
 const makeQuotes = (n) => [
-  { text:`Ê ${n} ơi! Con mèo nhà tao ngủ 16 tiếng/ngày mà vẫn đầy năng lượng. Mày thì mày làm gì với 24 tiếng còn lại? 🐱`, cat:'😎', color:'#f59e0b' },
-  { text:`${n} ơi, thất bại là mẹ thành công. Mày đã thất bại nhiều chưa? Thất bại nhiều vào — rồi có nhiều mẹ hơn! 💪`, cat:'😹', color:'#8b5cf6' },
-  { text:`Nghe đây ${n}! Einstein từng nói: "Sự điên rồ là làm đi làm lại một việc nhưng mong đợi kết quả khác". Thôi thì thôi làm lại đi! 🧠`, cat:'🤓', color:'#06b6d4' },
-  { text:`${n}, hôm nay trời đẹp. Hoặc mưa. Dù thế nào mày vẫn phải thức dậy thôi. Con mèo tao còn dậy mà! 😤`, cat:'😾', color:'#10b981' },
-  { text:`Bí quyết thành công: 1% cảm hứng + 99% vẫn ngồi cố dù không có cảm hứng. Áp dụng đi ${n}! 🔥`, cat:'😸', color:'#ec4899' },
-  { text:`${n} ơi, mày biết con mèo không? Nó rơi từ đâu cũng đứng dậy được. Mày rớt môn thì đứng dậy học tiếp! 🐾`, cat:'😼', color:'#f59e0b' },
-  { text:`Hỡi ${n}! Nếu Plan A fail thì còn 25 chữ cái nữa. Mà thật ra tao nghĩ mày nên thử Plan B đi vì A mày đã fail rồi 🤭`, cat:'😻', color:'#8b5cf6' },
-  { text:`${n}, uống nước đi. Đây là lời khuyên khoa học. Thật ra tao là mèo, tao không biết khoa học nhưng nghe có vẻ đúng! 💧`, cat:'😺', color:'#06b6d4' },
-  { text:`Giữa mày và thành công là gì, ${n}? Cái ghế mày đang ngồi. Đứng dậy đi làm việc! Hoặc... đặt laptop xuống sàn cho lạ. 💻`, cat:'🙀', color:'#10b981' },
-  { text:`${n} ơi, tao tin mày làm được! Lý do: tao là mèo, tao không có lý do gì để nói dối. (Trừ khi có cá!) 😇`, cat:'🐱', color:'#ec4899' },
+  { text:`${n} không cần giải quyết hết mọi thứ hôm nay. Chỉ cần chọn một việc nhỏ và bắt đầu từ đó.`, cat:'🌱', color:'#f59e0b' },
+  { text:`Nghỉ ngơi không làm bạn tụt lại. Đôi khi, đó chính là bước giúp mình đi tiếp bền hơn.`, cat:'☁️', color:'#8b5cf6' },
+  { text:`Tiến bộ có thể chậm và không hoàn hảo. Một bước nhỏ vẫn là một bước tiến.`, cat:'🐾', color:'#06b6d4' },
+  { text:`Nếu hôm nay khó khăn, hãy thử thu nhỏ mục tiêu thay vì trách bản thân.`, cat:'🧩', color:'#10b981' },
+  { text:`${n} đã đi qua nhiều ngày không dễ dàng. Hôm nay cũng chỉ cần thêm một bước vừa sức thôi.`, cat:'✨', color:'#ec4899' },
+  { text:`Không cần chờ có động lực mới bắt đầu. Hãy bắt đầu thật nhỏ, rồi động lực có thể đến sau.`, cat:'🌤️', color:'#f59e0b' },
 ]
 
-// ── Fake Stats ───────────────────────────────────────────────────────────────
-const makeStats = (n) => [
-  { label:'Tiềm năng của ' + n, val:9001, max:9001, color:'#f59e0b', unit:'%', note:'Off the charts!' },
-  { label:'Độ game thủ', val:98, max:100, color:'#8b5cf6', unit:'%', note:'Cần 2% nữa là pro' },
-  { label:'Khả năng ăn cơm', val:100, max:100, color:'#10b981', unit:'%', note:'Siêu đẳng' },
-  { label:'Sự lười biếng hôm nay', val:12, max:100, color:'#ec4899', unit:'%', note:'Thấp kỷ lục!' },
+const focusCards = [
+  { icon:'🪴', title:'Bắt đầu nhỏ', text:'Chọn một việc có thể hoàn thành trong 10 phút.' },
+  { icon:'💧', title:'Chăm sóc mình', text:'Uống nước, ăn đúng bữa và nghỉ khi cần.' },
+  { icon:'🤝', title:'Nhờ giúp đỡ', text:'Chia sẻ với người bạn tin tưởng khi thấy quá tải.' },
 ]
-
-function StatBar({ stat, delay }) {
-  const [w, setW] = useState(0)
-  const ref = useRef(null)
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setTimeout(() => setW(Math.min((stat.val / stat.max) * 100, 100)), delay); obs.disconnect() }
-    }, { threshold: 0.5 })
-    if (ref.current) obs.observe(ref.current)
-    return () => obs.disconnect()
-  }, [])
-  return (
-    <div ref={ref} style={{ marginBottom:20 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:8 }}>
-        <div>
-          <div style={{ fontSize:14, fontWeight:600, color:'rgba(255,255,255,0.85)' }}>{stat.label}</div>
-          <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)', marginTop:2 }}>{stat.note}</div>
-        </div>
-        <span style={{ fontSize:18, fontWeight:800, color:stat.color }}>{stat.val.toLocaleString()}{stat.unit}</span>
-      </div>
-      <div style={{ height:8, background:'rgba(255,255,255,0.06)', borderRadius:4, overflow:'hidden' }}>
-        <div style={{ height:'100%', width:`${w}%`, background:`linear-gradient(90deg, ${stat.color}88, ${stat.color})`, borderRadius:4, transition:'width 1.2s cubic-bezier(0.16,1,0.3,1)', boxShadow:`0 0 12px ${stat.color}88` }} />
-      </div>
-    </div>
-  )
-}
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 function MotivationContent({ link }) {
   const quotes = makeQuotes(link.name)
-  const stats  = makeStats(link.name)
   const [qi, setQi] = useState(() => Math.floor(Math.random() * quotes.length))
   const [anim, setAnim] = useState(false)
   const [planDone, setPlanDone] = useState({})
@@ -121,13 +89,14 @@ function MotivationContent({ link }) {
   const section = { maxWidth:880, margin:'0 auto', padding:'0 24px' }
 
   const plan = [
-    { icon:'☀️', text:`Dậy sớm và nhớ mặt trời vẫn mọc kể cả khi ${link.name} chưa ready` },
-    { icon:'🧴', text:'Rửa mặt. Nghiêm túc đó. Rửa mặt đi.' },
-    { icon:'☕', text:'Pha cà phê / trà / nước mắm — cái gì cho tỉnh thì uống' },
-    { icon:'📱', text:'Tắt app mạng xã hội trong... 5 phút thôi, thực tế thôi' },
-    { icon:'🎯', text:`Làm 1 việc nhỏ có ích. 1 thôi. ${link.name} làm được!` },
-    { icon:'🐱', text:'Cưng mèo (hoặc nhìn ảnh mèo) để lấy thêm năng lượng' },
+    { icon:'🌤️', text:'Dành một phút để hít thở và nhận ra mình đang cảm thấy thế nào.' },
+    { icon:'💧', text:'Uống một cốc nước hoặc đứng dậy duỗi người một chút.' },
+    { icon:'🧭', text:'Chọn một việc quan trọng nhất — chưa cần làm tất cả cùng lúc.' },
+    { icon:'⏳', text:'Thử tập trung 10 phút, sau đó tự cho mình một khoảng nghỉ.' },
+    { icon:'💬', text:'Nếu thấy khó, nhắn cho một người bạn tin tưởng.' },
   ]
+  const completedSteps = Object.values(planDone).filter(Boolean).length
+  const progress = Math.round((completedSteps / plan.length) * 100)
 
   return (
     <div style={{ minHeight:'100vh', background:'radial-gradient(ellipse at 20% 10%, #1a0f00 0%, #0a0f1e 50%, #0f0a00 100%)', fontFamily:'var(--font-sans)', color:'#f0f0ff', overflowX:'hidden' }}>
@@ -146,7 +115,7 @@ function MotivationContent({ link }) {
         </div>
 
         <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(251,191,36,0.12)', border:'1px solid rgba(251,191,36,0.3)', borderRadius:99, padding:'8px 22px', marginBottom:24, fontSize:13, fontWeight:600, color:'#fbbf24', letterSpacing:'0.05em' }}>
-          💪 Chuyên gia tạo động lực — Cat Edition
+          💛 Một lời nhắc dịu dàng dành cho {link.name}
         </div>
 
         <h1 style={{
@@ -155,11 +124,11 @@ function MotivationContent({ link }) {
           WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
           animation:'shimmer 4s linear infinite', marginBottom:16,
         }}>
-          Dậy lên!<br/>{link.name}!
+          Từng bước<br/>một thôi.
         </h1>
 
         <p style={{ fontSize:18, color:'rgba(255,255,255,0.6)', marginBottom:48, maxWidth:500, lineHeight:1.7 }}>
-          Hôm nay là ngày mới. Một trang giấy trắng. Và tao — con mèo này — sẽ làm mày phải nghiêm túc. 😤
+          Bạn không cần phải hoàn hảo hay làm tất cả ngay hôm nay. Chọn một điều nhỏ vừa sức — vậy là đủ để bắt đầu.
         </p>
 
         <div style={{ display:'flex', gap:14, flexWrap:'wrap', justifyContent:'center' }}>
@@ -171,22 +140,30 @@ function MotivationContent({ link }) {
           onMouseEnter={e => { e.currentTarget.style.transform='translateY(-3px)'; e.currentTarget.style.boxShadow='0 0 60px rgba(251,191,36,0.7)' }}
           onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='0 0 40px rgba(251,191,36,0.4)' }}
           >
-            ⚡ Nhận động lực ngay
+            🌱 Chọn một bước nhỏ
           </a>
         </div>
       </section>
 
-      {/* ── STATS ── */}
-      <section style={{ padding:'80px 0', background:'rgba(251,191,36,0.03)', borderTop:'1px solid rgba(251,191,36,0.08)', borderBottom:'1px solid rgba(251,191,36,0.08)' }}>
+      <PersonalNote message={link.message} accent="#fbbf24" label={`Lời nhắn dành cho ${link.name}`} />
+
+      {/* ── GENTLE REMINDERS ── */}
+      <section style={{ padding:'76px 0', background:'rgba(251,191,36,0.03)', borderTop:'1px solid rgba(251,191,36,0.08)', borderBottom:'1px solid rgba(251,191,36,0.08)' }}>
         <div style={section}>
           <div style={{ textAlign:'center', marginBottom:48 }}>
             <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:'clamp(24px,4vw,44px)', fontWeight:800, marginBottom:10 }}>
-              📊 Chỉ số của {link.name} hôm nay
+              ✨ Nhắc mình những điều quan trọng
             </h2>
-            <p style={{ color:'rgba(255,255,255,0.45)', fontSize:14 }}>Dữ liệu 100% chính xác. (Tao là mèo, tao không biết làm số liệu giả.)</p>
+            <p style={{ color:'rgba(255,255,255,0.45)', fontSize:14 }}>Không phải bảng điểm — chỉ là vài gợi ý để ngày hôm nay nhẹ nhàng hơn.</p>
           </div>
-          <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(251,191,36,0.15)', borderRadius:24, padding:'36px 40px' }}>
-            {stats.map((s, i) => <StatBar key={i} stat={s} delay={i * 150} />)}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(210px, 1fr))', gap:14 }}>
+            {focusCards.map((card) => (
+              <article key={card.title} style={{ background:'rgba(255,255,255,0.045)', border:'1px solid rgba(251,191,36,0.14)', borderRadius:20, padding:'24px 22px' }}>
+                <div style={{ fontSize:30, marginBottom:14 }}>{card.icon}</div>
+                <h3 style={{ fontSize:16, color:'#fbbf24', margin:'0 0 8px' }}>{card.title}</h3>
+                <p style={{ color:'rgba(255,255,255,0.63)', fontSize:14, lineHeight:1.75, margin:0 }}>{card.text}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -199,7 +176,7 @@ function MotivationContent({ link }) {
               <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:'clamp(24px,4vw,44px)', fontWeight:800, marginBottom:10 }}>
                 📸 Gallery của {link.name}
               </h2>
-              <p style={{ color:'rgba(255,255,255,0.45)', fontSize:14 }}>Những khoảnh khắc để nhớ — và để tiếp tục cố gắng!</p>
+              <p style={{ color:'rgba(255,255,255,0.45)', fontSize:14 }}>Một góc nhỏ để lưu giữ những khoảnh khắc bạn trân quý.</p>
             </div>
             <Gallery images={link.images} />
           </div>
@@ -210,9 +187,9 @@ function MotivationContent({ link }) {
       <section id="quote" style={{ padding:'100px 0', background:'radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.06) 0%, transparent 70%)' }}>
         <div style={{ ...section, textAlign:'center' }}>
           <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:'clamp(24px,4vw,44px)', fontWeight:800, marginBottom:12 }}>
-            💬 Lời khuyên từ Life Coach Mèo
+            💬 Một lời nhắc cho lúc này
           </h2>
-          <p style={{ color:'rgba(255,255,255,0.45)', fontSize:14, marginBottom:48 }}>Mỗi lần nhấn là một câu mới. Nhấn cho đến khi bạn ổn.</p>
+          <p style={{ color:'rgba(255,255,255,0.45)', fontSize:14, marginBottom:48 }}>Một vài lời nhắc để đọc chậm lại — không cần phải ổn ngay lập tức.</p>
 
           <div style={{
             background:'rgba(255,255,255,0.05)', backdropFilter:'blur(20px)',
@@ -231,7 +208,7 @@ function MotivationContent({ link }) {
           {/* Dot nav */}
           <div style={{ display:'flex', justifyContent:'center', gap:8, marginBottom:28 }}>
             {quotes.map((_, i) => (
-              <div key={i} onClick={() => setQi(i)} style={{ width: i===qi ? 20 : 6, height:6, borderRadius:3, background: i===qi ? q.color : 'rgba(255,255,255,0.15)', transition:'all 0.3s', cursor:'pointer' }} />
+              <button key={i} type="button" aria-label={`Xem lời nhắc ${i + 1}`} aria-pressed={i === qi} onClick={() => setQi(i)} style={{ width: i===qi ? 20 : 6, height:6, padding:0, border:0, borderRadius:3, background: i===qi ? q.color : 'rgba(255,255,255,0.15)', transition:'all 0.3s', cursor:'pointer' }} />
             ))}
           </div>
 
@@ -267,15 +244,24 @@ function MotivationContent({ link }) {
             <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:'clamp(24px,4vw,44px)', fontWeight:800, marginBottom:10 }}>
               📋 Kế hoạch hành động của {link.name}
             </h2>
-            <p style={{ color:'rgba(255,255,255,0.45)', fontSize:14 }}>Tick từng bước đi. Tao tin mày làm được!</p>
+            <p style={{ color:'rgba(255,255,255,0.45)', fontSize:14 }}>Chỉ chọn những bước phù hợp với bạn hôm nay.</p>
+          </div>
+          <div style={{ marginBottom:22, padding:18, borderRadius:16, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(251,191,36,0.14)' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', gap:12, marginBottom:10, color:'rgba(255,255,255,0.72)', fontSize:13 }}>
+              <span>Tiến độ hôm nay</span><strong style={{ color:'#fbbf24' }}>{completedSteps}/{plan.length} · {progress}%</strong>
+            </div>
+            <div role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Tiến độ các bước hôm nay" style={{ height:8, background:'rgba(255,255,255,0.08)', borderRadius:99, overflow:'hidden' }}>
+              <div style={{ height:'100%', width:`${progress}%`, background:'linear-gradient(90deg,#fbbf24,#34d399)', transition:'width 0.3s ease' }} />
+            </div>
           </div>
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             {plan.map((step, i) => (
-              <div key={i} onClick={() => setPlanDone(d => ({ ...d, [i]: !d[i] }))} style={{
+              <button key={i} type="button" aria-pressed={Boolean(planDone[i])} onClick={() => setPlanDone(d => ({ ...d, [i]: !d[i] }))} style={{
                 display:'flex', alignItems:'center', gap:18,
                 background: planDone[i] ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.04)',
                 border:`1px solid ${planDone[i] ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)'}`,
                 borderRadius:16, padding:'18px 24px', cursor:'pointer', transition:'all 0.25s',
+                textAlign:'left', color:'inherit', font:'inherit',
               }}
               onMouseEnter={e => { if (!planDone[i]) { e.currentTarget.style.borderColor='rgba(251,191,36,0.3)'; e.currentTarget.style.background='rgba(255,255,255,0.06)' } }}
               onMouseLeave={e => { if (!planDone[i]) { e.currentTarget.style.borderColor='rgba(255,255,255,0.08)'; e.currentTarget.style.background='rgba(255,255,255,0.04)' } }}
@@ -287,14 +273,14 @@ function MotivationContent({ link }) {
                 <span style={{ fontSize:15, color: planDone[i] ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.8)', textDecoration: planDone[i] ? 'line-through' : 'none', transition:'all 0.25s' }}>
                   {step.text}
                 </span>
-              </div>
+              </button>
             ))}
           </div>
           {Object.values(planDone).filter(Boolean).length === plan.length && (
             <div style={{ textAlign:'center', marginTop:40, animation:'popIn 0.5s cubic-bezier(0.16,1,0.3,1)' }}>
               <div style={{ fontSize:64, marginBottom:12 }}>🏆</div>
               <h3 style={{ fontFamily:'Syne, sans-serif', fontSize:28, fontWeight:800, color:'#fbbf24', marginBottom:8 }}>Xong hết rồi! 🎉</h3>
-              <p style={{ color:'rgba(255,255,255,0.6)', fontSize:15 }}>Tao tự hào về mày lắm, {link.name}! 🐾</p>
+              <p style={{ color:'rgba(255,255,255,0.6)', fontSize:15 }}>Bạn đã chăm sóc bản thân bằng những bước nhỏ — như vậy đã rất đáng quý rồi, {link.name}. 🐾</p>
             </div>
           )}
         </div>
@@ -302,7 +288,7 @@ function MotivationContent({ link }) {
 
       {/* Footer */}
       <div style={{ textAlign:'center', padding:'32px 24px', borderTop:'1px solid rgba(255,255,255,0.06)', color:'rgba(255,255,255,0.25)', fontSize:13 }}>
-        Được trao với tình cảm và một chút xỉa 😹 · <a href="/" style={{ color:'rgba(251,191,36,0.5)', textDecoration:'none' }}>dotme</a>
+        Một lời nhắc dịu dàng dành cho bạn · <a href="/" style={{ color:'rgba(251,191,36,0.5)', textDecoration:'none' }}>dotme</a>
       </div>
 
       <style>{`

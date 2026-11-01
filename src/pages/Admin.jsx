@@ -365,7 +365,7 @@ function AccountModal({ mode, initial, onSave, onClose }) {
 // ─── Link Modal (assign permission) ─────────────────────────────────────────
 
 function LinkModal({ accounts, onSave, onClose }) {
-  const [form, setForm] = useState({ ownerUsername: accounts[0]?.username || '', type:'birthday', gameId:DEFAULT_GAME_BY_TYPE.birthday, name:'', expiresAt:'', difficulty:'medium' })
+  const [form, setForm] = useState({ ownerUsername: accounts[0]?.username || '', type:'birthday', gameId:DEFAULT_GAME_BY_TYPE.birthday, name:'', message:'', expiresAt:'', difficulty:'medium' })
   const [images, setImages] = useState([])
   const [created, setCreated] = useState(null)
   const [copied, setCopied] = useState(false)
@@ -380,7 +380,7 @@ function LinkModal({ accounts, onSave, onClose }) {
     setSaving(true)
     setErr('')
     try {
-      const link = await api.addLink({ ownerUsername:form.ownerUsername, type:form.type, gameId:form.gameId, name:form.name.trim(), expiresAt:form.expiresAt || null, images, difficulty:form.difficulty })
+      const link = await api.addLink({ ownerUsername:form.ownerUsername, type:form.type, gameId:form.gameId, name:form.name.trim(), message:form.message.trim(), expiresAt:form.expiresAt || null, images, difficulty:form.difficulty })
       setCreated(link)
       onSave()
     } catch (error) {
@@ -532,6 +532,25 @@ function LinkModal({ accounts, onSave, onClose }) {
                 <input type="text" placeholder="Vd: Nguyễn Văn A, em Lan..." required value={form.name}
                   onChange={e => setForm(f => ({ ...f, name:e.target.value }))}
                   style={INPUT} onFocus={focus} onBlur={blur} />
+              </div>
+
+              <div>
+                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:6, letterSpacing:'0.05em' }}>
+                  LỜI NHẮN RIÊNG (không bắt buộc)
+                </label>
+                <textarea
+                  placeholder="Viết vài dòng dành riêng cho người nhận..."
+                  value={form.message}
+                  maxLength={500}
+                  rows={4}
+                  onChange={e => setForm(f => ({ ...f, message:e.target.value }))}
+                  style={{ ...INPUT, resize:'vertical', lineHeight:1.6 }}
+                  onFocus={focus}
+                  onBlur={blur}
+                />
+                <div style={{ textAlign:'right', fontSize:11, color:'#666680', marginTop:4 }}>
+                  {form.message.length}/500
+                </div>
               </div>
 
               <div>

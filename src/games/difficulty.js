@@ -86,6 +86,23 @@ export const DIFFICULTY = {
       desc:'Ăn 16 mồi để thắng',
     },
   },
+  'goose-forage': {
+    easy: {
+      label:'Dễ', icon:'😊', color:'#10b981',
+      targetScore:6,
+      desc:'Nhặt 6 hạt trong khu vườn',
+    },
+    medium: {
+      label:'Vừa', icon:'😐', color:'#f59e0b',
+      targetScore:9,
+      desc:'Nhặt 9 hạt, tránh bụi gai',
+    },
+    hard: {
+      label:'Khó', icon:'😤', color:'#ef4444',
+      targetScore:12,
+      desc:'Nhặt 12 hạt trong khu vườn',
+    },
+  },
 }
 
 export function getDiffConfig(type, difficulty) {
