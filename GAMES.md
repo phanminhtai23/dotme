@@ -18,7 +18,7 @@ collection that includes Snake, Bounce, Defender, Pacman, Puzzle, and Spider.
 The app's Snake game is implemented as a native React component; no upstream
 source or assets are bundled.
 
-Goose Forage is an original grid game with a hand-drawn canvas goose. Guide it
+Goose Forage is an original grid game with a hand-drawn baby goose. Guide it
 around the garden to collect seeds; movement is controlled by the arrow keys,
 WASD, or on-screen buttons.
 

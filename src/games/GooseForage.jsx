@@ -40,36 +40,86 @@ function drawGoose(ctx, x, y) {
   const cy = y * CELL + CELL / 2
   ctx.save()
   ctx.translate(cx, cy)
+
+  // Original baby-goose design: fluffy cheeks, a tiny neckerchief, and bright eyes.
   ctx.fillStyle = 'rgba(24, 50, 37, 0.18)'
   ctx.beginPath()
-  ctx.ellipse(0, 7, 10, 4, 0, 0, Math.PI * 2)
+  ctx.ellipse(0, 9, 10, 3.5, 0, 0, Math.PI * 2)
   ctx.fill()
-  ctx.fillStyle = '#fffdf1'
+
+  ctx.fillStyle = '#fffdf5'
+  ctx.strokeStyle = '#e9e2ca'
+  ctx.lineWidth = 0.8
   ctx.beginPath()
-  ctx.ellipse(-1, 1, 9, 7, -0.15, 0, Math.PI * 2)
+  ctx.ellipse(-1, 2, 10, 7.5, -0.12, 0, Math.PI * 2)
   ctx.fill()
+  ctx.stroke()
+
+  ctx.fillStyle = '#f6f0dc'
   ctx.beginPath()
-  ctx.ellipse(4, -5, 5, 6, 0.2, 0, Math.PI * 2)
+  ctx.ellipse(-3, 1, 5, 4, -0.25, 0, Math.PI * 2)
   ctx.fill()
+
+  ctx.fillStyle = '#fffdf5'
+  ctx.beginPath()
+  ctx.ellipse(3, -5, 6, 6.5, 0.12, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.stroke()
+
+  ctx.fillStyle = '#fffdf5'
+  ctx.beginPath()
+  ctx.moveTo(0, -10)
+  ctx.quadraticCurveTo(-3, -15, 1, -13)
+  ctx.quadraticCurveTo(3, -16, 4, -11)
+  ctx.quadraticCurveTo(7, -14, 7, -9)
+  ctx.closePath()
+  ctx.fill()
+
+  ctx.fillStyle = '#30453a'
+  ctx.beginPath()
+  ctx.arc(5, -6, 1.65, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.fillStyle = '#fff'
+  ctx.beginPath()
+  ctx.arc(5.5, -6.6, 0.58, 0, Math.PI * 2)
+  ctx.fill()
+
+  ctx.fillStyle = '#f6a8a0'
+  ctx.beginPath()
+  ctx.ellipse(8, -2.5, 2.2, 1.3, 0, 0, Math.PI * 2)
+  ctx.fill()
+
   ctx.fillStyle = '#f59e0b'
   ctx.beginPath()
   ctx.moveTo(8, -5)
-  ctx.lineTo(15, -3)
-  ctx.lineTo(8, -1)
+  ctx.quadraticCurveTo(14, -5, 15, -3)
+  ctx.quadraticCurveTo(13, -1.5, 8, -2)
   ctx.closePath()
   ctx.fill()
-  ctx.fillStyle = '#25392e'
+
+  ctx.fillStyle = '#78c6bd'
   ctx.beginPath()
-  ctx.arc(5, -7, 1, 0, Math.PI * 2)
+  ctx.moveTo(-2, -0.5)
+  ctx.quadraticCurveTo(3, 1, 8, -0.5)
+  ctx.lineTo(7, 2)
+  ctx.quadraticCurveTo(3, 4, -1, 2.5)
+  ctx.closePath()
   ctx.fill()
+  ctx.beginPath()
+  ctx.moveTo(3, 2.5)
+  ctx.lineTo(6, 3)
+  ctx.lineTo(4, 6)
+  ctx.closePath()
+  ctx.fill()
+
   ctx.strokeStyle = '#e98618'
-  ctx.lineWidth = 2
+  ctx.lineWidth = 1.6
   ctx.lineCap = 'round'
   ctx.beginPath()
-  ctx.moveTo(-4, 6)
-  ctx.lineTo(-5, 10)
-  ctx.moveTo(2, 6)
-  ctx.lineTo(3, 10)
+  ctx.moveTo(-4, 7)
+  ctx.lineTo(-5, 9)
+  ctx.moveTo(2, 7)
+  ctx.lineTo(3, 9)
   ctx.stroke()
   ctx.restore()
 }
