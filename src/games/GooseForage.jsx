@@ -126,31 +126,51 @@ function drawGoose(ctx, x, y) {
 
 export default function GooseForage({ onWin, onLose, config = {} }) {
   const targetScore = config.targetScore ?? 9
+  const duration = config.duration ?? 60
   const canvasRef = useRef(null)
   const gooseRef = useRef(START)
   const seedRef = useRef({ x:12, y:12 })
   const scoreRef = useRef(0)
+  const timeLeftRef = useRef(duration)
   const endedRef = useRef(false)
   const callbacksRef = useRef({ onWin, onLose })
   const [phase, setPhase] = useState('start')
   const [goose, setGoose] = useState(START)
   const [seed, setSeed] = useState(seedRef.current)
   const [score, setScore] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(duration)
 
   useEffect(() => {
     callbacksRef.current = { onWin, onLose }
   }, [onWin, onLose])
 
+  const finish = useCallback((won) => {
+    if (endedRef.current) return
+    endedRef.current = true
+    setPhase('ended')
+    if (won) {
+      callbacksRef.current.onWin?.()
+    } else {
+      callbacksRef.current.onLose?.({
+        score: scoreRef.current,
+        total: targetScore,
+        unit: 'hạt',
+      })
+    }
+  }, [targetScore])
+
   const startGame = useCallback(() => {
     gooseRef.current = START
     seedRef.current = chooseSeed(START)
     scoreRef.current = 0
+    timeLeftRef.current = duration
     endedRef.current = false
     setGoose(START)
     setSeed(seedRef.current)
     setScore(0)
+    setTimeLeft(duration)
     setPhase('playing')
-  }, [])
+  }, [duration])
 
   const move = useCallback((direction) => {
     if (phase !== 'playing' || endedRef.current) return
@@ -161,13 +181,7 @@ export default function GooseForage({ onWin, onLose, config = {} }) {
     const hitEdge = next.x < 0 || next.x >= CELLS || next.y < 0 || next.y >= CELLS
     const hitHedge = HEDGES.some((hedge) => hedge.x === next.x && hedge.y === next.y)
     if (hitEdge || hitHedge) {
-      endedRef.current = true
-      setPhase('ended')
-      callbacksRef.current.onLose?.({
-        score: scoreRef.current,
-        total: targetScore,
-        unit: 'hạt',
-      })
+      finish(false)
       return
     }
 
@@ -178,15 +192,24 @@ export default function GooseForage({ onWin, onLose, config = {} }) {
       scoreRef.current = nextScore
       setScore(nextScore)
       if (nextScore >= targetScore) {
-        endedRef.current = true
-        setPhase('ended')
-        callbacksRef.current.onWin?.()
+        finish(true)
         return
       }
       seedRef.current = chooseSeed(next)
       setSeed(seedRef.current)
     }
-  }, [phase, targetScore])
+  }, [finish, phase, targetScore])
+
+  useEffect(() => {
+    if (phase !== 'playing') return undefined
+    const timer = window.setInterval(() => {
+      if (endedRef.current) return
+      timeLeftRef.current = Math.max(0, timeLeftRef.current - 1)
+      setTimeLeft(timeLeftRef.current)
+      if (timeLeftRef.current === 0) finish(false)
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [finish, phase])
 
   useEffect(() => {
     if (phase !== 'playing') return undefined
@@ -284,7 +307,10 @@ export default function GooseForage({ onWin, onLose, config = {} }) {
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:14, maxWidth:'100%' }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', width:'min(84vw, 400px)' }}>
           <strong style={{ color:'#365b43', fontSize:13, letterSpacing:'0.08em' }}>NGỖNG NHẶT HẠT</strong>
-          <span style={{ color:'#365b43', fontSize:14 }}>🌾 {score}/{targetScore}</span>
+          <div style={{ display:'flex', gap:14, color:'#365b43', fontSize:14, fontWeight:700 }}>
+            <span aria-label="Thời gian còn lại">⏱️ {timeLeft} giây</span>
+            <span>🌾 {score}/{targetScore}</span>
+          </div>
         </div>
         <div style={{ position:'relative', width:'min(84vw, 400px)', aspectRatio:'1' }}>
           <canvas
@@ -300,8 +326,10 @@ export default function GooseForage({ onWin, onLose, config = {} }) {
               <strong style={{ fontSize:22 }}>{phase === 'ended' ? 'Chuyến dạo vườn kết thúc' : 'Một vòng dạo vườn nhé?'}</strong>
               <p style={messageStyle}>
                 {phase === 'ended'
-                  ? `Ngỗng đã nhặt được ${score}/${targetScore} hạt.`
-                  : `Dẫn bạn ngỗng nhặt ${targetScore} hạt, nhớ tránh các bụi cây nhé.`}
+                  ? timeLeft === 0
+                    ? `Hết giờ rồi! Ngỗng đã nhặt được ${score}/${targetScore} hạt.`
+                    : `Ngỗng đã nhặt được ${score}/${targetScore} hạt.`
+                  : `Dẫn bạn ngỗng nhặt ${targetScore} hạt trong ${duration} giây, nhớ tránh các bụi cây nhé.`}
               </p>
               {phase === 'start' && (
                 <button type="button" onClick={startGame} style={buttonStyle}>Bắt đầu</button>

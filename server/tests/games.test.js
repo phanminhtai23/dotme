@@ -22,3 +22,12 @@ test("Star Catcher is selectable and has a playable config at every difficulty",
 
     assert.equal(resolveGameId("unknown-game", "birthday"), "balloon-pop");
 });
+
+test("Goose Forage difficulty configs include a positive countdown timer", () => {
+    for (const difficulty of ["easy", "medium", "hard"]) {
+        const config = getDiffConfig("goose-forage", difficulty);
+        assert.ok(config.targetScore > 0);
+        assert.ok(config.duration > 0);
+        assert.match(config.desc, new RegExp(`${config.duration} giây`));
+    }
+});

@@ -20,7 +20,8 @@ source or assets are bundled.
 
 Goose Forage is an original grid game with a hand-drawn baby goose. Guide it
 around the garden to collect seeds; movement is controlled by the arrow keys,
-WASD, or on-screen buttons.
+WASD, or on-screen buttons. Each difficulty has a countdown timer; collect the
+target number of seeds before time runs out.
 
 Star Catcher is an original canvas game. Move the basket with the arrow keys,
 A/D, on-screen controls, or by dragging on touch screens to catch falling stars.

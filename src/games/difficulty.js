@@ -89,18 +89,18 @@ export const DIFFICULTY = {
   'goose-forage': {
     easy: {
       label:'Dễ', icon:'😊', color:'#10b981',
-      targetScore:6,
-      desc:'Nhặt 6 hạt trong khu vườn',
+      targetScore:6, duration:60,
+      desc:'Nhặt 6 hạt trong 60 giây',
     },
     medium: {
       label:'Vừa', icon:'😐', color:'#f59e0b',
-      targetScore:9,
-      desc:'Nhặt 9 hạt, tránh bụi gai',
+      targetScore:9, duration:45,
+      desc:'Nhặt 9 hạt trong 45 giây, tránh bụi gai',
     },
     hard: {
       label:'Khó', icon:'😤', color:'#ef4444',
-      targetScore:12,
-      desc:'Nhặt 12 hạt trong khu vườn',
+      targetScore:12, duration:35,
+      desc:'Nhặt 12 hạt trong 35 giây',
     },
   },
   'star-catcher': {

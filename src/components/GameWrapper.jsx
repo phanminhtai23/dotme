@@ -438,7 +438,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
     'cat-runner': { surviveSecs: diffCfg?.surviveSecs, speedMult: diffCfg?.speedMult, spawnInterval: diffCfg?.spawnInterval, obstacleHeightMult: diffCfg?.obstacleHeightMult },
     'heart-memory': { pairs: diffCfg?.pairs, cols: diffCfg?.cols, time: diffCfg?.time, flipDelay: diffCfg?.flipDelay },
     snake: { tickMs: diffCfg?.tickMs, targetScore: diffCfg?.targetScore },
-    'goose-forage': { targetScore: diffCfg?.targetScore },
+    'goose-forage': { targetScore: diffCfg?.targetScore, duration: diffCfg?.duration },
     'star-catcher': { targetScore: diffCfg?.targetScore, duration: diffCfg?.duration, fallSpeed: diffCfg?.fallSpeed, spawnInterval: diffCfg?.spawnInterval },
   }[effectiveGameId] || {}
 
