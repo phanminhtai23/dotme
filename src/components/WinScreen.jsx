@@ -1,4 +1,4 @@
-export default function WinScreen({ winTime, remaining, accent = '#8B5CF6' }) {
+export default function WinScreen({ winTime, remaining, accent = '#8B5CF6', apiWarning }) {
   return (
     <div style={{
       position:'fixed', inset:0, zIndex:500,
@@ -68,6 +68,12 @@ export default function WinScreen({ winTime, remaining, accent = '#8B5CF6' }) {
             Màn hình win có ghi ngày giờ — đây là bằng chứng chiến thắng của bạn 🌟
           </p>
         </div>
+
+        {apiWarning && (
+          <p role="alert" style={{ color:'#fca5a5', fontSize:12, lineHeight:1.6 }}>
+            {apiWarning}
+          </p>
+        )}
 
         {remaining > 0 && (
           <p style={{ fontSize:12, color:'rgba(255,255,255,0.3)' }}>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { isAuthenticated, isAdmin, logout, getSession } from '../auth'
 import { PAGE_TYPES } from '../store'
 import { DIFFICULTY } from '../games/difficulty'
+import { DEFAULT_GAME_BY_TYPE, GAME_OPTIONS } from '../games/catalog'
 import { getAnalytics, trackVisit } from '../analytics'
 import { api } from '../api'
 import ImageUploader from '../components/ImageUploader'
@@ -364,22 +365,33 @@ function AccountModal({ mode, initial, onSave, onClose }) {
 // ─── Link Modal (assign permission) ─────────────────────────────────────────
 
 function LinkModal({ accounts, onSave, onClose }) {
-  const [form, setForm] = useState({ ownerUsername: accounts[0]?.username || '', type:'birthday', name:'', expiresAt:'', difficulty:'medium' })
+  const [form, setForm] = useState({ ownerUsername: accounts[0]?.username || '', type:'birthday', gameId:DEFAULT_GAME_BY_TYPE.birthday, name:'', expiresAt:'', difficulty:'medium' })
   const [images, setImages] = useState([])
   const [created, setCreated] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [err, setErr] = useState('')
+  const [saving, setSaving] = useState(false)
   const { isMobile } = useBreakpoint()
 
   const handle = async (e) => {
     e.preventDefault()
     if (!form.name.trim()) return
+    if (saving) return
+    setSaving(true)
+    setErr('')
     try {
-      const link = await api.addLink({ ownerUsername:form.ownerUsername, type:form.type, name:form.name.trim(), expiresAt:form.expiresAt || null, images, difficulty:form.difficulty })
+      const link = await api.addLink({ ownerUsername:form.ownerUsername, type:form.type, gameId:form.gameId, name:form.name.trim(), expiresAt:form.expiresAt || null, images, difficulty:form.difficulty })
       setCreated(link)
       onSave()
-    } catch (err) { console.error(err) }
+    } catch (error) {
+      console.error(error)
+      setErr(error.message || 'Không thể tạo link')
+    } finally {
+      setSaving(false)
+    }
   }
 
+  const selectedGame = GAME_OPTIONS.find((game) => game.id === (created?.gameId || form.gameId)) || GAME_OPTIONS[0]
   const origin = window.location.origin
   const copyLink = () => {
     navigator.clipboard.writeText(origin + created.path)
@@ -428,6 +440,7 @@ function LinkModal({ accounts, onSave, onClose }) {
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, fontSize:13, color:'#8888aa', marginBottom:24 }}>
               <span>👤 Chủ: <strong style={{ color:'#f0f0ff' }}>{created.ownerUsername}</strong></span>
               <span>📌 Loại: <strong style={{ color:PAGE_TYPES[created.type].color }}>{PAGE_TYPES[created.type].emoji} {PAGE_TYPES[created.type].label}</strong></span>
+              <span>🎮 Trò chơi: <strong style={{ color:'#a7f3d0' }}>{selectedGame.emoji} {selectedGame.name}</strong></span>
               <span>👑 Tên: <strong style={{ color:'#f0f0ff' }}>{created.name}</strong></span>
               <span>⏰ Hết hạn: <strong style={{ color:'#f0f0ff' }}>{created.expiresAt || 'Không giới hạn'}</strong></span>
             </div>
@@ -457,7 +470,7 @@ function LinkModal({ accounts, onSave, onClose }) {
                 <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:10, letterSpacing:'0.05em' }}>LOẠI TRANG</label>
                 <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
                   {Object.entries(PAGE_TYPES).map(([key, meta]) => (
-                    <button key={key} type="button" onClick={() => setForm(f => ({ ...f, type:key }))} style={{
+                    <button key={key} type="button" onClick={() => setForm(f => ({ ...f, type:key, gameId:DEFAULT_GAME_BY_TYPE[key], difficulty:'medium' }))} style={{
                       flex: isMobile ? '1 1 30%' : 1, background: form.type === key ? `${meta.color}18` : 'rgba(255,255,255,0.04)',
                       border:`1px solid ${form.type === key ? meta.color + '55' : 'rgba(255,255,255,0.1)'}`,
                       borderRadius:12, padding:'12px 8px', cursor:'pointer',
@@ -471,11 +484,32 @@ function LinkModal({ accounts, onSave, onClose }) {
                 </div>
               </div>
 
+              <div>
+                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:10, letterSpacing:'0.05em' }}>TRÒ CHƠI CHO LINK NÀY</label>
+                <div style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1fr 1fr', gap:8 }}>
+                  {GAME_OPTIONS.map(game => (
+                    <button key={game.id} type="button" onClick={() => setForm(f => ({ ...f, gameId:game.id, difficulty:'medium' }))} style={{
+                      display:'flex', alignItems:'center', gap:10, padding:'12px 10px', textAlign:'left',
+                      background:form.gameId === game.id ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.04)',
+                      border:`1px solid ${form.gameId === game.id ? 'rgba(52,211,153,0.55)' : 'rgba(255,255,255,0.1)'}`,
+                      borderRadius:10, color:form.gameId === game.id ? '#a7f3d0' : '#8888aa',
+                      fontFamily:'Inter, sans-serif', cursor:'pointer',
+                    }}>
+                      <span style={{ fontSize:23 }}>{game.emoji}</span>
+                      <span>
+                        <strong style={{ display:'block', fontSize:12 }}>{game.name}</strong>
+                        <small style={{ display:'block', marginTop:3, fontSize:10, lineHeight:1.4, opacity:0.75 }}>{game.description}</small>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Difficulty picker */}
               <div>
                 <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:10, letterSpacing:'0.05em' }}>ĐỘ KHÓ TRÒ CHƠI</label>
                 <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-                  {Object.entries(DIFFICULTY[form.type] || DIFFICULTY.birthday).map(([key, meta]) => (
+                  {Object.entries(DIFFICULTY[form.gameId] || DIFFICULTY['balloon-pop']).map(([key, meta]) => (
                     <button key={key} type="button" onClick={() => setForm(f => ({ ...f, difficulty:key }))} style={{
                       flex: isMobile ? '1 1 30%' : 1, background: form.difficulty === key ? `${meta.color}20` : 'rgba(255,255,255,0.04)',
                       border:`1px solid ${form.difficulty === key ? meta.color+'66' : 'rgba(255,255,255,0.1)'}`,
@@ -514,13 +548,14 @@ function LinkModal({ accounts, onSave, onClose }) {
               </div>
 
               <div style={{ display:'flex', gap:10, marginTop:4 }}>
-                <GradBtn style={{ flex:1 }}>🔗 Tạo link</GradBtn>
+                <GradBtn disabled={saving} style={{ flex:1, opacity:saving ? 0.65 : 1 }}>🔗 {saving ? 'Đang tạo...' : 'Tạo link'}</GradBtn>
                 <button type="button" onClick={onClose} style={{
                   flex:1, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)',
                   borderRadius:10, color:'#8888aa', fontSize:14, fontWeight:600,
                   fontFamily:'Inter, sans-serif', cursor:'pointer', padding:'10px',
                 }}>Huỷ</button>
               </div>
+              {err && <div role="alert" style={{ fontSize:13, color:'#fca5a5', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:8, padding:'10px 14px' }}>⚠️ {err}</div>}
             </form>
           </>
         )}

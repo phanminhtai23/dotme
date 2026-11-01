@@ -15,6 +15,7 @@ const databasePath = join(testDir, "test.sqlite");
 process.env.SQLITE_PATH = databasePath;
 
 const storage = await import("../database.js");
+const { finishPlay, getPlaySummary, reservePlay } = await import("../game-plays.js");
 const legacyCollection = join(testDir, "links.json");
 const legacyAnalytics = join(testDir, "analytics.json");
 
@@ -129,4 +130,47 @@ test("imports Supabase collections, visits, and uploads only once", () => {
     assert.deepEqual(storage.readCollection("content:certificates"), source.collections["content:certificates"]);
     assert.equal(storage.readVisits().length, 1);
     assert.deepEqual(storage.readUpload("supabase-certificate.jpg").content, Buffer.from("image"));
+});
+
+test("reserves each game attempt atomically and updates its result once", async () => {
+    const linkId = "game-play-limit-test";
+    storage.writeCollection("links", [{ id: linkId, plays: [] }]);
+
+    const attempts = await Promise.all(
+        Array.from({ length: 5 }, (_, index) =>
+            Promise.resolve().then(() =>
+                reservePlay(linkId, `127.0.0.${index + 1}`, `request-${index}-1234`),
+            ),
+        ),
+    );
+    const accepted = attempts.filter((attempt) => attempt.status === "reserved");
+    assert.equal(accepted.length, 3);
+    assert.equal(attempts.filter((attempt) => attempt.status === "maxed").length, 2);
+    assert.equal(getPlaySummary(linkId).remaining, 0);
+
+    const firstPlay = accepted[0].play;
+    const finished = finishPlay(linkId, firstPlay.id, true);
+    assert.equal(finished.status, "finished");
+    assert.equal(finished.play.won, true);
+    assert.equal(finished.play.status, "finished");
+    assert.equal(finishPlay(linkId, firstPlay.id, false).status, "already-finished");
+    assert.equal(getPlaySummary(linkId).count, 3);
+    assert.equal(
+        reservePlay(linkId, "127.0.0.9", "request-0-1234").play.id,
+        firstPlay.id,
+    );
+});
+
+test("existing play history continues to consume the three-play limit", () => {
+    const linkId = "legacy-game-play-limit-test";
+    storage.writeCollection("links", [{
+        id: linkId,
+        plays: [{ at: "old-1" }, { at: "old-2" }, { at: "old-3" }],
+    }]);
+
+    assert.equal(getPlaySummary(linkId).remaining, 0);
+    assert.equal(
+        reservePlay(linkId, "127.0.0.1", "legacy-limit-request").status,
+        "maxed",
+    );
 });

@@ -396,7 +396,7 @@ export default function Love() {
   const { id } = useParams()
   return (
     <ProtectedPage linkId={id} accent="#ec4899" bgEmoji="💌" renderPage={link => (
-      <GameWrapper linkId={id} linkType="love" accent="#ec4899" difficulty={link.difficulty || 'medium'}>
+      <GameWrapper linkId={id} linkType="love" gameId={link.gameId} accent="#ec4899" difficulty={link.difficulty || 'medium'}>
         <LoveContent link={link} />
       </GameWrapper>
     )} />

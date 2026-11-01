@@ -320,7 +320,7 @@ export default function Motivation() {
   const { id } = useParams()
   return (
     <ProtectedPage linkId={id} accent="#f59e0b" bgEmoji="💪" renderPage={link => (
-      <GameWrapper linkId={id} linkType="motivation" accent="#f59e0b" difficulty={link.difficulty || 'medium'}>
+      <GameWrapper linkId={id} linkType="motivation" gameId={link.gameId} accent="#f59e0b" difficulty={link.difficulty || 'medium'}>
         <MotivationContent link={link} />
       </GameWrapper>
     )} />

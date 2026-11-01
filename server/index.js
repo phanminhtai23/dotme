@@ -27,6 +27,11 @@ import {
     deleteUpload,
     writeCollection as writeSqliteCollection,
 } from "./database.js";
+import {
+    finishPlay,
+    getPlaySummary,
+    reservePlay,
+} from "./game-plays.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "data");
@@ -450,9 +455,24 @@ app.post("/api/links", async (req, res) => {
         expiresAt,
         images = [],
         difficulty = "medium",
+        gameId,
     } = req.body;
     if (!ownerUsername || !type || !name)
         return res.status(400).json({ error: "Thiếu thông tin" });
+    const defaultGameByType = {
+        birthday: "balloon-pop",
+        motivation: "cat-runner",
+        love: "heart-memory",
+    };
+    const allowedGames = new Set([
+        "balloon-pop",
+        "cat-runner",
+        "heart-memory",
+        "snake",
+    ]);
+    if (gameId && !allowedGames.has(gameId)) {
+        return res.status(400).json({ error: "Trò chơi không hợp lệ" });
+    }
     const id = genId();
     const link = {
         id,
@@ -464,6 +484,7 @@ app.post("/api/links", async (req, res) => {
         expiresAt: expiresAt || null,
         images,
         difficulty,
+        gameId: gameId || defaultGameByType[type] || "balloon-pop",
         plays: [],
     };
     const links = await readCollection("links", LINKS_FILE);
@@ -475,6 +496,13 @@ app.put("/api/links/:id", async (req, res) => {
     const links = await readCollection("links", LINKS_FILE);
     const idx = links.findIndex((l) => l.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: "Không tìm thấy" });
+    if (
+        req.body &&
+        Object.hasOwn(req.body, "gameId") &&
+        !["balloon-pop", "cat-runner", "heart-memory", "snake"].includes(req.body.gameId)
+    ) {
+        return res.status(400).json({ error: "Trò chơi không hợp lệ" });
+    }
     links[idx] = { ...links[idx], ...req.body, id: links[idx].id };
     await writeCollection("links", LINKS_FILE, links);
     res.json(links[idx]);
@@ -500,43 +528,73 @@ app.get("/api/links/:id", async (req, res) => {
 });
 
 // ── Game Plays ────────────────────────────────────────────────────────────────
-const MAX_PLAYS = 3;
-
 app.get("/api/links/:id/plays", async (req, res) => {
-    const link = (await readCollection("links", LINKS_FILE)).find(
-        (l) => l.id === req.params.id,
-    );
-    if (!link) return res.status(404).json({ error: "Không tìm thấy" });
-    const plays = link.plays || [];
-    res.json({
-        count: plays.length,
-        remaining: Math.max(0, MAX_PLAYS - plays.length),
-        plays,
-    });
+    const summary = getPlaySummary(req.params.id);
+    if (!summary) return res.status(404).json({ error: "Không tìm thấy" });
+    res.json(summary);
 });
 
 app.post("/api/links/:id/play", async (req, res) => {
-    const links = await readCollection("links", LINKS_FILE);
-    const idx = links.findIndex((l) => l.id === req.params.id);
-    if (idx === -1) return res.status(404).json({ error: "Không tìm thấy" });
-    const plays = links[idx].plays || [];
-    if (plays.length >= MAX_PLAYS)
-        return res.status(403).json({ error: "Đã hết lượt chơi", maxed: true });
     const ip =
         req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
         req.socket?.remoteAddress ||
         "unknown";
-    const play = {
-        ip,
-        won: req.body.won || false,
-        at: new Date().toISOString(),
-    };
-    links[idx].plays = [...plays, play];
-    await writeCollection("links", LINKS_FILE, links);
+    const body = req.body || {};
+    const isLegacyRequest =
+        typeof body.won === "boolean" && !body.reservationId;
+    const reservationId = isLegacyRequest
+        ? `legacy-${genId()}`
+        : body.reservationId;
+    if (
+        typeof reservationId !== "string" ||
+        reservationId.length < 8 ||
+        reservationId.length > 128
+    ) {
+        return res.status(400).json({ error: "Mã lượt chơi không hợp lệ" });
+    }
+
+    const result = reservePlay(req.params.id, ip, reservationId);
+    if (result.status === "not-found")
+        return res.status(404).json({ error: "Không tìm thấy" });
+    if (result.status === "maxed") {
+        return res.status(403).json({
+            error: "Đã hết lượt chơi",
+            maxed: true,
+            remaining: 0,
+        });
+    }
+
+    if (isLegacyRequest) {
+        const finished = finishPlay(req.params.id, result.play.id, body.won);
+        if (finished.status === "not-found")
+            return res.status(404).json({ error: "Không tìm thấy" });
+        return res.json({
+            ok: true,
+            remaining: finished.remaining,
+            play: finished.play,
+        });
+    }
+
     res.json({
         ok: true,
-        remaining: Math.max(0, MAX_PLAYS - links[idx].plays.length),
-        play,
+        remaining: result.remaining,
+        play: result.play,
+    });
+});
+
+app.patch("/api/links/:id/play/:playId", async (req, res) => {
+    if (typeof req.body?.won !== "boolean") {
+        return res.status(400).json({ error: "Kết quả lượt chơi không hợp lệ" });
+    }
+    const result = finishPlay(req.params.id, req.params.playId, req.body.won);
+    if (result.status === "not-found")
+        return res.status(404).json({ error: "Không tìm thấy" });
+    if (result.status === "play-not-found")
+        return res.status(404).json({ error: "Không tìm thấy lượt chơi" });
+    res.json({
+        ok: true,
+        remaining: result.remaining,
+        play: result.play,
     });
 });
 

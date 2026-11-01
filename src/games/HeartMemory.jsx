@@ -66,12 +66,10 @@ export default function HeartMemory({ onWin, onLose, config = {} }) {
 
   useEffect(() => {
     if (gameResult === "lose") {
-      const t = setTimeout(() => onLose && onLose({ score: matchedCount, total: PAIRS, unit: 'cặp' }), 1500);
-      return () => clearTimeout(t);
+      onLose && onLose({ score: matchedCount, total: PAIRS, unit: 'cặp' });
     }
     if (gameResult === "win") {
-      const t = setTimeout(() => onWin && onWin(), 1500);
-      return () => clearTimeout(t);
+      onWin && onWin();
     }
   }, [gameResult, onWin, onLose]);
 
@@ -146,18 +144,6 @@ export default function HeartMemory({ onWin, onLose, config = {} }) {
     },
     [gameOver, isChecking, cards, stopTimer]
   );
-
-  const handleRestart = () => {
-    stopTimer();
-    setCards(createDeckN(PAIRS));
-    setFlipped([]);
-    setMatchedCount(0);
-    setWrongFlips(0);
-    setTimeLeft(GAME_TIME);
-    setGameOver(false);
-    setGameResult(null);
-    setIsChecking(false);
-  };
 
   const timerPercent = (timeLeft / GAME_TIME) * 100;
   const timerColor =
@@ -481,9 +467,6 @@ export default function HeartMemory({ onWin, onLose, config = {} }) {
                 ? `Lật đúng hết ${PAIRS} cặp! Sai ${wrongFlips} lần, còn ${timeLeft}s!`
                 : `Bạn lật được ${matchedCount}/${PAIRS} cặp. Cố lên lần sau!`}
             </p>
-            <button className="hm-btn" onClick={handleRestart}>
-              Chơi Lại
-            </button>
           </div>
         </div>
       )}

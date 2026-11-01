@@ -369,7 +369,7 @@ export default function Birthday() {
   const { id } = useParams()
   return (
     <ProtectedPage linkId={id} accent="#ff6b9d" bgEmoji="🎂" renderPage={link => (
-      <GameWrapper linkId={id} linkType="birthday" accent="#ff6b9d" difficulty={link.difficulty || 'medium'}>
+      <GameWrapper linkId={id} linkType="birthday" gameId={link.gameId} accent="#ff6b9d" difficulty={link.difficulty || 'medium'}>
         <BirthdayContent link={link} />
       </GameWrapper>
     )} />

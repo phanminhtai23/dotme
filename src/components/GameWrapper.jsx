@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import WinScreen from './WinScreen'
-import { DIFFICULTY, getDiffConfig } from '../games/difficulty'
+import { getDiffConfig } from '../games/difficulty'
+import { resolveGameId, GAME_OPTIONS } from '../games/catalog'
 
 const TYPE_META = {
   birthday:   { emoji:'🎈', name:'Bắn bóng bay',        color:'#ff6b9d' },
@@ -154,7 +155,7 @@ function IntroOverlay({ meta, diffCfg, difficulty, remaining, onStart, onClose, 
 }
 
 // ── Lose overlay ──────────────────────────────────────────────────────────────
-function LoseOverlay({ remaining, onRetry, onClose, accent, loseData }) {
+function LoseOverlay({ remaining, onRetry, onClose, accent, loseData, apiWarning }) {
   return (
     <div style={{
       position:'fixed', inset:0, zIndex:300,
@@ -182,6 +183,11 @@ function LoseOverlay({ remaining, onRetry, onClose, accent, loseData }) {
             <strong style={{ color:'rgba(255,255,255,0.9)' }}>{loseData.total}</strong>
             {' '}{loseData.unit}
           </div>
+        )}
+        {apiWarning && (
+          <p role="alert" style={{ color:'#fca5a5', fontSize:12, lineHeight:1.6, marginBottom:14 }}>
+            {apiWarning}
+          </p>
         )}
         <p style={{ color:'rgba(255,255,255,0.55)', fontSize:14, lineHeight:1.7, marginBottom:28 }}>
           {remaining > 0 ? `Đừng nản! Còn ${remaining} lượt — thử lại đi!` : 'Đã hết 3 lượt chơi. Chúc may mắn lần khác!'}
@@ -233,70 +239,210 @@ function MaxedOverlay({ onClose }) {
   )
 }
 
+function StatusOverlay({ message }) {
+  return (
+    <div style={{
+      position:'fixed', inset:0, zIndex:350,
+      display:'flex', alignItems:'center', justifyContent:'center',
+      background:'rgba(0,0,0,0.82)', color:'#f0f0ff',
+      fontFamily:'var(--font-sans)', fontSize:15, fontWeight:700,
+    }}>
+      {message}
+    </div>
+  )
+}
+
+function RequestErrorOverlay({ message, onRetry }) {
+  return (
+    <div style={{
+      position:'fixed', inset:0, zIndex:350,
+      display:'flex', alignItems:'center', justifyContent:'center',
+      padding:24, background:'rgba(0,0,0,0.88)', fontFamily:'var(--font-sans)',
+    }}>
+      <div style={{ maxWidth:380, padding:32, borderRadius:20, textAlign:'center', background:'#100c1e', border:'1px solid rgba(248,113,113,0.35)' }}>
+        <div style={{ fontSize:48, marginBottom:14 }}>⚠️</div>
+        <h2 style={{ color:'#f0f0ff', margin:'0 0 10px', fontSize:20 }}>Không thể xác nhận lượt chơi</h2>
+        <p role="alert" style={{ color:'#fca5a5', fontSize:14, lineHeight:1.6, margin:'0 0 20px' }}>{message}</p>
+        <button onClick={onRetry} style={{ border:0, borderRadius:10, padding:'11px 20px', background:'linear-gradient(135deg,#8B5CF6,#22d3ee)', color:'#fff', fontWeight:700, cursor:'pointer' }}>
+          Thử lại
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function GameWrapper({ linkId, linkType, children, accent, difficulty = 'medium' }) {
-  const [gameState, setGameState] = useState('idle') // idle | intro | playing | won | lost | maxed
-  const [remaining, setRemaining] = useState(3)
+export default function GameWrapper({ linkId, linkType, gameId, children, accent, difficulty = 'medium' }) {
+  const [gameState, setGameState] = useState('checking')
+  const [remaining, setRemaining] = useState(0)
   const [winTime, setWinTime] = useState('')
   const [loseData, setLoseData] = useState(null)
   const [GameComponent, setGameComponent] = useState(null)
+  const [gameLoadError, setGameLoadError] = useState('')
+  const [apiError, setApiError] = useState('')
+  const [apiWarning, setApiWarning] = useState('')
+  const [checkVersion, setCheckVersion] = useState(0)
+  const reservationIdRef = useRef(null)
+  const activePlayIdRef = useRef(null)
+  const reservationInFlightRef = useRef(false)
+  const completionInFlightRef = useRef(false)
+  const activeLinkIdRef = useRef(linkId)
 
-  const meta = TYPE_META[linkType] || TYPE_META.birthday
-  const effectiveAccent = accent || meta.color
-  const diffCfg = getDiffConfig(linkType, difficulty)
+  const effectiveGameId = resolveGameId(gameId, linkType)
+  const selectedGame = GAME_OPTIONS.find((game) => game.id === effectiveGameId) || GAME_OPTIONS[0]
+  const typeMeta = TYPE_META[linkType] || TYPE_META.birthday
+  const effectiveAccent = accent || typeMeta.color
+  const meta = { ...selectedGame, color:effectiveAccent }
+  const diffCfg = getDiffConfig(effectiveGameId, difficulty)
 
-  // Dynamic import game
   useEffect(() => {
+    let active = true
+    setGameComponent(null)
+    setGameLoadError('')
     const map = {
-      birthday:   () => import('../games/BalloonPop.jsx'),
-      motivation: () => import('../games/CatRunner.jsx'),
-      love:       () => import('../games/HeartMemory.jsx'),
+      'balloon-pop': () => import('../games/BalloonPop.jsx'),
+      'cat-runner': () => import('../games/CatRunner.jsx'),
+      'heart-memory': () => import('../games/HeartMemory.jsx'),
+      snake: () => import('../games/SnakeGame.jsx'),
     }
-    map[linkType]?.().then(m => setGameComponent(() => m.default))
-  }, [linkType])
+    const loadGame = map[effectiveGameId]
+    if (!loadGame) {
+      setGameLoadError('Trò chơi này chưa được hỗ trợ.')
+      return () => { active = false }
+    }
+    loadGame()
+      .then(module => { if (active) setGameComponent(() => module.default) })
+      .catch(error => {
+        console.error('Không thể tải trò chơi:', error)
+        if (active) setGameLoadError('Không thể tải trò chơi. Vui lòng tải lại trang.')
+      })
+    return () => { active = false }
+  }, [effectiveGameId])
 
-  // Check remaining plays
   useEffect(() => {
+    let active = true
+    if (activeLinkIdRef.current !== linkId) {
+      activeLinkIdRef.current = linkId
+      reservationIdRef.current = null
+      activePlayIdRef.current = null
+      completionInFlightRef.current = false
+    }
+    setGameState('checking')
+    setApiError('')
     api.getPlays(linkId)
-      .then(d => { if (d.remaining <= 0) setGameState('maxed'); else setRemaining(d.remaining) })
-      .catch(() => setRemaining(3))
-  }, [linkId])
+      .then(data => {
+        if (!active) return
+        setRemaining(data.remaining)
+        setGameState(data.remaining <= 0 ? 'maxed' : 'idle')
+      })
+      .catch(error => {
+        if (!active) return
+        setApiError(error.message || 'Không thể tải số lượt chơi.')
+        setGameState('error')
+      })
+    return () => { active = false }
+  }, [linkId, checkVersion])
 
-  const openIntro  = () => remaining <= 0 ? setGameState('maxed') : setGameState('intro')
+  const openIntro = () => {
+    if (remaining <= 0) setGameState('maxed')
+    else setGameState('intro')
+  }
   const closeIntro = () => setGameState('idle')
-  const startGame  = () => remaining <= 0 ? setGameState('maxed') : setGameState('playing')
 
-  const handleWin = async () => {
-    const now = new Date()
-    setWinTime(now.toLocaleString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }))
-    try { const d = await api.recordPlay(linkId, true); setRemaining(d.remaining || 0) } catch {}
-    setGameState('won')
+  const startGame = async () => {
+    if (reservationInFlightRef.current) return
+    if (remaining <= 0) {
+      setGameState('maxed')
+      return
+    }
+    if (gameLoadError) {
+      setApiError(gameLoadError)
+      setGameState('error')
+      return
+    }
+
+    reservationInFlightRef.current = true
+    setApiError('')
+    setGameState('starting')
+    if (!reservationIdRef.current) {
+      reservationIdRef.current = globalThis.crypto?.randomUUID?.()
+        || `play-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    }
+    try {
+      const data = await api.reservePlay(linkId, reservationIdRef.current)
+      reservationIdRef.current = null
+      activePlayIdRef.current = data.play.id
+      completionInFlightRef.current = false
+      setRemaining(data.remaining)
+      setGameState('playing')
+    } catch (error) {
+      if (error.data?.maxed) {
+        setRemaining(0)
+        setGameState('maxed')
+      } else {
+        setApiError(error.message || 'Không thể giữ lượt chơi.')
+        setGameState('error')
+      }
+    } finally {
+      reservationInFlightRef.current = false
+    }
   }
 
-  const handleLose = async (data) => {
-    setLoseData(data || null)
-    try { const d = await api.recordPlay(linkId, false); setRemaining(d.remaining || 0) } catch {}
-    setGameState('lost')
+  const recordGameResult = async (won, data) => {
+    if (completionInFlightRef.current) return
+    const playId = activePlayIdRef.current
+    if (!playId) {
+      setApiError('Không tìm thấy lượt chơi đã giữ trên máy chủ.')
+      setGameState('error')
+      return
+    }
+    completionInFlightRef.current = true
+    setGameState('recording')
+    setApiWarning('')
+    if (won) {
+      const now = new Date()
+      setWinTime(now.toLocaleString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }))
+    } else {
+      setLoseData(data || null)
+    }
+
+    try {
+      const result = await api.finishPlay(linkId, playId, won)
+      setRemaining(result.remaining)
+      activePlayIdRef.current = null
+    } catch (error) {
+      console.error('Không thể lưu kết quả lượt chơi:', error)
+      setApiWarning('Kết quả chưa đồng bộ được lên máy chủ; lượt chơi đã được giữ và vẫn được tính.')
+    } finally {
+      setGameState(won ? 'won' : 'lost')
+      completionInFlightRef.current = false
+    }
   }
 
-  // Build the game config from difficulty
+  const retryCheck = () => {
+    if (gameLoadError) {
+      window.location.reload()
+      return
+    }
+    if (reservationIdRef.current) startGame()
+    else setCheckVersion((version) => version + 1)
+  }
+
   const gameConfig = {
-    birthday:   { totalBalloons: diffCfg?.totalBalloons, target: diffCfg?.target, time: diffCfg?.time, balloonSpeedFactor: diffCfg?.balloonSpeedFactor, spawnBatch: diffCfg?.spawnBatch },
-    motivation: { surviveSecs: diffCfg?.surviveSecs, speedMult: diffCfg?.speedMult, spawnInterval: diffCfg?.spawnInterval, obstacleHeightMult: diffCfg?.obstacleHeightMult },
-    love:       { pairs: diffCfg?.pairs, cols: diffCfg?.cols, time: diffCfg?.time, flipDelay: diffCfg?.flipDelay },
-  }[linkType] || {}
+    'balloon-pop': { totalBalloons: diffCfg?.totalBalloons, target: diffCfg?.target, time: diffCfg?.time, balloonSpeedFactor: diffCfg?.balloonSpeedFactor, spawnBatch: diffCfg?.spawnBatch },
+    'cat-runner': { surviveSecs: diffCfg?.surviveSecs, speedMult: diffCfg?.speedMult, spawnInterval: diffCfg?.spawnInterval, obstacleHeightMult: diffCfg?.obstacleHeightMult },
+    'heart-memory': { pairs: diffCfg?.pairs, cols: diffCfg?.cols, time: diffCfg?.time, flipDelay: diffCfg?.flipDelay },
+    snake: { tickMs: diffCfg?.tickMs, targetScore: diffCfg?.targetScore },
+  }[effectiveGameId] || {}
 
   return (
     <>
-      {/* Always show the page content */}
       {children}
 
-      {/* Floating gift button — visible when idle */}
-      {(gameState === 'idle') && (
+      {gameState === 'idle' && (
         <GiftButton onClick={openIntro} accent={effectiveAccent} />
       )}
 
-      {/* Intro overlay */}
       {gameState === 'intro' && (
         <IntroOverlay
           meta={meta}
@@ -309,32 +455,35 @@ export default function GameWrapper({ linkId, linkType, children, accent, diffic
         />
       )}
 
-      {/* Full-screen game */}
+      {gameState === 'checking' && <StatusOverlay message="Đang kiểm tra lượt chơi..." />}
+      {gameState === 'starting' && <StatusOverlay message="Đang giữ lượt chơi..." />}
+      {gameState === 'recording' && <StatusOverlay message="Đang lưu kết quả..." />}
+      {gameState === 'error' && <RequestErrorOverlay message={apiError} onRetry={retryCheck} />}
+
       {gameState === 'playing' && (
         <div style={{ position:'fixed', inset:0, zIndex:250, background:'#06060f' }}>
           {GameComponent && (
             <GameComponent onWin={handleWin} onLose={handleLose} config={gameConfig} />
           )}
+          {!GameComponent && <StatusOverlay message="Đang tải trò chơi..." />}
         </div>
       )}
 
-      {/* Win screen */}
       {gameState === 'won' && (
-        <WinScreen winTime={winTime} remaining={remaining} accent={effectiveAccent} />
+        <WinScreen winTime={winTime} remaining={remaining} accent={effectiveAccent} apiWarning={apiWarning} />
       )}
 
-      {/* Lose overlay */}
       {gameState === 'lost' && (
         <LoseOverlay
           remaining={remaining}
-          onRetry={() => setGameState('playing')}
+          onRetry={startGame}
           onClose={() => setGameState('idle')}
           accent={effectiveAccent}
           loseData={loseData}
+          apiWarning={apiWarning}
         />
       )}
 
-      {/* Maxed overlay */}
       {gameState === 'maxed' && (
         <MaxedOverlay onClose={() => setGameState('idle')} />
       )}

@@ -82,16 +82,18 @@ function readLegacyJson(file, fallback) {
 }
 
 function replaceCollection(collection, items) {
-    const transaction = db.transaction(() => {
-        db.prepare(
-            "INSERT INTO collections (name, initialized_at) VALUES (?, ?) ON CONFLICT(name) DO NOTHING",
-        ).run(collection, new Date().toISOString());
-        deleteCollectionItems.run(collection);
-        items.forEach((item, position) => {
-            insertCollection.run(collection, position, JSON.stringify(item));
-        });
-    });
+    const transaction = db.transaction(() => replaceCollectionContents(collection, items));
     transaction();
+}
+
+function replaceCollectionContents(collection, items) {
+    db.prepare(
+        "INSERT INTO collections (name, initialized_at) VALUES (?, ?) ON CONFLICT(name) DO NOTHING",
+    ).run(collection, new Date().toISOString());
+    deleteCollectionItems.run(collection);
+    items.forEach((item, position) => {
+        insertCollection.run(collection, position, JSON.stringify(item));
+    });
 }
 
 export function isCollectionInitialized(collection) {
@@ -117,6 +119,23 @@ export function writeCollection(collection, items) {
         throw new TypeError(`Collection "${collection}" must be an array`);
     }
     replaceCollection(collection, items);
+}
+
+export function mutateCollection(collection, mutate) {
+    if (typeof mutate !== "function") {
+        throw new TypeError("Collection mutation must be a function");
+    }
+
+    const transaction = db.transaction(() => {
+        const items = selectCollection.all(collection).map(({ payload }) => JSON.parse(payload));
+        const { items: nextItems, result } = mutate(items);
+        if (!Array.isArray(nextItems)) {
+            throw new TypeError(`Collection "${collection}" mutation must return an array`);
+        }
+        replaceCollectionContents(collection, nextItems);
+        return result;
+    });
+    return transaction.immediate();
 }
 
 export function initializeAnalytics(legacyFile) {

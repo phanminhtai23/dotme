@@ -3,7 +3,7 @@
 // obstacleHeightMult: nhân chiều cao obstacle — > 1 = cao hơn (khó nhảy qua hơn)
 
 export const DIFFICULTY = {
-  birthday: {
+  'balloon-pop': {
     easy: {
       label:'Dễ', icon:'😊', color:'#10b981',
       totalBalloons:20, target:10, time:35,
@@ -26,7 +26,7 @@ export const DIFFICULTY = {
       desc:'Bắn 25/30 bóng trong 16 giây',
     },
   },
-  motivation: {
+  'cat-runner': {
     easy: {
       label:'Dễ', icon:'😊', color:'#10b981',
       surviveSecs:15, speedMult:0.85,
@@ -49,7 +49,7 @@ export const DIFFICULTY = {
       desc:'Sống sót 30 giây',
     },
   },
-  love: {
+  'heart-memory': {
     easy: {
       label:'Dễ', icon:'😊', color:'#10b981',
       pairs:6, cols:3, time:80,
@@ -69,8 +69,25 @@ export const DIFFICULTY = {
       desc:'8 cặp trong 38 giây',
     },
   },
+  snake: {
+    easy: {
+      label:'Dễ', icon:'😊', color:'#10b981',
+      tickMs:170, targetScore:8,
+      desc:'Ăn 8 mồi để thắng',
+    },
+    medium: {
+      label:'Vừa', icon:'😐', color:'#f59e0b',
+      tickMs:125, targetScore:12,
+      desc:'Ăn 12 mồi để thắng',
+    },
+    hard: {
+      label:'Khó', icon:'😤', color:'#ef4444',
+      tickMs:90, targetScore:16,
+      desc:'Ăn 16 mồi để thắng',
+    },
+  },
 }
 
 export function getDiffConfig(type, difficulty) {
-  return DIFFICULTY[type]?.[difficulty] || DIFFICULTY[type]?.medium
+  return DIFFICULTY[type]?.[difficulty] || DIFFICULTY[type]?.medium || DIFFICULTY['balloon-pop'].medium
 }

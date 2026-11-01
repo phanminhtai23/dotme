@@ -8,7 +8,12 @@ async function req(method, path, body) {
     }
     const res = await fetch(BASE + path, opts);
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    if (!res.ok) {
+        const error = new Error(data.error || `HTTP ${res.status}`);
+        error.status = res.status;
+        error.data = data;
+        throw error;
+    }
     return data;
 }
 
@@ -33,7 +38,10 @@ export const api = {
 
     // Game plays
     getPlays: (id) => req("GET", `/links/${id}/plays`),
-    recordPlay: (id, won) => req("POST", `/links/${id}/play`, { won }),
+    reservePlay: (id, reservationId) =>
+        req("POST", `/links/${id}/play`, { reservationId }),
+    finishPlay: (id, playId, won) =>
+        req("PATCH", `/links/${id}/play/${playId}`, { won }),
 
     // Analytics
     recordVisit: (payload) => req("POST", "/visit", payload),

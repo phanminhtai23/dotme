@@ -6,6 +6,7 @@ const GROUND_Y = 240;
 const CAT_X = 100;
 const CAT_W = 36;
 const CAT_H = 32;
+const CAT_DUCK_H = 18;
 const GRAVITY = 0.55;
 const JUMP_VEL = -12;
 const WIN_TIME = 20;
@@ -36,13 +37,24 @@ const OBSTACLE_PALETTE = [
 ];
 
 function randomObstacle(x) {
+  const color = OBSTACLE_PALETTE[Math.floor(Math.random() * OBSTACLE_PALETTE.length)];
+  if (Math.random() < 0.3) {
+    const h = 14;
+    return { x, y: GROUND_Y - CAT_DUCK_H - h, w: 42 + Math.random() * 18, h, color, overhead:true };
+  }
   const h = 30 + Math.random() * 45;
   const w = 18 + Math.random() * 22;
-  const color = OBSTACLE_PALETTE[Math.floor(Math.random() * OBSTACLE_PALETTE.length)];
   return { x, y: GROUND_Y - h, w, h, color };
 }
 
-function drawCat(ctx, x, y, legPhase) {
+function drawCat(ctx, x, y, legPhase, ducking = false) {
+  ctx.save();
+  if (ducking) {
+    ctx.translate(0, GROUND_Y);
+    ctx.scale(1, CAT_DUCK_H / CAT_H);
+    y = -CAT_H;
+  }
+
   // Body
   ctx.fillStyle = COLORS.catBody;
   ctx.beginPath();
@@ -132,6 +144,7 @@ function drawCat(ctx, x, y, legPhase) {
   ctx.beginPath();
   ctx.roundRect(x + 24, y + CAT_H - 2, 7, 10 + leg1, 3);
   ctx.fill();
+  ctx.restore();
 }
 
 function drawBackground(ctx, bgOffset) {
@@ -238,6 +251,7 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
     catY: GROUND_Y - CAT_H,
     catVY: 0,
     onGround: true,
+    ducking: false,
     obstacles: [],
     bgOffset: 0,
     speed: BASE_SPEED,
@@ -262,27 +276,59 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
   const jump = useCallback(() => {
     const s = stateRef.current;
     if (s.running && s.onGround && !s.dead && !s.won) {
+      s.ducking = false;
+      s.catY = GROUND_Y - CAT_H;
       s.catVY = JUMP_VEL;
       s.onGround = false;
     }
   }, []);
 
+  const setDucking = useCallback((ducking) => {
+    const s = stateRef.current;
+    if (!s.running || s.dead || s.won) return;
+    if (ducking) {
+      s.ducking = true;
+      s.catY = GROUND_Y - CAT_DUCK_H;
+      s.catVY = 0;
+      s.onGround = true;
+    } else if (s.ducking) {
+      s.ducking = false;
+      s.catY = GROUND_Y - CAT_H;
+    }
+  }, []);
+
   useEffect(() => {
+    if (phase !== "playing") return undefined;
     const onKey = (e) => {
-      if (e.code === "Space") {
+      if (e.code === "Space" || e.code === "ArrowUp") {
         e.preventDefault();
         jump();
+      } else if (e.code === "ArrowDown") {
+        e.preventDefault();
+        setDucking(true);
       }
     };
+    const onKeyUp = (e) => {
+      if (e.code === "ArrowDown") setDucking(false);
+    };
+    const onBlur = () => setDucking(false);
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [jump]);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+      setDucking(false);
+    };
+  }, [jump, phase, setDucking]);
 
   const startGame = useCallback(() => {
     const s = stateRef.current;
     s.catY = GROUND_Y - CAT_H;
     s.catVY = 0;
     s.onGround = true;
+    s.ducking = false;
     s.obstacles = [];
     s.bgOffset = 0;
     s.speed = BASE_SPEED;
@@ -321,7 +367,7 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
         s.running = false;
         s.won = true;
         setPhase("won");
-        setTimeout(() => callbacksRef.current.onWin && callbacksRef.current.onWin(), 800);
+        callbacksRef.current.onWin && callbacksRef.current.onWin();
         return;
       }
 
@@ -349,14 +395,20 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
       s.spawnTimer++;
       if (s.spawnTimer >= s.spawnInterval) {
         s.spawnTimer = 0;
-        const obs = randomObstacle(CANVAS_WIDTH + 20);
-        obs.h = obs.h * OBS_H_MULT; obs.y = GROUND_Y - obs.h;
+        const createObstacle = (x) => {
+          const obstacle = randomObstacle(x);
+          if (!obstacle.overhead) {
+            obstacle.h *= OBS_H_MULT;
+            obstacle.y = GROUND_Y - obstacle.h;
+          }
+          return obstacle;
+        };
+        const obs = createObstacle(CANVAS_WIDTH + 20);
         s.obstacles.push(obs);
         // Occasionally double obstacle (more frequent on hard)
         const doubleChance = 0.15 + (SPEED_MULT - 1) * 0.2;
         if (Math.random() < doubleChance && s.elapsed > 5) {
-          const obs2 = randomObstacle(CANVAS_WIDTH + 60 + Math.random() * 30);
-          obs2.h = obs2.h * OBS_H_MULT; obs2.y = GROUND_Y - obs2.h;
+          const obs2 = createObstacle(CANVAS_WIDTH + 60 + Math.random() * 30);
           s.obstacles.push(obs2);
         }
       }
@@ -370,7 +422,7 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
       const catLeft = CAT_X + 4;
       const catRight = CAT_X + CAT_W - 4;
       const catTop = s.catY + 4;
-      const catBottom = s.catY + CAT_H;
+      const catBottom = s.catY + (s.ducking ? CAT_DUCK_H : CAT_H);
 
       for (const obs of s.obstacles) {
         if (
@@ -383,7 +435,7 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
           s.dead = true;
           setPhase("dead");
           const survivedSecs = parseFloat(s.elapsed.toFixed(1));
-          setTimeout(() => callbacksRef.current.onLose && callbacksRef.current.onLose({ score: survivedSecs, total: WIN_TIME_C, unit: 'giây' }), 900);
+          callbacksRef.current.onLose && callbacksRef.current.onLose({ score: survivedSecs, total: WIN_TIME_C, unit: 'giây' });
           // Draw death frame then return
           drawFrame(ctx, s);
           return;
@@ -413,7 +465,7 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
       // X eyes
       drawCatDead(ctx, CAT_X, s.catY);
     } else {
-      drawCat(ctx, CAT_X, s.catY, s.legPhase);
+      drawCat(ctx, CAT_X, s.catY, s.legPhase, s.ducking);
     }
   }
 
@@ -456,7 +508,7 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
     const s = stateRef.current;
     s.bgOffset = 0;
     drawBackground(ctx, 0);
-    drawCat(ctx, CAT_X, GROUND_Y - CAT_H, 0);
+    drawCat(ctx, CAT_X, GROUND_Y - CAT_H, 0, false);
   }, [phase]);
 
   const fmtTime = (t) => t.toFixed(1);
@@ -623,7 +675,7 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
               </div>
               <div className="cat-overlay-sub">
                 Sống sót {WIN_TIME_C} giây để thắng!<br />
-                Click hoặc nhấn Space để nhảy
+                ↑ / Space để nhảy, ↓ để cúi
               </div>
               <button className="cat-btn" onClick={startGame}>
                 Bắt Đầu
@@ -643,9 +695,6 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
                 Sống sót được {fmtTime(displayTime)}s / {WIN_TIME_C}s<br />
                 Chướng ngại vật quá nhanh!
               </div>
-              <button className="cat-btn" style={{ borderColor: "#f97316", color: "#f97316" }} onClick={startGame}>
-                Thử Lại
-              </button>
             </div>
           )}
 
@@ -661,9 +710,6 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
                 Chú mèo đã sống sót suốt {WIN_TIME_C} giây!<br />
                 Nhanh thật đó!
               </div>
-              <button className="cat-btn" onClick={startGame}>
-                Chơi Lại
-              </button>
             </div>
           )}
         </div>
@@ -671,8 +717,8 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
         <div className="cat-runner-footer">
           <span className="cat-runner-hint">
             {phase === "playing"
-              ? "CLICK hoặc SPACE để nhảy"
-              : `Nhấn BẮT ĐẦU — sống sót ${WIN_TIME_C} giây để thắng!`}
+              ? "↑ / SPACE để nhảy · giữ ↓ để cúi"
+              : `↑ / SPACE để nhảy, ↓ để cúi — sống sót ${WIN_TIME_C} giây!`}
           </span>
         </div>
       </div>

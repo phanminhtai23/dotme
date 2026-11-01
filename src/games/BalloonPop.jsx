@@ -337,7 +337,7 @@ function StartScreen({ onStart, target, time }) {
   );
 }
 
-function EndScreen({ win, popped, onRestart, target }) {
+function EndScreen({ win, popped, target }) {
   const sparkles = ['✨', '🌟', '💫', '⭐', '🎉', '🎊'];
   return (
     <div
@@ -410,29 +410,6 @@ function EndScreen({ win, popped, onRestart, target }) {
           {win ? ' 🎈' : ` out of ${target} needed`}
         </div>
 
-        <button
-          onClick={onRestart}
-          style={{
-            marginTop: 8,
-            padding: '13px 40px',
-            fontSize: 16,
-            fontWeight: 800,
-            color: '#fff',
-            background: win
-              ? 'linear-gradient(135deg, #ffd700 0%, #ff6b9d 100%)'
-              : 'linear-gradient(135deg, #ff6b9d 0%, #c44dff 100%)',
-            border: 'none',
-            borderRadius: 50,
-            cursor: 'pointer',
-            letterSpacing: 1,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-            transition: 'transform 0.15s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.08)')}
-          onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
-        >
-          CHƠI LẠI
-        </button>
       </div>
     </div>
   );
@@ -608,7 +585,7 @@ export default function BalloonPop({ onWin, onLose, config = {} }) {
       {/* Screens */}
       {phase === 'idle' && <StartScreen onStart={startGame} target={BALLOONS_TO_WIN} time={GAME_DURATION} />}
       {phase === 'ended' && (
-        <EndScreen win={win} popped={popped} onRestart={startGame} target={BALLOONS_TO_WIN} />
+        <EndScreen win={win} popped={popped} target={BALLOONS_TO_WIN} />
       )}
     </div>
   );
