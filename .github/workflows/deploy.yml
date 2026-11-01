@@ -66,4 +66,4 @@ jobs:
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" \
             -o BatchMode=yes -o StrictHostKeyChecking=yes \
             "$SSH_USER@$SSH_HOST" \
-            'cd /home/opc/projects/dotme && DOTME_DIR=/home/opc/projects/dotme bash deploy.sh'
+            'cd /home/opc/projects/dotme && git fetch origin main && git checkout main && git pull --ff-only origin main && DOTME_DIR=/home/opc/projects/dotme bash deploy.sh'
