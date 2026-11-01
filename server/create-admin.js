@@ -3,22 +3,17 @@
 // role: superadmin | admin | user  (default: admin)
 
 import bcrypt from 'bcryptjs'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
+import {
+  initializeCollection,
+  readCollection,
+  writeCollection,
+} from './database.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, 'data')
 const ACCOUNTS_FILE = join(DATA_DIR, 'accounts.json')
-
-try { mkdirSync(DATA_DIR, { recursive: true }) } catch {}
-
-function rj(file) {
-  try { return JSON.parse(readFileSync(file, 'utf8')) } catch { return [] }
-}
-function wj(file, data) {
-  writeFileSync(file, JSON.stringify(data, null, 2), 'utf8')
-}
 
 const [,, username, password, displayName, role = 'admin'] = process.argv
 
@@ -34,7 +29,8 @@ if (!validRoles.includes(role)) {
   process.exit(1)
 }
 
-const accounts = rj(ACCOUNTS_FILE)
+initializeCollection('accounts', ACCOUNTS_FILE)
+const accounts = readCollection('accounts')
 if (accounts.find(a => a.username === username)) {
   console.error(`❌ Username "${username}" already exists`)
   process.exit(1)
@@ -49,7 +45,7 @@ accounts.push({
   created: new Date().toISOString().slice(0, 10),
   expiresAt: null,
 })
-wj(ACCOUNTS_FILE, accounts)
+writeCollection('accounts', accounts)
 
 console.log(`✅ Created account:`)
 console.log(`   username    : ${username}`)

@@ -36,7 +36,7 @@
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
   --shadow-float: 0 20px 60px rgba(0, 0, 0, 0.5);
 
-  --font-sans: 'Inter', 'Be Vietnam Pro', system-ui, sans-serif;
+  --font-sans: 'Be Vietnam Pro', 'Inter', system-ui, sans-serif;
   --font-display: 'Syne', 'Be Vietnam Pro', system-ui, sans-serif;
 }
 
@@ -48,7 +48,7 @@ body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;

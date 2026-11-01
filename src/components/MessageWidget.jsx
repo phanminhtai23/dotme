@@ -88,7 +88,7 @@ export default function MessageWidget() {
     width: '100%', boxSizing: 'border-box',
     background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
     borderRadius: 12, padding: '12px 16px', color: '#f0f0ff',
-    fontSize: 15, fontFamily: 'Inter, sans-serif', outline: 'none', transition: 'all 0.2s',
+    fontSize: 15, fontFamily: 'var(--font-sans)', outline: 'none', transition: 'all 0.2s',
   }
 
   return (
@@ -120,7 +120,7 @@ export default function MessageWidget() {
           position: 'fixed', bottom: 96, right: 28, zIndex: 499,
           background: 'rgba(20,20,35,0.95)', backdropFilter: 'blur(16px)',
           border: '1px solid rgba(139,92,246,0.3)', borderRadius: 12,
-          padding: '10px 16px', fontSize: 13, color: '#f0f0ff', fontFamily: 'Inter, sans-serif',
+          padding: '10px 16px', fontSize: 13, color: '#f0f0ff', fontFamily: 'var(--font-sans)',
           whiteSpace: 'nowrap', animation: 'tooltipFadeIn 0.4s ease',
           boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         }}>
@@ -141,7 +141,7 @@ export default function MessageWidget() {
         background: 'rgba(13,13,26,0.97)', backdropFilter: 'blur(24px)',
         border: '1px solid rgba(139,92,246,0.25)',
         borderRadius: 20, boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
-        fontFamily: 'Inter, sans-serif', overflow: 'hidden',
+        fontFamily: 'var(--font-sans)', overflow: 'hidden',
         opacity: open ? 1 : 0,
         transform: open ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
         pointerEvents: open ? 'auto' : 'none',
@@ -177,7 +177,7 @@ export default function MessageWidget() {
               <button type="submit" style={{
                 background: 'linear-gradient(135deg,#8B5CF6,#ec4899)', color: '#fff', border: 'none',
                 borderRadius: 10, padding: '12px', fontSize: 14, fontWeight: 700,
-                fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+                fontFamily: 'var(--font-sans)', cursor: 'pointer',
                 boxShadow: '0 0 20px rgba(139,92,246,0.35)', transition: 'all 0.2s',
               }}
               onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'}
@@ -205,13 +205,13 @@ export default function MessageWidget() {
                 <button type="button" onClick={() => setStep(STEP.name)} style={{
                   background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                   borderRadius: 10, padding: '11px', fontSize: 13, color: '#8888aa',
-                  fontFamily: 'Inter, sans-serif', cursor: 'pointer', flexShrink: 0,
+                  fontFamily: 'var(--font-sans)', cursor: 'pointer', flexShrink: 0,
                 }}>←</button>
                 <button type="submit" disabled={sending} style={{
                   flex: 1, background: 'linear-gradient(135deg,#8B5CF6,#ec4899)',
                   color: '#fff', border: 'none', borderRadius: 10,
                   padding: '12px', fontSize: 14, fontWeight: 700,
-                  fontFamily: 'Inter, sans-serif', cursor: sending ? 'default' : 'pointer',
+                  fontFamily: 'var(--font-sans)', cursor: sending ? 'default' : 'pointer',
                   boxShadow: '0 0 20px rgba(139,92,246,0.35)', transition: 'all 0.2s', opacity: sending ? 0.8 : 1,
                 }}>{sending ? tx.sending : tx.send}</button>
               </div>

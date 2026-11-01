@@ -1,0 +1,51 @@
+map $http_user_agent $blocked_bot {
+    default 0;
+    ~*Dataprovider 1;
+}
+
+server {
+    listen 80;
+    server_name kevinphan.me www.kevinphan.me;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name kevinphan.me www.kevinphan.me;
+
+    ssl_certificate /etc/letsencrypt/live/kevinphan.me/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/kevinphan.me/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    client_max_body_size 15M;
+
+    if ($blocked_bot) {
+        return 403;
+    }
+
+    root /home/opc/projects/dotme/dist;
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /uploads/ {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

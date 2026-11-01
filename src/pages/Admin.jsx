@@ -538,6 +538,7 @@ function AdminInner() {
   const [accounts, setAccounts] = useState([])
   const [links, setLinks]       = useState([])
   const [messages, setMessages] = useState([])
+  const [messageNotice, setMessageNotice] = useState(null)
   const [modal, setModal]       = useState(null)
   const [editTarget, setEditTarget] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
@@ -594,11 +595,26 @@ function AdminInner() {
   }
 
   const handleDeleteMsg = async (id) => {
-    await api.deleteMessage(id).catch(() => {
-      const msgs = messages.filter(m => m.id !== id)
-      localStorage.setItem('dotme_messages', JSON.stringify(msgs))
-    })
-    refresh()
+    setMessageNotice(null)
+    try {
+      await api.deleteMessage(id)
+      setMessages(current => current.filter(message => message.id !== id))
+      setMessageNotice({ type:'success', text:'Đã xóa tin nhắn.' })
+    } catch (error) {
+      setMessageNotice({ type:'error', text:`Xóa tin nhắn thất bại: ${error.message}` })
+    }
+  }
+
+  const handleDeleteAllMessages = async () => {
+    if (!window.confirm('Xóa tất cả tin nhắn?')) return
+    setMessageNotice(null)
+    try {
+      await api.deleteAllMessages()
+      setMessages([])
+      setMessageNotice({ type:'success', text:'Đã xóa tất cả tin nhắn.' })
+    } catch (error) {
+      setMessageNotice({ type:'error', text:`Xóa tin nhắn thất bại: ${error.message}` })
+    }
   }
 
   if (!analytics) return null
@@ -763,7 +779,7 @@ function AdminInner() {
                   {[
                     { label:tr.storageLabels.total,   value: storage.total.size, color:'#8B5CF6' },
                     { label:tr.storageLabels.uploads,  value: `${storage.uploads.size} (${storage.uploads.count})`, color:'#22d3ee' },
-                    { label:tr.storageLabels.json,     value: storage.json.size, color:'#10b981' },
+                    { label:tr.storageLabels.sqlite,  value: storage.sqlite.size, color:'#10b981' },
                     { label:tr.storageLabels.counts,   value: `${storage.links} / ${storage.accounts} / ${storage.messages}`, color:'#f59e0b' },
                   ].map((s, i) => (
                     <div key={i} style={{ background:'rgba(255,255,255,0.03)', border:`1px solid ${s.color}20`, borderRadius:12, padding:'14px 16px' }}>
@@ -1016,18 +1032,21 @@ function AdminInner() {
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
               <p style={{ color:'#8888aa', fontSize:14 }}>{messages.length} tin nhắn</p>
               {messages.length > 0 && (
-                <button onClick={async () => {
-                  if (window.confirm('Xóa tất cả tin nhắn?')) {
-                    await api.deleteAllMessages().catch(() => { localStorage.setItem('dotme_messages','[]') })
-                    setMessages([])
-                  }
-                }} style={{
+                <button onClick={handleDeleteAllMessages} style={{
                   background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)',
                   borderRadius:8, padding:'8px 16px', color:'#fca5a5', fontSize:13,
                   fontFamily:'Inter, sans-serif', cursor:'pointer',
                 }}>Xóa tất cả</button>
               )}
             </div>
+            {messageNotice && (
+              <div role={messageNotice.type === 'error' ? 'alert' : 'status'} style={{
+                marginBottom:16, padding:'12px 16px', borderRadius:10, fontSize:13,
+                color:messageNotice.type === 'error' ? '#fca5a5' : '#6ee7b7',
+                background:messageNotice.type === 'error' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                border:`1px solid ${messageNotice.type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}`,
+              }}>{messageNotice.text}</div>
+            )}
             {messages.length === 0 ? (
               <Card style={{ textAlign:'center', padding:60 }}>
                 <div style={{ fontSize:56, marginBottom:16 }}>💬</div>

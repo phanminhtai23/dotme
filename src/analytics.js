@@ -1,4 +1,4 @@
-// Visitor analytics — lưu ở backend hoặc Supabase (nếu đã cấu hình)
+// Visitor analytics are persisted by the backend.
 import { isAdmin } from "./auth";
 import { api } from "./api";
 

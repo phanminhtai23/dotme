@@ -3,62 +3,40 @@ import cors from "cors";
 import multer from "multer";
 import bcrypt from "bcryptjs";
 import { Resend } from "resend";
-import { createClient } from "@supabase/supabase-js";
 import {
-    readFileSync,
-    writeFileSync,
     existsSync,
     mkdirSync,
     unlinkSync,
-    readdirSync,
-    statSync,
 } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join, extname } from "path";
+import {
+    db,
+    getCollectionCounts,
+    getDatabaseBytes,
+    getUploadStats,
+    isCollectionInitialized,
+    initializeAnalytics,
+    initializeCollection,
+    initializeLegacyUploads,
+    readCollection as readSqliteCollection,
+    readUpload,
+    readVisits,
+    saveVisit,
+    saveUpload,
+    deleteUpload,
+    writeCollection as writeSqliteCollection,
+} from "./database.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, "data");
 const UPLOADS_DIR = join(__dirname, "uploads");
-try {
-    mkdirSync(DATA_DIR, { recursive: true });
-} catch {}
-try {
-    mkdirSync(UPLOADS_DIR, { recursive: true });
-} catch {}
+mkdirSync(UPLOADS_DIR, { recursive: true });
 
 const ACCOUNTS_FILE = join(DATA_DIR, "accounts.json");
 const LINKS_FILE = join(DATA_DIR, "links.json");
 const MESSAGES_FILE = join(DATA_DIR, "messages.json");
 const ANALYTICS_FILE = join(DATA_DIR, "analytics.json");
-
-const EMPTY_ANALYTICS = {
-    visits: {},
-    pages: {},
-    history: [],
-    total: 0,
-    lastVisit: null,
-};
-
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-const SUPABASE_DOCS_TABLE = process.env.SUPABASE_DOCS_TABLE || "documents";
-const SUPABASE_VISITS_TABLE = process.env.SUPABASE_VISITS_TABLE || "visits";
-
-const supabase =
-    SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
-        ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-        : null;
-
-function normalizeAnalyticsStore(store = {}) {
-    return {
-        visits: store.visits || {},
-        pages: store.pages || {},
-        history: Array.isArray(store.history) ? store.history : [],
-        total: store.total || 0,
-        lastVisit: store.lastVisit || null,
-    };
-}
 
 function formatVisitRow(row) {
     const createdAt = row.created_at || row.createdAt || new Date().toISOString();
@@ -95,158 +73,21 @@ function buildAnalyticsFromHistory(history) {
     };
 }
 
-async function readCollection(collection, file) {
-    if (!supabase) return rj(file, []);
-
-    const { data, error } = await supabase
-        .from(SUPABASE_DOCS_TABLE)
-        .select("payload")
-        .eq("collection", collection)
-        .order("created_at", { ascending: true });
-
-    if (error) {
-        console.error(`Supabase read ${collection} failed:`, error.message);
-        return [];
-    }
-
-    return (data || []).map((row) => {
-        if (!row.payload) return null;
-        try {
-            return typeof row.payload === "string" ? JSON.parse(row.payload) : row.payload;
-        } catch { return null; }
-    }).filter(Boolean);
+async function readCollection(collection) {
+    return readSqliteCollection(collection);
 }
 
-async function writeCollection(collection, file, items) {
-    if (!supabase) {
-        wj(file, items);
-        return;
-    }
-
-    const { error: deleteError } = await supabase
-        .from(SUPABASE_DOCS_TABLE)
-        .delete()
-        .eq("collection", collection);
-
-    if (deleteError) {
-        console.error(`Supabase delete ${collection} failed:`, deleteError.message);
-        return;
-    }
-
-    wj(file, items);
-
-    if (!items.length) return;
-
-    const rows = items.map((item, index) => ({
-        collection,
-        item_key: item.id || item.username || `${collection}-${index}`,
-        payload: JSON.stringify(item),
-        sort_order: index,
-    }));
-
-    const { error: insertError } = await supabase
-        .from(SUPABASE_DOCS_TABLE)
-        .insert(rows);
-
-    if (insertError) {
-        console.error(`Supabase write ${collection} failed:`, insertError.message);
-    }
-}
-
-// Seeding from the local JSON mirror must happen AT MOST ONCE per collection,
-// ever — otherwise an intentionally-emptied collection (e.g. all messages
-// deleted) looks indistinguishable from "never seeded" and gets repopulated
-// from stale local data on every server restart.
-//
-// This marker is stored IN SUPABASE (collection "_seed_state"), not on local
-// disk — Render (and most PaaS hosts) run on an ephemeral filesystem that's
-// rebuilt from the git repo on every deploy/restart, so a local marker file
-// would itself get wiped and defeat the point. Supabase is the only thing
-// that actually survives a restart here.
-const SEED_MARKER_COLLECTION = "_seed_state";
-async function hasSeedMarker(collection) {
-    const { data, error } = await supabase
-        .from(SUPABASE_DOCS_TABLE)
-        .select("id")
-        .eq("collection", SEED_MARKER_COLLECTION)
-        .eq("item_key", collection)
-        .limit(1);
-    if (error) {
-        console.error(`Supabase seed-marker check ${collection} failed:`, error.message);
-        return false;
-    }
-    return !!data?.length;
-}
-async function setSeedMarker(collection) {
-    const { error } = await supabase.from(SUPABASE_DOCS_TABLE).insert({
-        collection: SEED_MARKER_COLLECTION,
-        item_key: collection,
-        payload: JSON.stringify({ seededAt: new Date().toISOString() }),
-        sort_order: 0,
-    });
-    if (error) {
-        console.error(`Supabase seed-marker write ${collection} failed:`, error.message);
-    }
-}
-
-async function seedCollectionFromLocal(collection, file) {
-    if (!supabase) return;
-    if (await hasSeedMarker(collection)) return;
-
-    const { data, error } = await supabase
-        .from(SUPABASE_DOCS_TABLE)
-        .select("id")
-        .eq("collection", collection)
-        .limit(1);
-
-    if (error) {
-        console.error(`Supabase seed check ${collection} failed:`, error.message);
-        return;
-    }
-
-    if (!data?.length) {
-        const localItems = rj(file, []);
-        if (localItems.length) await writeCollection(collection, file, localItems);
-    }
-    await setSeedMarker(collection);
+async function writeCollection(collection, _file, items) {
+    writeSqliteCollection(collection, items);
 }
 
 async function readAnalyticsStore() {
-    if (supabase) {
-        const { data, error } = await supabase
-            .from(SUPABASE_VISITS_TABLE)
-            .select("id, created_at, page, ip, user_agent, visitor_id, referrer")
-            .order("created_at", { ascending: true });
-
-        if (!error) {
-            return buildAnalyticsFromHistory((data || []).map(formatVisitRow));
-        }
-
-        console.error("Supabase read analytics failed:", error.message);
-    }
-
-    return normalizeAnalyticsStore(rj(ANALYTICS_FILE, { ...EMPTY_ANALYTICS }));
+    return buildAnalyticsFromHistory(readVisits().map(formatVisitRow));
 }
 
 async function saveVisitRecord(record) {
-    if (supabase) {
-        const { error } = await supabase.from(SUPABASE_VISITS_TABLE).insert({
-            created_at: record.createdAt,
-            page: record.page,
-            ip: record.ip,
-            user_agent: record.userAgent,
-            visitor_id: record.visitorId,
-            referrer: record.referrer,
-        });
-
-        if (!error) return true;
-        console.error("Supabase save analytics failed:", error.message);
-    }
-
-    const store = normalizeAnalyticsStore(rj(ANALYTICS_FILE, { ...EMPTY_ANALYTICS }));
-    const next = buildAnalyticsFromHistory([...store.history, record]);
-    wj(ANALYTICS_FILE, next);
-    return false;
+    saveVisit(record);
+    return true;
 }
 
 const CONTENT_SECTIONS = [
@@ -465,19 +306,20 @@ const allowedOrigins = (
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
-app.use("/uploads", express.static(UPLOADS_DIR));
-
-// ── JSON helpers ─────────────────────────────────────────────────────────────
-function rj(file, fallback = []) {
-    try {
-        return JSON.parse(readFileSync(file, "utf8"));
-    } catch {
-        return fallback;
+app.get("/uploads/:filename", (req, res, next) => {
+    const { filename } = req.params;
+    if (!/^[A-Za-z0-9._-]+$/.test(filename)) {
+        return res.status(400).json({ error: "Tên file không hợp lệ" });
     }
-}
-function wj(file, data) {
-    writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
-}
+
+    const upload = readUpload(filename);
+    if (!upload) return next();
+
+    res.set("X-Content-Type-Options", "nosniff");
+    res.set("Cache-Control", "public, max-age=31536000, immutable");
+    res.type(upload.mimetype).send(upload.content);
+});
+app.use("/uploads", express.static(UPLOADS_DIR));
 
 function genId() {
     const c = "abcdefghjkmnpqrstuvwxyz23456789";
@@ -488,15 +330,17 @@ function genId() {
 
 // ── Init default data ────────────────────────────────────────────────────────
 async function initData() {
-    await ensureStorageBucket();
-    if (!existsSync(ACCOUNTS_FILE)) {
+    let defaultAccounts = [];
+    if (
+        !isCollectionInitialized("accounts") &&
+        !existsSync(ACCOUNTS_FILE)
+    ) {
         const defaultPass = process.env.ADMIN_DEFAULT_PASS;
         if (!defaultPass) {
-            console.error("❌ ADMIN_DEFAULT_PASS not set in .env");
-            process.exit(1);
+            throw new Error("ADMIN_DEFAULT_PASS is required to create the initial admin account");
         }
         const hash = await bcrypt.hash(defaultPass, 10);
-        wj(ACCOUNTS_FILE, [
+        defaultAccounts = [
             {
                 username: "admin",
                 passwordHash: hash,
@@ -505,24 +349,16 @@ async function initData() {
                 created: new Date().toISOString().slice(0, 10),
                 expiresAt: null,
             },
-        ]);
-        console.log(`✅ Created default admin — username: admin`);
-        console.log(`   ⚠️  Đổi mật khẩu sau khi đăng nhập lần đầu!`);
+        ];
     }
-    if (!existsSync(LINKS_FILE)) wj(LINKS_FILE, []);
-    if (!existsSync(MESSAGES_FILE)) wj(MESSAGES_FILE, []);
-    if (!existsSync(ANALYTICS_FILE)) wj(ANALYTICS_FILE, EMPTY_ANALYTICS);
+    initializeCollection("accounts", ACCOUNTS_FILE, defaultAccounts);
+    initializeCollection("links", LINKS_FILE);
+    initializeCollection("messages", MESSAGES_FILE);
     for (const s of CONTENT_SECTIONS) {
-        if (!existsSync(CONTENT_FILES[s]))
-            wj(CONTENT_FILES[s], INITIAL_CONTENT[s]);
+        initializeCollection(`content:${s}`, CONTENT_FILES[s], INITIAL_CONTENT[s]);
     }
-
-    await seedCollectionFromLocal("accounts", ACCOUNTS_FILE);
-    await seedCollectionFromLocal("links", LINKS_FILE);
-    await seedCollectionFromLocal("messages", MESSAGES_FILE);
-    for (const s of CONTENT_SECTIONS) {
-        await seedCollectionFromLocal(`content:${s}`, CONTENT_FILES[s]);
-    }
+    initializeAnalytics(ANALYTICS_FILE);
+    initializeLegacyUploads(UPLOADS_DIR);
 }
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
@@ -705,33 +541,13 @@ app.post("/api/links/:id/play", async (req, res) => {
 });
 
 // ── Image Upload ──────────────────────────────────────────────────────────────
-// On ephemeral hosts (Render et al.) `server/uploads/` is wiped on every
-// restart/redeploy, so persist into Supabase Storage when configured —
-// falls back to local disk only for offline/no-Supabase local dev.
-const UPLOAD_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "uploads";
-
 function genUploadKey(originalname) {
     const ext = extname(originalname).toLowerCase() || ".jpg";
     return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
 }
 
-async function ensureStorageBucket() {
-    if (!supabase) return;
-    const { data } = await supabase.storage.getBucket(UPLOAD_BUCKET);
-    if (data) return;
-    const { error } = await supabase.storage.createBucket(UPLOAD_BUCKET, { public: true });
-    if (error && !/already exists/i.test(error.message)) {
-        console.error("Supabase bucket create failed:", error.message);
-    }
-}
-
 const upload = multer({
-    storage: supabase
-        ? multer.memoryStorage()
-        : multer.diskStorage({
-              destination: UPLOADS_DIR,
-              filename: (_, file, cb) => cb(null, genUploadKey(file.originalname)),
-          }),
+    storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (_, file, cb) =>
         file.mimetype.startsWith("image/") || file.mimetype === "application/pdf"
@@ -742,42 +558,31 @@ const upload = multer({
 app.post("/api/upload", upload.single("image"), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "No file" });
 
-    if (!supabase) {
-        return res.json({
-            url: `/uploads/${req.file.filename}`,
-            filename: req.file.filename,
-            mimetype: req.file.mimetype,
-            originalName: req.file.originalname,
-        });
-    }
-
-    const key = genUploadKey(req.file.originalname);
-    const { error } = await supabase.storage
-        .from(UPLOAD_BUCKET)
-        .upload(key, req.file.buffer, { contentType: req.file.mimetype });
-
-    if (error) {
-        console.error("Supabase storage upload failed:", error.message);
-        return res.status(500).json({ error: "Tải file thất bại" });
-    }
-
-    const { data } = supabase.storage.from(UPLOAD_BUCKET).getPublicUrl(key);
+    const filename = genUploadKey(req.file.originalname);
+    saveUpload({
+        filename,
+        mimetype: req.file.mimetype,
+        originalName: req.file.originalname,
+        content: req.file.buffer,
+        createdAt: new Date().toISOString(),
+    });
     res.json({
-        url: data.publicUrl,
-        filename: key,
+        url: `/uploads/${filename}`,
+        filename,
         mimetype: req.file.mimetype,
         originalName: req.file.originalname,
     });
 });
 
 app.delete("/api/upload/:filename", async (req, res) => {
-    if (supabase) {
-        const { error } = await supabase.storage.from(UPLOAD_BUCKET).remove([req.params.filename]);
-        if (error) console.error("Supabase storage delete failed:", error.message);
-    } else {
-        try {
-            unlinkSync(join(UPLOADS_DIR, req.params.filename));
-        } catch {}
+    if (!/^[A-Za-z0-9._-]+$/.test(req.params.filename)) {
+        return res.status(400).json({ error: "Tên file không hợp lệ" });
+    }
+    try {
+        deleteUpload(req.params.filename);
+        unlinkSync(join(UPLOADS_DIR, req.params.filename));
+    } catch (error) {
+        if (error.code !== "ENOENT") throw error;
     }
     res.json({ ok: true });
 });
@@ -829,11 +634,15 @@ app.get("/api/messages", async (_, res) => {
 });
 
 app.delete("/api/messages/:id", async (req, res) => {
-    const msgs = (await readCollection("messages", MESSAGES_FILE)).filter(
+    const messages = await readCollection("messages", MESSAGES_FILE);
+    const msgs = messages.filter(
         (m) => m.id !== req.params.id,
     );
+    if (msgs.length === messages.length) {
+        return res.status(404).json({ error: "Không tìm thấy tin nhắn" });
+    }
     await writeCollection("messages", MESSAGES_FILE, msgs);
-    res.json({ ok: true });
+    res.json({ ok: true, message: "Đã xóa tin nhắn" });
 });
 
 app.delete("/api/messages", async (_, res) => {
@@ -940,7 +749,6 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 app.head("/api/health", (_, res) => res.status(200).end());
 
 app.post("/api/admin/reseed-content", async (_, res) => {
-    if (!supabase) return res.status(400).json({ error: "Supabase not configured" });
     try {
         for (const s of CONTENT_SECTIONS) {
             await writeCollection(`content:${s}`, CONTENT_FILES[s], INITIAL_CONTENT[s]);
@@ -958,28 +766,10 @@ app.head("/api/ping", (_, res) => res.status(200).end());
 
 app.get("/api/storage", (_, res) => {
     try {
-        const accounts = rj(ACCOUNTS_FILE);
-        const links = rj(LINKS_FILE);
-        const messages = rj(MESSAGES_FILE);
-
-        let uploadBytes = 0,
-            uploadCount = 0;
-        try {
-            const files = readdirSync(UPLOADS_DIR);
-            uploadCount = files.length;
-            files.forEach((f) => {
-                try {
-                    uploadBytes += statSync(join(UPLOADS_DIR, f)).size;
-                } catch {}
-            });
-        } catch {}
-
-        const jsonBytes =
-            Buffer.byteLength(JSON.stringify(accounts)) +
-            Buffer.byteLength(JSON.stringify(links)) +
-            Buffer.byteLength(JSON.stringify(messages));
-
-        const totalBytes = uploadBytes + jsonBytes;
+        const collections = getCollectionCounts();
+        const uploads = getUploadStats();
+        const databaseBytes = getDatabaseBytes();
+        const totalBytes = databaseBytes;
         const fmt = (b) =>
             b > 1024 * 1024
                 ? `${(b / 1024 / 1024).toFixed(2)} MB`
@@ -987,11 +777,11 @@ app.get("/api/storage", (_, res) => {
                   ? `${(b / 1024).toFixed(1)} KB`
                   : `${b} B`;
         res.json({
-            accounts: accounts.length,
-            links: links.length,
-            messages: messages.length,
-            uploads: { count: uploadCount, size: fmt(uploadBytes) },
-            json: { size: fmt(jsonBytes) },
+            accounts: collections.accounts || 0,
+            links: collections.links || 0,
+            messages: collections.messages || 0,
+            uploads: { count: uploads.count, size: fmt(uploads.bytes) },
+            sqlite: { size: fmt(databaseBytes) },
             total: { size: fmt(totalBytes), bytes: totalBytes },
         });
     } catch (err) {
@@ -1007,7 +797,11 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3001;
 initData().then(() =>
-    app.listen(PORT, () =>
+    app.listen(PORT, "127.0.0.1", () =>
         console.log(`✅ dotme API → http://localhost:${PORT}`),
     ),
-);
+).catch((error) => {
+    console.error("❌ Could not initialize dotme:", error.message);
+    db.close();
+    process.exitCode = 1;
+});
