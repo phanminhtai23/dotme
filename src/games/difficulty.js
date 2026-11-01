@@ -103,6 +103,23 @@ export const DIFFICULTY = {
       desc:'Nhặt 12 hạt trong khu vườn',
     },
   },
+  'star-catcher': {
+    easy: {
+      label:'Dễ', icon:'😊', color:'#10b981',
+      targetScore:8, duration:40, fallSpeed:145, spawnInterval:1050,
+      desc:'Hứng 8 ngôi sao trong 40 giây',
+    },
+    medium: {
+      label:'Vừa', icon:'😐', color:'#f59e0b',
+      targetScore:12, duration:35, fallSpeed:180, spawnInterval:850,
+      desc:'Hứng 12 ngôi sao trong 35 giây',
+    },
+    hard: {
+      label:'Khó', icon:'😤', color:'#ef4444',
+      targetScore:16, duration:32, fallSpeed:230, spawnInterval:700,
+      desc:'Hứng 16 ngôi sao trong 32 giây',
+    },
+  },
 }
 
 export function getDiffConfig(type, difficulty) {

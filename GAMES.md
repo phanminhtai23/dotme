@@ -10,6 +10,7 @@ without a `gameId` keep the game previously associated with their page type.
 | Heart Memory | Love |
 | Goose Forage | Any page type |
 | Snake | Any page type |
+| Star Catcher | Any page type |
 
 The Snake option was selected after reviewing
 [TomMalbran/games](https://github.com/TomMalbran/games), an MIT-licensed
@@ -20,6 +21,9 @@ source or assets are bundled.
 Goose Forage is an original grid game with a hand-drawn canvas goose. Guide it
 around the garden to collect seeds; movement is controlled by the arrow keys,
 WASD, or on-screen buttons.
+
+Star Catcher is an original canvas game. Move the basket with the arrow keys,
+A/D, on-screen controls, or by dragging on touch screens to catch falling stars.
 
 Each started round reserves one of the link's three attempts. Retries go
 through the same server-side reservation, and in-game restart buttons are

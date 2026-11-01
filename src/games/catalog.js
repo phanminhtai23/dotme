@@ -10,6 +10,7 @@ export const GAME_OPTIONS = [
   { id:'heart-memory', name:'Lật bài đôi', emoji:'💕', description:'Tìm các cặp hình giống nhau' },
   { id:'snake', name:'Rắn săn mồi', emoji:'🐍', description:'Điều khiển rắn ăn mồi, tránh va chạm' },
   { id:'goose-forage', name:'Ngỗng nhặt hạt', emoji:'🪿', description:'Dẫn ngỗng đi nhặt hạt trong khu vườn' },
+  { id:'star-catcher', name:'Hứng sao đêm', emoji:'🌠', description:'Di chuyển chiếc giỏ để hứng sao rơi' },
 ]
 
 export function resolveGameId(gameId, type) {

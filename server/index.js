@@ -42,6 +42,14 @@ const ACCOUNTS_FILE = join(DATA_DIR, "accounts.json");
 const LINKS_FILE = join(DATA_DIR, "links.json");
 const MESSAGES_FILE = join(DATA_DIR, "messages.json");
 const ANALYTICS_FILE = join(DATA_DIR, "analytics.json");
+const ALLOWED_GAME_IDS = new Set([
+    "balloon-pop",
+    "cat-runner",
+    "heart-memory",
+    "snake",
+    "goose-forage",
+    "star-catcher",
+]);
 
 function formatVisitRow(row) {
     const createdAt = row.created_at || row.createdAt || new Date().toISOString();
@@ -468,14 +476,7 @@ app.post("/api/links", async (req, res) => {
         motivation: "cat-runner",
         love: "heart-memory",
     };
-    const allowedGames = new Set([
-        "balloon-pop",
-        "cat-runner",
-        "heart-memory",
-        "snake",
-        "goose-forage",
-    ]);
-    if (gameId && !allowedGames.has(gameId)) {
+    if (gameId && !ALLOWED_GAME_IDS.has(gameId)) {
         return res.status(400).json({ error: "Trò chơi không hợp lệ" });
     }
     const id = genId();
@@ -505,7 +506,7 @@ app.put("/api/links/:id", async (req, res) => {
     if (
         req.body &&
         Object.hasOwn(req.body, "gameId") &&
-        !["balloon-pop", "cat-runner", "heart-memory", "snake", "goose-forage"].includes(req.body.gameId)
+        !ALLOWED_GAME_IDS.has(req.body.gameId)
     ) {
         return res.status(400).json({ error: "Trò chơi không hợp lệ" });
     }

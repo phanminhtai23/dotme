@@ -305,6 +305,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
       'heart-memory': () => import('../games/HeartMemory.jsx'),
       snake: () => import('../games/SnakeGame.jsx'),
       'goose-forage': () => import('../games/GooseForage.jsx'),
+      'star-catcher': () => import('../games/StarCatcher.jsx'),
     }
     const loadGame = map[effectiveGameId]
     if (!loadGame) {
@@ -435,6 +436,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
     'heart-memory': { pairs: diffCfg?.pairs, cols: diffCfg?.cols, time: diffCfg?.time, flipDelay: diffCfg?.flipDelay },
     snake: { tickMs: diffCfg?.tickMs, targetScore: diffCfg?.targetScore },
     'goose-forage': { targetScore: diffCfg?.targetScore },
+    'star-catcher': { targetScore: diffCfg?.targetScore, duration: diffCfg?.duration, fallSpeed: diffCfg?.fallSpeed, spawnInterval: diffCfg?.spawnInterval },
   }[effectiveGameId] || {}
 
   return (
