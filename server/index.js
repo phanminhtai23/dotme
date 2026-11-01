@@ -30,6 +30,7 @@ import {
 import {
     finishPlay,
     getPlaySummary,
+    MAX_EXTRA_PLAYS,
     reservePlay,
 } from "./game-plays.js";
 
@@ -517,6 +518,17 @@ app.put("/api/links/:id", async (req, res) => {
     ) {
         return res.status(400).json({ error: "Lời nhắn tối đa 500 ký tự" });
     }
+    if (
+        req.body &&
+        Object.hasOwn(req.body, "extraPlays") &&
+        (!Number.isSafeInteger(req.body.extraPlays) ||
+            req.body.extraPlays < 0 ||
+            req.body.extraPlays > MAX_EXTRA_PLAYS)
+    ) {
+        return res.status(400).json({
+            error: `Số lượt cộng thêm phải là số nguyên từ 0 đến ${MAX_EXTRA_PLAYS}`,
+        });
+    }
     links[idx] = { ...links[idx], ...req.body, id: links[idx].id };
     await writeCollection("links", LINKS_FILE, links);
     res.json(links[idx]);
@@ -574,6 +586,7 @@ app.post("/api/links/:id/play", async (req, res) => {
         return res.status(403).json({
             error: "Đã hết lượt chơi",
             maxed: true,
+            maxPlays: result.maxPlays,
             remaining: 0,
         });
     }
@@ -584,6 +597,7 @@ app.post("/api/links/:id/play", async (req, res) => {
             return res.status(404).json({ error: "Không tìm thấy" });
         return res.json({
             ok: true,
+            maxPlays: finished.maxPlays,
             remaining: finished.remaining,
             play: finished.play,
         });
@@ -591,6 +605,7 @@ app.post("/api/links/:id/play", async (req, res) => {
 
     res.json({
         ok: true,
+        maxPlays: result.maxPlays,
         remaining: result.remaining,
         play: result.play,
     });
@@ -607,6 +622,7 @@ app.patch("/api/links/:id/play/:playId", async (req, res) => {
         return res.status(404).json({ error: "Không tìm thấy lượt chơi" });
     res.json({
         ok: true,
+        maxPlays: result.maxPlays,
         remaining: result.remaining,
         play: result.play,
     });

@@ -26,9 +26,10 @@ target number of seeds before time runs out.
 Star Catcher is an original canvas game. Move the basket with the arrow keys,
 A/D, on-screen controls, or by dragging on touch screens to catch falling stars.
 
-Each started round reserves one of the link's three attempts. Retries go
-through the same server-side reservation, and in-game restart buttons are
-intentionally omitted so they cannot bypass the limit.
+Each started round reserves one of the link's three default attempts. Admins
+can grant additional attempts from the link list; retries go through the same
+server-side reservation, and in-game restart buttons are intentionally omitted
+so they cannot bypass the limit.
 
 Admins can also add an optional personal note of up to 500 characters when
 creating a link. The note is displayed as plain text on the Motivation,

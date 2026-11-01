@@ -35,11 +35,13 @@ function chooseSeed(goose) {
   return free[Math.floor(Math.random() * free.length)]
 }
 
-function drawGoose(ctx, x, y) {
+function drawGoose(ctx, x, y, frame = 0) {
   const cx = x * CELL + CELL / 2
   const cy = y * CELL + CELL / 2
+  const bob = Math.sin(frame * 0.006) * 1.2
   ctx.save()
-  ctx.translate(cx, cy)
+  ctx.translate(cx, cy + bob)
+  ctx.rotate(Math.sin(frame * 0.003) * 0.035)
 
   // Original baby-goose design: fluffy cheeks, a tiny neckerchief, and bright eyes.
   ctx.fillStyle = 'rgba(24, 50, 37, 0.18)'
@@ -59,6 +61,15 @@ function drawGoose(ctx, x, y) {
   ctx.beginPath()
   ctx.ellipse(-3, 1, 5, 4, -0.25, 0, Math.PI * 2)
   ctx.fill()
+
+  ctx.save()
+  ctx.translate(-5, 1)
+  ctx.rotate(Math.sin(frame * 0.018) * 0.14)
+  ctx.fillStyle = '#fff7e2'
+  ctx.beginPath()
+  ctx.ellipse(0, 0, 3.8, 2.2 + Math.max(0, Math.sin(frame * 0.018)) * 0.8, -0.2, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
 
   ctx.fillStyle = '#fffdf5'
   ctx.beginPath()
@@ -117,9 +128,9 @@ function drawGoose(ctx, x, y) {
   ctx.lineCap = 'round'
   ctx.beginPath()
   ctx.moveTo(-4, 7)
-  ctx.lineTo(-5, 9)
+  ctx.lineTo(-5, 9 + Math.sin(frame * 0.018))
   ctx.moveTo(2, 7)
-  ctx.lineTo(3, 9)
+  ctx.lineTo(3, 9 - Math.sin(frame * 0.018))
   ctx.stroke()
   ctx.restore()
 }
@@ -229,41 +240,54 @@ export default function GooseForage({ onWin, onLose, config = {} }) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    ctx.fillStyle = '#d9edc9'
-    ctx.fillRect(0, 0, SIZE, SIZE)
-    for (let y = 0; y < CELLS; y += 1) {
-      for (let x = 0; x < CELLS; x += 1) {
-        if ((x + y) % 2 === 0) {
-          ctx.fillStyle = 'rgba(255,255,255,0.12)'
-          ctx.fillRect(x * CELL, y * CELL, CELL, CELL)
+    const render = (frame = 0) => {
+      ctx.fillStyle = '#d9edc9'
+      ctx.fillRect(0, 0, SIZE, SIZE)
+      for (let y = 0; y < CELLS; y += 1) {
+        for (let x = 0; x < CELLS; x += 1) {
+          if ((x + y) % 2 === 0) {
+            ctx.fillStyle = 'rgba(255,255,255,0.12)'
+            ctx.fillRect(x * CELL, y * CELL, CELL, CELL)
+          }
         }
       }
+
+      HEDGES.forEach(({ x, y }) => {
+        ctx.fillStyle = '#4d8b54'
+        ctx.beginPath()
+        ctx.roundRect(x * CELL + 2, y * CELL + 2, CELL - 4, CELL - 4, 6)
+        ctx.fill()
+        ctx.fillStyle = 'rgba(255,255,255,0.18)'
+        ctx.beginPath()
+        ctx.arc(x * CELL + 8, y * CELL + 7, 3, 0, Math.PI * 2)
+        ctx.fill()
+      })
+
+      const seedX = seed.x * CELL + CELL / 2
+      const seedY = seed.y * CELL + CELL / 2
+      ctx.fillStyle = '#b7791f'
+      ctx.beginPath()
+      ctx.ellipse(seedX, seedY, 4, 6, -0.55, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = '#f6c453'
+      ctx.beginPath()
+      ctx.ellipse(seedX - 1, seedY - 1, 1.4, 2.4, -0.55, 0, Math.PI * 2)
+      ctx.fill()
+
+      drawGoose(ctx, goose.x, goose.y, phase === 'playing' ? frame : 0)
     }
 
-    HEDGES.forEach(({ x, y }) => {
-      ctx.fillStyle = '#4d8b54'
-      ctx.beginPath()
-      ctx.roundRect(x * CELL + 2, y * CELL + 2, CELL - 4, CELL - 4, 6)
-      ctx.fill()
-      ctx.fillStyle = 'rgba(255,255,255,0.18)'
-      ctx.beginPath()
-      ctx.arc(x * CELL + 8, y * CELL + 7, 3, 0, Math.PI * 2)
-      ctx.fill()
-    })
+    render()
+    if (phase !== 'playing') return undefined
 
-    const seedX = seed.x * CELL + CELL / 2
-    const seedY = seed.y * CELL + CELL / 2
-    ctx.fillStyle = '#b7791f'
-    ctx.beginPath()
-    ctx.ellipse(seedX, seedY, 4, 6, -0.55, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.fillStyle = '#f6c453'
-    ctx.beginPath()
-    ctx.ellipse(seedX - 1, seedY - 1, 1.4, 2.4, -0.55, 0, Math.PI * 2)
-    ctx.fill()
-
-    drawGoose(ctx, goose.x, goose.y)
-  }, [goose, seed])
+    let animationFrame
+    const animate = (frame) => {
+      render(frame)
+      animationFrame = window.requestAnimationFrame(animate)
+    }
+    animationFrame = window.requestAnimationFrame(animate)
+    return () => window.cancelAnimationFrame(animationFrame)
+  }, [goose, seed, phase])
 
   const control = (key, label) => (
     <button

@@ -174,3 +174,27 @@ test("existing play history continues to consume the three-play limit", () => {
         "maxed",
     );
 });
+
+test("admin-granted extra plays extend the limit and appear in the summary", () => {
+    const linkId = "game-play-extra-limit-test";
+    storage.writeCollection("links", [{
+        id: linkId,
+        extraPlays: 3,
+        plays: [{ at: "old-1" }, { at: "old-2" }, { at: "old-3" }],
+    }]);
+
+    const summary = getPlaySummary(linkId);
+    assert.equal(summary.maxPlays, 6);
+    assert.equal(summary.remaining, 3);
+
+    const accepted = Array.from({ length: 3 }, (_, index) =>
+        reservePlay(linkId, `127.0.0.${index + 1}`, `bonus-request-${index}`),
+    );
+    assert.equal(accepted.every((result) => result.status === "reserved"), true);
+    assert.equal(accepted[0].maxPlays, 6);
+    assert.equal(getPlaySummary(linkId).remaining, 0);
+    assert.equal(
+        reservePlay(linkId, "127.0.0.4", "over-limit-request").status,
+        "maxed",
+    );
+});

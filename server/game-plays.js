@@ -2,9 +2,18 @@ import { randomUUID } from "crypto";
 import { mutateCollection, readCollection } from "./database.js";
 
 export const MAX_PLAYS = 3;
+export const MAX_EXTRA_PLAYS = 1000;
 
-function remainingFor(plays) {
-    return Math.max(0, MAX_PLAYS - plays.length);
+function maxPlaysFor(link) {
+    const extraPlays = Number.isSafeInteger(link.extraPlays)
+        ? Math.min(MAX_EXTRA_PLAYS, Math.max(0, link.extraPlays))
+        : 0;
+    return MAX_PLAYS + extraPlays;
+}
+
+function remainingFor(link) {
+    const plays = Array.isArray(link.plays) ? link.plays : [];
+    return Math.max(0, maxPlaysFor(link) - plays.length);
 }
 
 export function getPlaySummary(linkId) {
@@ -14,7 +23,8 @@ export function getPlaySummary(linkId) {
     const plays = Array.isArray(link.plays) ? link.plays : [];
     return {
         count: plays.length,
-        remaining: remainingFor(plays),
+        maxPlays: maxPlaysFor(link),
+        remaining: remainingFor(link),
         plays,
     };
 }
@@ -33,14 +43,19 @@ export function reservePlay(linkId, ip, reservationId) {
                 result: {
                     status: "reserved",
                     play: existing,
-                    remaining: remainingFor(plays),
+                    maxPlays: maxPlaysFor(link),
+                    remaining: remainingFor(link),
                 },
             };
         }
-        if (plays.length >= MAX_PLAYS) {
+        if (plays.length >= maxPlaysFor(link)) {
             return {
                 items: links,
-                result: { status: "maxed", remaining: 0 },
+                result: {
+                    status: "maxed",
+                    maxPlays: maxPlaysFor(link),
+                    remaining: 0,
+                },
             };
         }
 
@@ -63,7 +78,8 @@ export function reservePlay(linkId, ip, reservationId) {
             result: {
                 status: "reserved",
                 play,
-                remaining: remainingFor(updatedLink.plays),
+                maxPlays: maxPlaysFor(updatedLink),
+                remaining: remainingFor(updatedLink),
             },
         };
     });
@@ -88,7 +104,8 @@ export function finishPlay(linkId, playId, won) {
                 result: {
                     status: "already-finished",
                     play,
-                    remaining: remainingFor(plays),
+                    maxPlays: maxPlaysFor(link),
+                    remaining: remainingFor(link),
                 },
             };
         }
@@ -102,14 +119,16 @@ export function finishPlay(linkId, playId, won) {
         const updatedPlays = [...plays];
         updatedPlays[playIndex] = finishedPlay;
         const updatedLinks = [...links];
-        updatedLinks[index] = { ...link, plays: updatedPlays };
+        const updatedLink = { ...link, plays: updatedPlays };
+        updatedLinks[index] = updatedLink;
 
         return {
             items: updatedLinks,
             result: {
                 status: "finished",
                 play: finishedPlay,
-                remaining: remainingFor(updatedPlays),
+                maxPlays: maxPlaysFor(updatedLink),
+                remaining: remainingFor(updatedLink),
             },
         };
     });

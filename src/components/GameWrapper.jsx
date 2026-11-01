@@ -4,6 +4,8 @@ import WinScreen from './WinScreen'
 import { getDiffConfig } from '../games/difficulty'
 import { resolveGameId, GAME_OPTIONS } from '../games/catalog'
 
+const DEFAULT_MAX_PLAYS = 3
+
 const TYPE_META = {
   birthday:   { emoji:'🎈', name:'Bắn bóng bay',        color:'#ff6b9d' },
   motivation: { emoji:'🐱', name:'Mèo vượt chướng ngại', color:'#f59e0b' },
@@ -86,7 +88,7 @@ function DiffBadge({ level, color }) {
 }
 
 // ── Intro overlay ─────────────────────────────────────────────────────────────
-function IntroOverlay({ meta, diffCfg, difficulty, remaining, onStart, onClose, accent }) {
+function IntroOverlay({ meta, diffCfg, difficulty, remaining, maxPlays, onStart, onClose, accent }) {
   return (
     <div style={{
       position:'fixed', inset:0, zIndex:200,
@@ -123,7 +125,7 @@ function IntroOverlay({ meta, diffCfg, difficulty, remaining, onStart, onClose, 
           {[
             `🏆 Thắng → Sẽ có quà hì hì :)`,
             `📸 Nhớ chụp screenshot win để nhận quà nha`,
-            `🔄 Còn ${remaining}/3 lượt chơi cho link này`,
+            `🔄 Còn ${remaining}/${maxPlays} lượt chơi cho link này`,
           ].map((r, i) => (
             <p key={i} style={{ fontSize:13, color:'rgba(255,255,255,0.5)', lineHeight:1.6 }}>{r}</p>
           ))}
@@ -143,7 +145,7 @@ function IntroOverlay({ meta, diffCfg, difficulty, remaining, onStart, onClose, 
         </button>
 
         <p style={{ fontSize:12, color:'rgba(255,255,255,0.25)', marginTop:14 }}>
-          Lượt {4 - remaining}/3
+          Lượt {maxPlays - remaining + 1}/{maxPlays}
         </p>
       </div>
       <style>{`
@@ -155,7 +157,7 @@ function IntroOverlay({ meta, diffCfg, difficulty, remaining, onStart, onClose, 
 }
 
 // ── Lose overlay ──────────────────────────────────────────────────────────────
-function LoseOverlay({ remaining, onRetry, onClose, accent, loseData, apiWarning }) {
+function LoseOverlay({ remaining, maxPlays, onRetry, onClose, accent, loseData, apiWarning }) {
   return (
     <div style={{
       position:'fixed', inset:0, zIndex:300,
@@ -190,7 +192,7 @@ function LoseOverlay({ remaining, onRetry, onClose, accent, loseData, apiWarning
           </p>
         )}
         <p style={{ color:'rgba(255,255,255,0.55)', fontSize:14, lineHeight:1.7, marginBottom:28 }}>
-          {remaining > 0 ? `Đừng nản! Còn ${remaining} lượt — thử lại đi!` : 'Đã hết 3 lượt chơi. Chúc may mắn lần khác!'}
+          {remaining > 0 ? `Đừng nản! Còn ${remaining} lượt — thử lại đi!` : `Đã dùng hết ${maxPlays} lượt chơi. Chúc may mắn lần khác!`}
         </p>
         <div style={{ display:'flex', gap:10 }}>
           {remaining > 0 && (
@@ -218,7 +220,7 @@ function LoseOverlay({ remaining, onRetry, onClose, accent, loseData, apiWarning
 }
 
 // ── Max plays screen ──────────────────────────────────────────────────────────
-function MaxedOverlay({ onClose }) {
+function MaxedOverlay({ maxPlays, onClose, onCheckAgain }) {
   return (
     <div style={{
       position:'fixed', inset:0, zIndex:300,
@@ -229,10 +231,15 @@ function MaxedOverlay({ onClose }) {
       <div style={{ background:'rgba(10,5,25,0.97)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:24, padding:'40px 36px', maxWidth:360, textAlign:'center' }}>
         <div style={{ fontSize:56, marginBottom:16 }}>🔒</div>
         <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:22, fontWeight:800, color:'#f0f0ff', marginBottom:10 }}>Hết lượt chơi</h2>
-        <p style={{ color:'#8888aa', fontSize:14, lineHeight:1.7, marginBottom:24 }}>Link này đã dùng đủ 3 lượt. Liên hệ Kevin để xin thêm nhé!</p>
-        <button onClick={onClose} style={{ background:'linear-gradient(135deg,#8B5CF6,#22d3ee)', color:'#fff', border:'none', borderRadius:12, padding:'12px 28px', fontSize:14, fontWeight:700, fontFamily:'var(--font-sans)', cursor:'pointer' }}>
-          OK, tôi hiểu
-        </button>
+        <p style={{ color:'#8888aa', fontSize:14, lineHeight:1.7, marginBottom:24 }}>Link này đã dùng đủ {maxPlays} lượt. Nếu Admin vừa cấp thêm lượt, hãy kiểm tra lại nhé.</p>
+        <div style={{ display:'flex', justifyContent:'center', gap:10 }}>
+          <button onClick={onCheckAgain} style={{ background:'linear-gradient(135deg,#8B5CF6,#22d3ee)', color:'#fff', border:'none', borderRadius:12, padding:'12px 20px', fontSize:14, fontWeight:700, fontFamily:'var(--font-sans)', cursor:'pointer' }}>
+            Kiểm tra lượt mới
+          </button>
+          <button onClick={onClose} style={{ background:'rgba(255,255,255,0.06)', color:'#aaa', border:'1px solid rgba(255,255,255,0.12)', borderRadius:12, padding:'12px 18px', fontSize:14, fontWeight:700, fontFamily:'var(--font-sans)', cursor:'pointer' }}>
+            Đóng
+          </button>
+        </div>
       </div>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&display=swap');`}</style>
     </div>
@@ -275,6 +282,7 @@ function RequestErrorOverlay({ message, onRetry }) {
 export default function GameWrapper({ linkId, linkType, gameId, children, accent, difficulty = 'medium' }) {
   const [gameState, setGameState] = useState('checking')
   const [remaining, setRemaining] = useState(0)
+  const [maxPlays, setMaxPlays] = useState(DEFAULT_MAX_PLAYS)
   const [winTime, setWinTime] = useState('')
   const [loseData, setLoseData] = useState(null)
   const [GameComponent, setGameComponent] = useState(null)
@@ -335,6 +343,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
       .then(data => {
         if (!active) return
         setRemaining(data.remaining)
+        setMaxPlays(data.maxPlays ?? DEFAULT_MAX_PLAYS)
         setGameState(data.remaining <= 0 ? 'maxed' : 'idle')
       })
       .catch(error => {
@@ -376,10 +385,12 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
       activePlayIdRef.current = data.play.id
       completionInFlightRef.current = false
       setRemaining(data.remaining)
+      setMaxPlays(data.maxPlays ?? maxPlays)
       setGameState('playing')
     } catch (error) {
       if (error.data?.maxed) {
         setRemaining(0)
+        setMaxPlays(error.data.maxPlays ?? maxPlays)
         setGameState('maxed')
       } else {
         setApiError(error.message || 'Không thể giữ lượt chơi.')
@@ -411,6 +422,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
     try {
       const result = await api.finishPlay(linkId, playId, won)
       setRemaining(result.remaining)
+      setMaxPlays(result.maxPlays ?? maxPlays)
       activePlayIdRef.current = null
     } catch (error) {
       console.error('Không thể lưu kết quả lượt chơi:', error)
@@ -456,6 +468,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
           diffCfg={diffCfg}
           difficulty={difficulty}
           remaining={remaining}
+          maxPlays={maxPlays}
           onStart={startGame}
           onClose={closeIntro}
           accent={effectiveAccent}
@@ -483,6 +496,7 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
       {gameState === 'lost' && (
         <LoseOverlay
           remaining={remaining}
+          maxPlays={maxPlays}
           onRetry={startGame}
           onClose={() => setGameState('idle')}
           accent={effectiveAccent}
@@ -492,7 +506,11 @@ export default function GameWrapper({ linkId, linkType, gameId, children, accent
       )}
 
       {gameState === 'maxed' && (
-        <MaxedOverlay onClose={() => setGameState('idle')} />
+        <MaxedOverlay
+          maxPlays={maxPlays}
+          onClose={() => setGameState('idle')}
+          onCheckAgain={() => setCheckVersion((version) => version + 1)}
+        />
       )}
     </>
   )

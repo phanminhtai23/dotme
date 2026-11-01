@@ -12,6 +12,15 @@ import { LangProvider, useLang } from '../LangContext'
 import { t } from '../i18n'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
+const DEFAULT_MAX_PLAYS = 3
+const MAX_EXTRA_PLAYS = 1000
+
+function getExtraPlays(value) {
+  return Number.isSafeInteger(value)
+    ? Math.min(MAX_EXTRA_PLAYS, Math.max(0, value))
+    : 0
+}
+
 function LangToggleAdmin() {
   const { lang, setLang } = useLang()
   return (
@@ -596,6 +605,8 @@ function AdminInner() {
   const [modal, setModal]       = useState(null)
   const [editTarget, setEditTarget] = useState(null)
   const [copiedId, setCopiedId] = useState(null)
+  const [grantingPlaysId, setGrantingPlaysId] = useState(null)
+  const [linkNotice, setLinkNotice] = useState(null)
   const [serverOnline, setServerOnline] = useState(null)
   const [storage, setStorage] = useState(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -646,6 +657,23 @@ function AdminInner() {
   const handleDeleteLink = async (id) => {
     if (!window.confirm('Xóa quyền truy cập này?')) return
     await api.deleteLink(id).catch(() => {}); refresh()
+  }
+
+  const handleGrantPlays = async (link) => {
+    const extraPlays = getExtraPlays(link.extraPlays)
+    const granted = Math.min(3, MAX_EXTRA_PLAYS - extraPlays)
+    if (granted <= 0 || grantingPlaysId) return
+    setGrantingPlaysId(link.id)
+    setLinkNotice(null)
+    try {
+      const updatedLink = await api.updateLink(link.id, { extraPlays:extraPlays + granted })
+      setLinks(current => current.map(item => item.id === link.id ? updatedLink : item))
+      setLinkNotice({ type:'success', text:`Đã cấp thêm ${granted} lượt cho link "${link.name}".` })
+    } catch (error) {
+      setLinkNotice({ type:'error', text:`Cấp lượt chơi thất bại: ${error.message}` })
+    } finally {
+      setGrantingPlaysId(null)
+    }
   }
 
   const handleDeleteMsg = async (id) => {
@@ -1012,6 +1040,17 @@ function AdminInner() {
               <p style={{ color:'#8888aa', fontSize:14 }}>{links.length} link đã tạo</p>
               <GradBtn onClick={() => setModal('add-link')}>🔑 Gán quyền mới</GradBtn>
             </div>
+            {linkNotice && (
+              <div role={linkNotice.type === 'error' ? 'alert' : 'status'} style={{
+                marginBottom:16,
+                padding:'12px 16px',
+                borderRadius:10,
+                color:linkNotice.type === 'error' ? '#fca5a5' : '#6ee7b7',
+                background:linkNotice.type === 'error' ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+                border:`1px solid ${linkNotice.type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}`,
+                fontSize:13,
+              }}>{linkNotice.text}</div>
+            )}
             {links.length === 0 ? (
               <Card style={{ textAlign:'center', padding:60 }}>
                 <div style={{ fontSize:56, marginBottom:16 }}>🔑</div>
@@ -1023,7 +1062,7 @@ function AdminInner() {
                 <table style={{ width:'100%', borderCollapse:'collapse', fontSize:14, minWidth: isMobile ? 760 : 'auto' }}>
                   <thead>
                     <tr style={{ borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
-                      {['Loại','Tên','Tài khoản','Hết hạn','Link',''].map(h => (
+                      {['Loại','Tên','Tài khoản','Hết hạn','Link','Lượt chơi',''].map(h => (
                         <th key={h} style={{ padding:'14px 20px', textAlign:'left', fontSize:12, fontWeight:600, color:'#555577', letterSpacing:'0.05em', whiteSpace:'nowrap' }}>{h}</th>
                       ))}
                     </tr>
@@ -1058,6 +1097,39 @@ function AdminInner() {
                             }}>
                               {copiedId === link.id ? '✓ Đã copy' : '📋 Copy link'}
                             </button>
+                          </td>
+                          <td style={{ padding:'14px 20px', whiteSpace:'nowrap' }}>
+                            {(() => {
+                              const extraPlays = getExtraPlays(link.extraPlays)
+                              const maxPlays = DEFAULT_MAX_PLAYS + extraPlays
+                              const used = Array.isArray(link.plays) ? link.plays.length : 0
+                              const remaining = Math.max(0, maxPlays - used)
+                              return (
+                                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                                  <span style={{ color:remaining === 0 ? '#fca5a5' : '#a7f3d0', fontSize:12 }}>{used}/{maxPlays}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleGrantPlays(link)}
+                                    disabled={grantingPlaysId !== null || extraPlays >= MAX_EXTRA_PLAYS}
+                                    style={{
+                                      background:'rgba(16,185,129,0.1)',
+                                      border:'1px solid rgba(16,185,129,0.28)',
+                                      borderRadius:8,
+                                      padding:'6px 10px',
+                                      color:'#6ee7b7',
+                                      fontSize:12,
+                                      fontFamily:'Inter, sans-serif',
+                                      cursor:grantingPlaysId !== null || extraPlays >= MAX_EXTRA_PLAYS ? 'not-allowed' : 'pointer',
+                                      opacity:grantingPlaysId !== null || extraPlays >= MAX_EXTRA_PLAYS ? 0.55 : 1,
+                                    }}
+                                  >
+                                    {grantingPlaysId === link.id
+                                      ? 'Đang cấp...'
+                                      : `+${Math.min(3, MAX_EXTRA_PLAYS - extraPlays)} lượt`}
+                                  </button>
+                                </div>
+                              )
+                            })()}
                           </td>
                           <td style={{ padding:'14px 20px' }}>
                             <button onClick={() => handleDeleteLink(link.id)} style={{
