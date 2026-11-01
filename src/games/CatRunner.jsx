@@ -587,6 +587,30 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
           font-family: 'Courier New', monospace;
           letter-spacing: 0.05em;
         }
+        .cat-runner-controls {
+          display: none;
+        }
+        @media (pointer: coarse), (max-width: 700px) {
+          .cat-runner-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 10px 12px;
+            box-sizing: border-box;
+          }
+          .cat-runner-touch-btn {
+            min-width: 112px;
+            min-height: 48px;
+            border: 1px solid rgba(251,191,36,0.5);
+            border-radius: 12px;
+            background: rgba(28,25,23,0.92);
+            color: #fbbf24;
+            font: 700 13px 'Courier New', monospace;
+            touch-action: none;
+            user-select: none;
+          }
+        }
         .cat-overlay {
           position: absolute;
           inset: 0;
@@ -713,6 +737,34 @@ export default function CatRunner({ onWin, onLose, config = {} }) {
             </div>
           )}
         </div>
+
+        {phase === "playing" && (
+          <div className="cat-runner-controls">
+            <button
+              type="button"
+              className="cat-runner-touch-btn"
+              onClick={jump}
+              aria-label="Nhảy"
+            >
+              Nhảy
+            </button>
+            <button
+              type="button"
+              className="cat-runner-touch-btn"
+              onPointerDown={(event) => {
+                event.preventDefault();
+                event.currentTarget.setPointerCapture(event.pointerId);
+                setDucking(true);
+              }}
+              onPointerUp={() => setDucking(false)}
+              onPointerCancel={() => setDucking(false)}
+              onLostPointerCapture={() => setDucking(false)}
+              aria-label="Giữ để cúi"
+            >
+              Giữ để cúi
+            </button>
+          </div>
+        )}
 
         <div className="cat-runner-footer">
           <span className="cat-runner-hint">

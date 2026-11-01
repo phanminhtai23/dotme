@@ -327,14 +327,16 @@ export default function HeartMemory({ onWin, onLose, config = {} }) {
           background: linear-gradient(160deg, #1e0533 0%, #2d0a4e 100%);
           border: 2px solid #ec4899;
           border-radius: 24px;
-          padding: 40px 48px;
+          width: min(360px, calc(100vw - 32px));
+          min-width: 0;
+          box-sizing: border-box;
+          padding: clamp(20px, 6vw, 40px);
           text-align: center;
           box-shadow: 0 0 40px #ec489966, 0 0 80px #f9a8d422;
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 16px;
-          min-width: 260px;
         }
 
         .hm-result-emoji {

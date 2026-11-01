@@ -148,7 +148,7 @@ function Balloon({ balloon, onPop }) {
       onClick={() => !balloon.popping && onPop(balloon.id)}
       style={{
         position: 'absolute',
-        left: `${balloon.leftPct}%`,
+        left: `min(${balloon.leftPct}%, calc(100% - ${balloon.size}px - 8px))`,
         bottom: '-10%',
         width: balloon.size,
         height: balloon.size * 1.5,

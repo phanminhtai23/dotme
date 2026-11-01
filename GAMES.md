@@ -18,6 +18,9 @@ collection that includes Snake, Bounce, Defender, Pacman, Puzzle, and Spider.
 The app's Snake game is implemented as a native React component; no upstream
 source or assets are bundled.
 
+All games fit narrow mobile screens and provide touch interaction. Cat Runner
+supports tapping to jump and a press-and-hold crouch control on touch devices.
+
 Goose Forage is an original grid game with a hand-drawn baby goose. Guide it
 around the garden to collect seeds; movement is controlled by the arrow keys,
 WASD, or on-screen buttons. Each difficulty has a countdown timer; collect the

@@ -268,7 +268,13 @@ export default function StarCatcher({ onWin, onLose, config = {} }) {
             </div>
           )}
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:18 }}>
+        <div style={{
+          display:'grid',
+          gridTemplateColumns:'44px minmax(0, 1fr) 44px',
+          alignItems:'center',
+          gap:12,
+          width:'min(84vw, 400px)',
+        }}>
           <button type="button" aria-label="Di chuyển giỏ sang trái" onClick={() => moveBasket(-1)} style={controlStyle}>←</button>
           <span style={{ color:'rgba(255,255,255,0.65)', fontSize:12 }}>← → / A D · Kéo giỏ để di chuyển</span>
           <button type="button" aria-label="Di chuyển giỏ sang phải" onClick={() => moveBasket(1)} style={controlStyle}>→</button>
@@ -280,7 +286,9 @@ export default function StarCatcher({ onWin, onLose, config = {} }) {
 
 const controlStyle = {
   width:44,
-  height:42,
+  minWidth:44,
+  height:44,
+  boxSizing:'border-box',
   border:'1px solid rgba(255,255,255,0.24)',
   borderRadius:12,
   background:'rgba(255,255,255,0.1)',
