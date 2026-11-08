@@ -822,6 +822,27 @@ app.delete("/api/content/:section/:id", async (req, res) => {
     res.json({ ok: true });
 });
 
+// ── Landing page version ─────────────────────────────────────────────────────
+const LANDING_VERSIONS = ["classic", "poster", "bento", "editorial"];
+const LANDING_COLLECTION = "settings:landing";
+
+async function readLandingVersion() {
+    const [saved] = await readCollection(LANDING_COLLECTION);
+    return LANDING_VERSIONS.includes(saved?.version) ? saved.version : "classic";
+}
+
+app.get("/api/settings/landing", async (_, res) => {
+    res.json({ version: await readLandingVersion(), versions: LANDING_VERSIONS });
+});
+
+app.put("/api/settings/landing", async (req, res) => {
+    const version = req.body?.version;
+    if (!LANDING_VERSIONS.includes(version))
+        return res.status(400).json({ error: "Invalid landing version" });
+    await writeCollection(LANDING_COLLECTION, null, [{ version }]);
+    res.json({ version });
+});
+
 // ── Visitor Analytics ───────────────────────────────────────────────────────
 // Lượt truy cập của admin/superadmin được loại trừ ở phía client (analytics.js)
 app.post("/api/visit", async (req, res) => {

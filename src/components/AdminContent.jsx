@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import AdminIconButton from './AdminIconButton'
+import AdminIcon from './AdminIcons'
 import './AdminSections.css'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL || '/api') + '/content'
@@ -15,44 +16,35 @@ async function saveContent(section, initial, payload) {
   }
 }
 
-const INPUT = {
-  width:'100%', boxSizing:'border-box',
-  background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)',
-  borderRadius:10, padding:'11px 16px', color:'#f0f0ff',
-  fontSize:13, fontFamily:'Inter, sans-serif', outline:'none', transition:'border-color 0.2s',
-}
-const TEXTAREA = { ...INPUT, resize:'vertical', minHeight:90, lineHeight:1.6 }
-const focus = e => { e.target.style.borderColor = 'rgba(139,92,246,0.6)' }
-const blur  = e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)' }
-
 function Label({ children }) {
-  return <label style={{ fontSize:11, color:'#8888aa', display:'block', marginBottom:5, letterSpacing:'0.06em', textTransform:'uppercase', fontWeight:600 }}>{children}</label>
+  return <span className="ad-label">{children}</span>
 }
 
 function Field({ label, children }) {
-  return <div style={{ display:'flex', flexDirection:'column', gap:4 }}><Label>{label}</Label>{children}</div>
+  return <div className="ad-field"><Label>{label}</Label>{children}</div>
 }
 
 function GradBtn({ children, onClick, color='purple', style={}, type='button', disabled=false }) {
-  const bg = color==='red' ? '#a7404e' : color==='green' ? '#236f58' : '#7655d8'
   return (
-    <button type={type} onClick={onClick} disabled={disabled} style={{ background:bg, color:'#fff', border:'none', borderRadius:10, padding:'9px 18px', fontSize:13, fontWeight:700, fontFamily:'Inter, sans-serif', cursor:disabled ? 'not-allowed' : 'pointer', opacity:disabled ? .65 : 1, transition:'all 0.2s', ...style }}
-      onMouseEnter={e => e.currentTarget.style.transform='translateY(-1px)'}
-      onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}
-    >{children}</button>
+    <button type={type} onClick={onClick} disabled={disabled} className={`ad-btn ${color === 'red' ? 'ad-btn--danger' : 'ad-btn--primary'}`} style={style}>{children}</button>
   )
 }
 
+function CancelBtn({ onClose }) {
+  return <button type="button" className="ad-btn" onClick={onClose}>Huỷ</button>
+}
+
+function SaveLabel({ saving }) {
+  return saving ? <><AdminIcon name="loader" size={15} className="ad-spin" /> Đang lưu...</> : <><AdminIcon name="save" size={15} /> Lưu</>
+}
+
 function Modal({ title, onClose, children }) {
-  const { isMobile } = useBreakpoint()
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 12 : 20 }}
-      onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{ background:'#0d0d1a', border:'1px solid rgba(255,255,255,0.1)', borderRadius:20, padding: isMobile ? 20 : 32, width:'100%', maxWidth:560, maxHeight:'90vh', overflowY:'auto', fontFamily:'Inter, sans-serif' }}
-        onMouseDown={e => e.stopPropagation()}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
-          <h3 style={{ fontWeight:800, fontSize:18, color:'#f0f0ff' }}>{title}</h3>
-          <button onClick={onClose} style={{ background:'none', border:'none', color:'#8888aa', fontSize:20, cursor:'pointer', lineHeight:1 }}>✕</button>
+    <div className="ad-modal-backdrop" style={{ zIndex:300 }} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="ad-modal ad-modal--lg" role="dialog" aria-modal="true" aria-label={title} onMouseDown={e => e.stopPropagation()}>
+        <div className="ad-modal__head">
+          <h3>{title}</h3>
+          <button type="button" className="ad-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
         </div>
         {children}
       </div>
@@ -67,7 +59,6 @@ function ExperienceForm({ initial, onSave, onClose }) {
   const [form, setForm] = useState(() => initial ? { ...initial, bullets: (initial.bullets||[]).join('\n') } : blank)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const { isMobile } = useBreakpoint()
 
   const handle = async e => {
     e.preventDefault(); setSaving(true); setError('')
@@ -79,24 +70,24 @@ function ExperienceForm({ initial, onSave, onClose }) {
   }
 
   return (
-    <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
-        <Field label="Công ty"><input style={INPUT} value={form.company} required onChange={e => setForm(f=>({...f,company:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-        <Field label="Chức vụ"><input style={INPUT} value={form.role} required onChange={e => setForm(f=>({...f,role:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-        <Field label="Thời gian (vd: Jan 2026 – Present)"><input style={INPUT} value={form.period} onChange={e => setForm(f=>({...f,period:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-        <Field label="Địa điểm"><input style={INPUT} value={form.location} onChange={e => setForm(f=>({...f,location:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
+    <form onSubmit={handle} className="ad-form">
+      <div className="ad-grid-2">
+        <Field label="Công ty"><input className="ad-input" value={form.company} required onChange={e => setForm(f=>({...f,company:e.target.value}))} /></Field>
+        <Field label="Chức vụ"><input className="ad-input" value={form.role} required onChange={e => setForm(f=>({...f,role:e.target.value}))} /></Field>
+        <Field label="Thời gian (vd: Jan 2026 – Present)"><input className="ad-input" value={form.period} onChange={e => setForm(f=>({...f,period:e.target.value}))} /></Field>
+        <Field label="Địa điểm"><input className="ad-input" value={form.location} onChange={e => setForm(f=>({...f,location:e.target.value}))} /></Field>
       </div>
-      <label style={{ display:'flex', alignItems:'center', gap:8, fontSize:13, color:'#a78bfa', cursor:'pointer' }}>
+      <label className="ad-check">
         <input type="checkbox" checked={form.current} onChange={e => setForm(f=>({...f,current:e.target.checked}))} />
         Đang làm hiện tại
       </label>
       <Field label="Bullets (mỗi dòng 1 mục, HTML được phép: <strong>text</strong>)">
-        <textarea style={TEXTAREA} value={form.bullets} onChange={e => setForm(f=>({...f,bullets:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="Mô tả công việc 1&#10;Mô tả công việc 2" />
+        <textarea className="ad-input" value={form.bullets} onChange={e => setForm(f=>({...f,bullets:e.target.value}))} placeholder="Mô tả công việc 1&#10;Mô tả công việc 2" />
       </Field>
-      {error && <div role="alert" className="admin-section__notice is-error">Không thể lưu: {error}</div>}
-      <div style={{ display:'flex', gap:10 }}>
-        <GradBtn type="submit" disabled={saving} style={{ flex:1 }} color={saving ? 'green' : 'purple'}>{saving ? '⏳ Đang lưu...' : '💾 Lưu'}</GradBtn>
-        <button type="button" onClick={onClose} style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#8888aa', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Huỷ</button>
+      {error && <div role="alert" className="ad-alert">Không thể lưu: {error}</div>}
+      <div className="ad-actions">
+        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}><SaveLabel saving={saving} /></GradBtn>
+        <CancelBtn onClose={onClose} />
       </div>
     </form>
   )
@@ -112,7 +103,6 @@ function ProjectForm({ initial, onSave, onClose }) {
   const [form, setForm] = useState(() => initial ? { ...initial, tags: Array.isArray(initial.tags) ? initial.tags.join(', ') : initial.tags || '' } : blank)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const { isMobile } = useBreakpoint()
 
   const handle = async e => {
     e.preventDefault(); setSaving(true); setError('')
@@ -124,43 +114,43 @@ function ProjectForm({ initial, onSave, onClose }) {
   }
 
   return (
-    <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
-        <Field label="Tên dự án"><input style={INPUT} value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-        <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+    <form onSubmit={handle} className="ad-form">
+      <div className="ad-grid-2">
+        <Field label="Tên dự án"><input className="ad-input" value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} /></Field>
+        <div className="ad-field">
           <Label>Icon (emoji)</Label>
-          <input style={INPUT} value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} onFocus={focus} onBlur={blur} maxLength={4} />
+          <input className="ad-input" value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} maxLength={4} />
         </div>
-        <Field label="Subtitle (VI)"><input style={INPUT} value={form.subtitleVi} onChange={e => setForm(f=>({...f,subtitleVi:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-        <Field label="Subtitle (EN)"><input style={INPUT} value={form.subtitleEn} onChange={e => setForm(f=>({...f,subtitleEn:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
+        <Field label="Subtitle (VI)"><input className="ad-input" value={form.subtitleVi} onChange={e => setForm(f=>({...f,subtitleVi:e.target.value}))} /></Field>
+        <Field label="Subtitle (EN)"><input className="ad-input" value={form.subtitleEn} onChange={e => setForm(f=>({...f,subtitleEn:e.target.value}))} /></Field>
       </div>
-      <Field label="Mô tả (VI)"><textarea style={TEXTAREA} value={form.descVi} onChange={e => setForm(f=>({...f,descVi:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-      <Field label="Mô tả (EN)"><textarea style={TEXTAREA} value={form.descEn} onChange={e => setForm(f=>({...f,descEn:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-      <Field label="Tags (phân cách bằng dấu phẩy)"><input style={INPUT} value={form.tags} onChange={e => setForm(f=>({...f,tags:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="React, FastAPI, Docker" /></Field>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap:12 }}>
+      <Field label="Mô tả (VI)"><textarea className="ad-input" value={form.descVi} onChange={e => setForm(f=>({...f,descVi:e.target.value}))} /></Field>
+      <Field label="Mô tả (EN)"><textarea className="ad-input" value={form.descEn} onChange={e => setForm(f=>({...f,descEn:e.target.value}))} /></Field>
+      <Field label="Tags (phân cách bằng dấu phẩy)"><input className="ad-input" value={form.tags} onChange={e => setForm(f=>({...f,tags:e.target.value}))} placeholder="React, FastAPI, Docker" /></Field>
+      <div className="ad-grid-3">
         <div>
           <Label>Màu</Label>
-          <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+          <div className="ad-swatches">
             {COLOR_PRESETS.map(c => (
-              <button key={c} type="button" onClick={() => setForm(f=>({...f,color:c}))} style={{ width:28, height:28, borderRadius:8, background:c, border: form.color===c ? '3px solid white' : '2px solid transparent', cursor:'pointer', transition:'all 0.15s' }} />
+              <button key={c} type="button" className="ad-swatch" style={{ '--swatch':c }} aria-pressed={form.color===c} aria-label={`Màu ${c}`} onClick={() => setForm(f=>({...f,color:c}))} />
             ))}
           </div>
         </div>
         <Field label="Status">
-          <select style={{ ...INPUT, background:'#1a1a2e', colorScheme:'dark' }} value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}>
-            {STATUS_OPTIONS.map(s => <option key={s} value={s} style={{ background:'#1a1a2e' }}>{s}</option>)}
+          <select className="ad-input" value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}>
+            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </Field>
-        <Field label="Năm"><input style={INPUT} value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} onFocus={focus} onBlur={blur} maxLength={4} /></Field>
+        <Field label="Năm"><input className="ad-input" value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} maxLength={4} /></Field>
       </div>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
-        <Field label="GitHub URL"><input style={INPUT} value={form.githubUrl} onChange={e => setForm(f=>({...f,githubUrl:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="https://github.com/..." /></Field>
-        <Field label="Live URL"><input style={INPUT} value={form.liveUrl} onChange={e => setForm(f=>({...f,liveUrl:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="https://..." /></Field>
+      <div className="ad-grid-2">
+        <Field label="GitHub URL"><input className="ad-input" value={form.githubUrl} onChange={e => setForm(f=>({...f,githubUrl:e.target.value}))} placeholder="https://github.com/..." /></Field>
+        <Field label="Live URL"><input className="ad-input" value={form.liveUrl} onChange={e => setForm(f=>({...f,liveUrl:e.target.value}))} placeholder="https://..." /></Field>
       </div>
-      {error && <div role="alert" className="admin-section__notice is-error">Không thể lưu: {error}</div>}
-      <div style={{ display:'flex', gap:10 }}>
-        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}>{saving ? '⏳ Đang lưu...' : '💾 Lưu'}</GradBtn>
-        <button type="button" onClick={onClose} style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#8888aa', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Huỷ</button>
+      {error && <div role="alert" className="ad-alert">Không thể lưu: {error}</div>}
+      <div className="ad-actions">
+        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}><SaveLabel saving={saving} /></GradBtn>
+        <CancelBtn onClose={onClose} />
       </div>
     </form>
   )
@@ -194,20 +184,20 @@ function SingleUpload({ label, value, onChange, accept, kind }) {
   }
 
   return (
-    <div>
+    <div className="ad-field">
       <Label>{label}</Label>
       {value ? (
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:4 }}>
+        <div className="ad-upload-row">
           {kind === 'image' ? (
-            <img src={value.url} alt="" style={{ width:48, height:48, borderRadius:10, objectFit:'cover', border:'1px solid rgba(255,255,255,0.1)' }} />
+            <img className="ad-upload-row__img" src={value.url} alt="" />
           ) : (
-            <a href={value.url} target="_blank" rel="noreferrer" style={{ fontSize:12, color:'#22d3ee', textDecoration:'none', maxWidth:160, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>📄 {value.name || 'Xem file'}</a>
+            <a className="ad-upload-row__file" href={value.url} target="_blank" rel="noreferrer"><AdminIcon name="file" size={15} /> {value.name || 'Xem file'}</a>
           )}
-          <button type="button" onClick={remove} style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:8, padding:'5px 10px', color:'#fca5a5', fontSize:11, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Xóa</button>
+          <button type="button" className="ad-btn ad-btn--danger ad-btn--sm" onClick={remove}>Xóa</button>
         </div>
       ) : (
-        <label style={{ display:'inline-flex', alignItems:'center', gap:6, marginTop:4, background: uploading ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.04)', border:'1px dashed rgba(139,92,246,0.3)', borderRadius:10, padding:'8px 14px', fontSize:12, color: uploading ? '#a78bfa' : '#8888aa', cursor:'pointer', transition:'all 0.2s' }}>
-          {uploading ? '⏳ Đang tải...' : (kind === 'image' ? '📤 Tải ảnh' : '📤 Tải PDF')}
+        <label className={`ad-upload-btn ${uploading ? 'is-busy' : ''}`}>
+          {uploading ? <><AdminIcon name="loader" size={15} className="ad-spin" /> Đang tải...</> : <><AdminIcon name="upload" size={15} /> {kind === 'image' ? 'Tải ảnh' : 'Tải PDF'}</>}
           <input type="file" accept={accept} hidden onChange={e => handleFile(e.target.files[0])} />
         </label>
       )}
@@ -219,7 +209,6 @@ function CertForm({ initial, onSave, onClose }) {
   const [form, setForm] = useState(initial ? { image:null, file:null, ...initial } : { name:'', issuer:'', icon:'🏅', color:'#8B5CF6', image:null, file:null })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const { isMobile } = useBreakpoint()
 
   const handle = async e => {
     e.preventDefault(); setSaving(true); setError('')
@@ -230,28 +219,28 @@ function CertForm({ initial, onSave, onClose }) {
   }
 
   return (
-    <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
-        <Field label="Tên chứng chỉ"><input style={INPUT} value={form.name} required onChange={e => setForm(f=>({...f,name:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-        <Field label="Tổ chức cấp"><input style={INPUT} value={form.issuer} onChange={e => setForm(f=>({...f,issuer:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
-        <Field label="Icon (emoji)"><input style={INPUT} value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} onFocus={focus} onBlur={blur} maxLength={4} /></Field>
+    <form onSubmit={handle} className="ad-form">
+      <div className="ad-grid-2">
+        <Field label="Tên chứng chỉ"><input className="ad-input" value={form.name} required onChange={e => setForm(f=>({...f,name:e.target.value}))} /></Field>
+        <Field label="Tổ chức cấp"><input className="ad-input" value={form.issuer} onChange={e => setForm(f=>({...f,issuer:e.target.value}))} /></Field>
+        <Field label="Icon (emoji)"><input className="ad-input" value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} maxLength={4} /></Field>
         <div>
           <Label>Màu accent</Label>
-          <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginTop:4 }}>
+          <div className="ad-swatches">
             {COLOR_PRESETS.map(c => (
-              <button key={c} type="button" onClick={() => setForm(f=>({...f,color:c}))} style={{ width:28, height:28, borderRadius:8, background:c, border: form.color===c ? '3px solid white' : '2px solid transparent', cursor:'pointer' }} />
+              <button key={c} type="button" className="ad-swatch" style={{ '--swatch':c }} aria-pressed={form.color===c} aria-label={`Màu ${c}`} onClick={() => setForm(f=>({...f,color:c}))} />
             ))}
           </div>
         </div>
       </div>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:12 }}>
+      <div className="ad-grid-2">
         <SingleUpload label="Ảnh chứng chỉ (hiện cạnh tên)" kind="image" accept="image/*" value={form.image} onChange={image => setForm(f => ({ ...f, image }))} />
         <SingleUpload label="File PDF chứng chỉ" kind="pdf" accept="application/pdf" value={form.file} onChange={file => setForm(f => ({ ...f, file }))} />
       </div>
-      {error && <div role="alert" className="admin-section__notice is-error">Không thể lưu: {error}</div>}
-      <div style={{ display:'flex', gap:10 }}>
-        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}>{saving ? '⏳...' : '💾 Lưu'}</GradBtn>
-        <button type="button" onClick={onClose} style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#8888aa', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Huỷ</button>
+      {error && <div role="alert" className="ad-alert">Không thể lưu: {error}</div>}
+      <div className="ad-actions">
+        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}><SaveLabel saving={saving} /></GradBtn>
+        <CancelBtn onClose={onClose} />
       </div>
     </form>
   )
@@ -285,20 +274,20 @@ function PubForm({ initial, onSave, onClose }) {
   }
 
   return (
-    <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      <Field label="Tên bài báo / paper"><textarea style={{ ...TEXTAREA, minHeight:60 }} value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
+    <form onSubmit={handle} className="ad-form">
+      <Field label="Tên bài báo / paper"><textarea className="ad-input" style={{ minHeight:60 }} value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} /></Field>
       <Field label="Tác giả (mỗi dòng 1 người, *Tên = highlight)">
-        <textarea style={TEXTAREA} value={form.authorsRaw} onChange={e => setForm(f=>({...f,authorsRaw:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="Tran Van A&#10;*Nguyen Van B (tác giả chính)&#10;Le Van C" />
+        <textarea className="ad-input" value={form.authorsRaw} onChange={e => setForm(f=>({...f,authorsRaw:e.target.value}))} placeholder="Tran Van A&#10;*Nguyen Van B (tác giả chính)&#10;Le Van C" />
       </Field>
-      <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 3fr', gap:12 }}>
-        <Field label="Năm"><input style={INPUT} value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} onFocus={focus} onBlur={blur} maxLength={4} /></Field>
-        <Field label="Hội nghị / Journal"><input style={INPUT} value={form.conference} onChange={e => setForm(f=>({...f,conference:e.target.value}))} onFocus={focus} onBlur={blur} /></Field>
+      <div className="ad-grid-2" style={!isMobile ? { gridTemplateColumns:'1fr 3fr' } : undefined}>
+        <Field label="Năm"><input className="ad-input" value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} maxLength={4} /></Field>
+        <Field label="Hội nghị / Journal"><input className="ad-input" value={form.conference} onChange={e => setForm(f=>({...f,conference:e.target.value}))} /></Field>
       </div>
-      <Field label="Link (tùy chọn)"><input style={INPUT} value={form.link} onChange={e => setForm(f=>({...f,link:e.target.value}))} onFocus={focus} onBlur={blur} placeholder="https://..." /></Field>
-      {error && <div role="alert" className="admin-section__notice is-error">Không thể lưu: {error}</div>}
-      <div style={{ display:'flex', gap:10 }}>
-        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}>{saving ? '⏳...' : '💾 Lưu'}</GradBtn>
-        <button type="button" onClick={onClose} style={{ flex:1, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#8888aa', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer' }}>Huỷ</button>
+      <Field label="Link (tùy chọn)"><input className="ad-input" value={form.link} onChange={e => setForm(f=>({...f,link:e.target.value}))} placeholder="https://..." /></Field>
+      {error && <div role="alert" className="ad-alert">Không thể lưu: {error}</div>}
+      <div className="ad-actions">
+        <GradBtn type="submit" disabled={saving} style={{ flex:1 }}><SaveLabel saving={saving} /></GradBtn>
+        <CancelBtn onClose={onClose} />
       </div>
     </form>
   )
@@ -362,10 +351,10 @@ export default function AdminContent() {
   }
 
   const SUBS = [
-    { id:'experience',   label:'💼 Kinh nghiệm' },
-    { id:'projects',     label:'🚀 Dự án' },
-    { id:'certificates', label:'🏅 Chứng chỉ' },
-    { id:'publications', label:'📄 Publications' },
+    { id:'experience',   label:'Kinh nghiệm', icon:'briefcase' },
+    { id:'projects',     label:'Dự án', icon:'rocket' },
+    { id:'certificates', label:'Chứng chỉ', icon:'award' },
+    { id:'publications', label:'Publications', icon:'file' },
   ]
 
   const FormMap = { experience: ExperienceForm, projects: ProjectForm, certificates: CertForm, publications: PubForm }
@@ -376,14 +365,14 @@ export default function AdminContent() {
       {/* Sub-tabs */}
       <div className="admin-content__tabs" role="group" aria-label="Loại nội dung">
         {SUBS.map(s => (
-          <button key={s.id} type="button" aria-pressed={sub === s.id} onClick={() => { setSub(s.id); setNotice(null) }}>{s.label}<span>{data[s.id].length}</span></button>
+          <button key={s.id} type="button" aria-pressed={sub === s.id} onClick={() => { setSub(s.id); setNotice(null) }}><AdminIcon name={s.icon} size={16} />{s.label}<span>{data[s.id].length}</span></button>
         ))}
       </div>
 
       {/* List */}
       <div className="admin-section__toolbar">
         <span className="admin-section__total">{loading[sub] ? 'Đang tải...' : `${data[sub].length} mục`}</span>
-        <button type="button" className="admin-section__primary" onClick={() => { setEditItem(null); setModal(sub) }}><span aria-hidden="true">+</span> Thêm mới</button>
+        <button type="button" className="admin-section__primary" onClick={() => { setEditItem(null); setModal(sub) }}><AdminIcon name="plus" size={16} /> Thêm mới</button>
       </div>
       {notice && <div role={notice.type === 'error' ? 'alert' : 'status'} className={`admin-section__notice ${notice.type === 'error' ? 'is-error' : ''}`}>{notice.text}</div>}
 
@@ -391,13 +380,13 @@ export default function AdminContent() {
         <div className="admin-section__empty"><strong>Chưa có nội dung</strong><p>Chọn “Thêm mới” để tạo mục đầu tiên.</p></div>
       ) : <div className="admin-content__list">{sub === 'experience' ? (
         data.experience.map(job => (
-          <ItemRow key={job.id} label={`${job.company} — ${job.role}`} sub={`${job.period} · ${job.location}${job.current ? ' · ● Hiện tại' : ''}`}
+          <ItemRow key={job.id} label={`${job.company} — ${job.role}`} sub={`${job.period} — ${job.location}${job.current ? ' (Hiện tại)' : ''}`}
             onEdit={() => { setEditItem(job); setModal('experience') }}
             onDelete={() => handleDelete('experience', job.id)} />
         ))
       ) : sub === 'projects' ? (
         data.projects.map(p => (
-          <ItemRow key={p.id} label={`${p.icon} ${p.title}`} sub={`${p.status} · ${p.year} · ${(Array.isArray(p.tags)?p.tags:p.tags?.split(',')||[]).slice(0,3).join(', ')}`}
+          <ItemRow key={p.id} label={`${p.icon} ${p.title}`} sub={`${p.status}, ${p.year}, ${(Array.isArray(p.tags)?p.tags:p.tags?.split(',')||[]).slice(0,3).join(', ')}`}
             onEdit={() => { setEditItem(p); setModal('projects') }}
             onDelete={() => handleDelete('projects', p.id)} />
         ))
@@ -409,7 +398,7 @@ export default function AdminContent() {
         ))
       ) : (
         data.publications.map(p => (
-          <ItemRow key={p.id} label={p.title} sub={`${p.year} · ${p.conference}`}
+          <ItemRow key={p.id} label={p.title} sub={`${p.year}, ${p.conference}`}
             onEdit={() => { setEditItem(p); setModal('publications') }}
             onDelete={() => handleDelete('publications', p.id)} />
         ))

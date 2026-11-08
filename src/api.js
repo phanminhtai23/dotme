@@ -52,4 +52,8 @@ export const api = {
     deleteMessage: (id) => req("DELETE", `/messages/${id}`),
     deleteAllMessages: () => req("DELETE", "/messages"),
     sendMessage: (name, message) => req("POST", "/messages", { name, message }),
+
+    // Landing page version
+    getLandingVersion: () => req("GET", "/settings/landing"),
+    setLandingVersion: (version) => req("PUT", "/settings/landing", { version }),
 };
