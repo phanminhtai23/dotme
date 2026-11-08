@@ -386,8 +386,7 @@ function LoveContent({ link }) {
         @keyframes sparkFly { 0%{opacity:1;transform:translate(0,0) scale(1)} 100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0.3)} }
         @keyframes twinkle { 0%,100%{opacity:0.05} 50%{opacity:0.4} }
         @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Inter:wght@400;500;600;700;800&display=swap');
-      `}</style>
+        `}</style>
     </div>
   )
 }

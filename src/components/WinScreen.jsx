@@ -122,8 +122,7 @@ export default function WinScreen({ winTime, remaining, accent = '#8B5CF6', apiW
       <style>{`
         @keyframes trophyBounce { 0%{transform:scale(0) rotate(-20deg)} 60%{transform:scale(1.2) rotate(5deg)} 100%{transform:scale(1) rotate(0)} }
         @keyframes winConfetti { 0%{transform:translateY(0) rotate(0)} 100%{transform:translateY(110vh) rotate(720deg); opacity:0} }
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&display=swap');
-      `}</style>
+        `}</style>
     </div>
   )
 }

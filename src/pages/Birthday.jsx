@@ -376,8 +376,7 @@ function BirthdayContent({ link }) {
         @keyframes popIn { 0%{opacity:0;transform:scale(0.7)} 60%{transform:scale(1.1)} 100%{opacity:1;transform:scale(1)} }
         @keyframes bounce { 0%{transform:translateY(0)} 100%{transform:translateY(-12px)} }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Inter:wght@400;500;600;700;800&display=swap');
-      `}</style>
+        `}</style>
     </div>
   )
 }

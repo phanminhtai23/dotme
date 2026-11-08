@@ -296,8 +296,7 @@ function MotivationContent({ link }) {
         @keyframes shimmer { 0%{background-position:0% center} 100%{background-position:200% center} }
         @keyframes floatDeco { 0%{transform:translateY(0) rotate(-10deg)} 100%{transform:translateY(-24px) rotate(10deg)} }
         @keyframes popIn { 0%{opacity:0;transform:scale(0.7)} 60%{transform:scale(1.08)} 100%{opacity:1;transform:scale(1)} }
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Inter:wght@400;500;600;700;800&display=swap');
-      `}</style>
+        `}</style>
     </div>
   )
 }

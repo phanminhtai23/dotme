@@ -150,8 +150,7 @@ function IntroOverlay({ meta, diffCfg, difficulty, remaining, maxPlays, onStart,
       </div>
       <style>{`
         @keyframes gameIconFloat { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-14px) rotate(5deg)} }
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&display=swap');
-      `}</style>
+        `}</style>
     </div>
   )
 }
@@ -214,7 +213,7 @@ function LoseOverlay({ remaining, maxPlays, onRetry, onClose, accent, loseData, 
           </button>
         </div>
       </div>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&display=swap');`}</style>
+      <style>{``}</style>
     </div>
   )
 }
@@ -241,7 +240,7 @@ function MaxedOverlay({ maxPlays, onClose, onCheckAgain }) {
           </button>
         </div>
       </div>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&display=swap');`}</style>
+      <style>{``}</style>
     </div>
   )
 }
