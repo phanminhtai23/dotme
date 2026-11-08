@@ -3,8 +3,8 @@ import { useLang } from '../LangContext'
 import { t } from '../i18n'
 import { useLandingData, SKILL_GROUPS, TAGS, STAT_VALUES, SOCIALS, GITHUB_URL } from './data'
 import { useRotatingRole, useContactForm, useLandingEffects, usePageScroll, ScrollProgress, CertShot, LangSwitch, Bullets } from './shared'
-import { TEAR_FIBRE, TEAR_PAPER } from './tear'
-import { STREAKS, PIXELS } from './poster-fx'
+import { BITS, WAVES, WAVE_GLOW, LINKS, NODES } from './stream'
+import { PIXELS } from './poster-fx'
 import './poster.css'
 import './poster-slides.css'
 
@@ -58,7 +58,6 @@ export default function Poster() {
         <div className="pz-fx" aria-hidden="true">
           <i className="pz-grid" />
           <div className="pz-fx__seam">
-            {STREAKS.map((streak, i) => <i key={i} className="pz-streak" style={{ '--y': `${streak.y}%`, '--w': `${streak.w}%`, '--h': `${streak.h}px`, '--d': `${streak.d}s`, '--delay': `${streak.delay}s` }} />)}
             {PIXELS.map((px, i) => <i key={i} className={`pz-px${px.hot ? ' is-hot' : ''}`} style={{ '--x': `${px.x}%`, '--y': `${px.y}%`, '--s': `${px.s}px`, '--d': `${px.d}s`, '--delay': `${px.delay}s` }} />)}
             <svg className="pz-badge" viewBox="0 0 120 120">
               <defs><path id="pz-ring" d="M60 60m-45 0a45 45 0 1 1 90 0a45 45 0 1 1-90 0" /></defs>
@@ -67,33 +66,23 @@ export default function Poster() {
             </svg>
           </div>
         </div>
-        <svg className="pz-tear" viewBox="0 0 400 1000" preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <filter id="pz-rough" x="-15%" y="-3%" width="130%" height="106%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.03 0.018" numOctaves="3" seed="4" result="wide" />
-              <feDisplacementMap in="SourceGraphic" in2="wide" scale="16" xChannelSelector="R" yChannelSelector="G" result="bent" />
-              <feTurbulence type="fractalNoise" baseFrequency="0.4 0.25" numOctaves="2" seed="9" result="fine" />
-              <feDisplacementMap in="bent" in2="fine" scale="5" xChannelSelector="G" yChannelSelector="R" />
-            </filter>
-            <filter id="pz-grain" x="0" y="0" width="100%" height="100%">
-              <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="2" />
-              <feColorMatrix type="matrix" values="0 0 0 0 .25  0 0 0 0 .28  0 0 0 0 .45  1.3 0 0 0 -.4" />
-            </filter>
-            <filter id="pz-soft" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur stdDeviation="7" /></filter>
-            <linearGradient id="pz-sheen" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0" stopColor="#d3d8ee" /><stop offset=".35" stopColor="#eef0f8" /><stop offset=".7" stopColor="#e6e9f4" /><stop offset="1" stopColor="#cfd4ec" />
-            </linearGradient>
-            <path id="pz-paper" d={TEAR_PAPER} />
-            <clipPath id="pz-clip"><use href="#pz-paper" /></clipPath>
-            <mask id="pz-outside"><rect x="-100" y="-60" width="600" height="1120" fill="#fff" /><use href="#pz-paper" fill="#000" /></mask>
-          </defs>
-          <g filter="url(#pz-rough)">
-            <path d={TEAR_FIBRE} fill="#c4cbef" />
-            <use href="#pz-paper" fill="url(#pz-sheen)" />
-            <g clipPath="url(#pz-clip)"><rect x="-100" y="-60" width="600" height="1120" filter="url(#pz-grain)" opacity=".4" /></g>
-            <g clipPath="url(#pz-clip)"><g filter="url(#pz-soft)"><rect x="-100" y="-60" width="600" height="1120" fill="#0a1180" opacity=".38" mask="url(#pz-outside)" /></g></g>
-          </g>
-        </svg>
+        <div className="pz-stream" aria-hidden="true">
+          <div className="pz-bits">{BITS}</div>
+          <svg viewBox="0 0 300 762" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="pz-line" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#60a5fa" stopOpacity="0" /><stop offset=".1" stopColor="#60a5fa" /><stop offset=".9" stopColor="#60a5fa" /><stop offset="1" stopColor="#60a5fa" stopOpacity="0" />
+              </linearGradient>
+              <filter id="pz-line-blur" x="-50%" y="-5%" width="200%" height="110%"><feGaussianBlur stdDeviation="5" /></filter>
+            </defs>
+            <g fill="none" strokeLinecap="round">
+              <path d={WAVE_GLOW} stroke="url(#pz-line)" strokeWidth="12" opacity=".28" filter="url(#pz-line-blur)" />
+              {WAVES.map((wave, i) => <path key={i} d={wave.d} stroke="url(#pz-line)" strokeWidth={wave.width} opacity={wave.opacity} />)}
+            </g>
+            <g className="pz-links" fill="none">{LINKS.map((link, i) => <path key={i} d={link.d} opacity={link.opacity} />)}</g>
+            <g className="pz-nodes">{NODES.map(([cx, cy, r, opacity], i) => <circle key={i} cx={cx} cy={cy} r={r} opacity={opacity} />)}</g>
+          </svg>
+        </div>
         <h1 className="pz-name" data-parallax="0.16"><span>Kevin</span><span>Phan</span></h1>
         <img className="pz-portrait" data-parallax="0.08" src="/avatar.webp" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" />
         <div className="pz-intro">

@@ -29,19 +29,6 @@
 .pz a.pz-pill.is-dark:hover { background: transparent; color: var(--pz-ink); }
 .pz .pz-name { position: relative; z-index: 1; flex: none; padding: 8px var(--pz-gutter) 0; font: 400 var(--pz-name)/.9 var(--pz-display); letter-spacing: -.01em; text-transform: uppercase; pointer-events: none; }
 .pz-name span { display: block; }
-/* Wide and short screens (a 15.6in laptop at 125% scaling is about 1536x730): the stacked intro would force a small name
-   and leave the middle empty, so the intro moves up beside the name and the name grows. */
-@media (min-aspect-ratio: 2 / 1) and (min-width: 1100px) and (max-width: 1699px) {
-  .pz-hero { --pz-name: clamp(96px, min(21vw, calc((100svh - 200px) / 1.8)), 340px); }
-  .pz-hero .pz-portrait { right: 0; }
-  .pz-hero .pz-intro { position: absolute; flex: none; width: 300px; padding: 0; left: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 40px); top: calc(88px + 0.9 * var(--pz-name) - 130px); }
-}
-/* Torn-paper seam between the text and the portrait: the blue sheet is ripped open and white paper shows through. Wide windows only. */
-.pz-tear { display: none; }
-@media (min-width: 901px) {
-  .pz-hero .pz-tear { display: block; position: absolute; z-index: 0; top: 0; --tear-w: clamp(220px, 17vw, 340px); left: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 95px - var(--tear-w) / 2); width: var(--tear-w); height: calc(100% - 48px); overflow: visible; pointer-events: none; filter: drop-shadow(0 0 1px rgba(0, 0, 60, .35)) drop-shadow(-5px 4px 9px rgba(0, 0, 70, .28)); }
-}
-@media (min-aspect-ratio: 2 / 1) and (min-width: 1100px) and (max-width: 1699px) { .pz-hero .pz-tear { display: none; } }
 .pz-portrait { position: absolute; z-index: 2; right: max(0px, calc((100vw - 1640px) / 2)); bottom: 48px; width: min(900px, 86vw, calc(96svh - 48px)); height: auto; filter: drop-shadow(3px 0 0 rgba(120, 224, 255, .95)) drop-shadow(8px 0 14px rgba(70, 150, 255, .55)); }
 @media (min-width: 1700px) { .pz-portrait { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); mask-image: linear-gradient(to right, #000 88%, transparent); } }
 .pz-intro > * { flex-shrink: 0; }
@@ -170,8 +157,6 @@
 .fx .pz-name span { animation: pz-rise 1.2s cubic-bezier(.16, 1, .3, 1) both; }
 .fx .pz-name span:nth-child(2) { animation-delay: .12s; }
 .fx .pz-portrait { animation: pz-fade 1.1s ease .3s both; }
-.fx .pz-tear { animation: pz-tear-in 1.5s cubic-bezier(.65, 0, .25, 1) .4s both; }
-@keyframes pz-tear-in { from { clip-path: inset(0 -20% 100% -20%); } to { clip-path: inset(0 -20% 0 -20%); } }
 .fx .pz-intro > * { animation: pz-up .8s cubic-bezier(.16, 1, .3, 1) both; }
 .fx .pz-intro > :nth-child(1) { animation-delay: .45s; } .fx .pz-intro > :nth-child(2) { animation-delay: .53s; }
 .fx .pz-intro > :nth-child(3) { animation-delay: .61s; } .fx .pz-intro > :nth-child(4) { animation-delay: .69s; }
@@ -224,7 +209,7 @@
   .pz-hero .pz-role { font-size: 32px; }
 }
 
-/* Small details on the hero cover: a faint grid, glowing streaks and pixels drifting away from the torn seam, and a ring badge. Wide windows only. */
+/* Small details on the hero cover: a faint grid, glowing streaks and pixels drifting away from the data stream, and a ring badge. Wide windows only. */
 .pz-fx { display: none; }
 @media (min-width: 901px) {
   .pz-hero { --seam-x: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 95px); }
@@ -244,11 +229,9 @@
 @keyframes pz-streak { from { transform: scaleX(.55); opacity: .35; } to { transform: scaleX(1); opacity: .95; } }
 @keyframes pz-twinkle { from { opacity: .25; } to { opacity: 1; } }
 @keyframes pz-spin { to { transform: rotate(360deg); } }
-@media (min-aspect-ratio: 2 / 1) and (min-width: 1100px) and (max-width: 1699px) { .pz-hero .pz-fx__seam { display: none; } }
 @media (max-width: 1099px) { .pz-hero .pz-badge { display: none; } }
 /* the ring badge says "available" on wide windows, so the pill above the role goes away there; it stays wherever the badge is hidden */
 @media (min-width: 1100px) { .pz-chip { display: none; } }
-@media (min-aspect-ratio: 2 / 1) and (min-width: 1100px) and (max-width: 1699px) { .pz-chip { display: block; } }
 
 /* phones and tablets: the same grid, streaks and pixels, spread over the whole cover (there is no torn seam to start from) and kept quieter so the name stays readable */
 @media (max-width: 900px) {
@@ -271,3 +254,67 @@
   .pz .pz-name span:last-child { text-align: right; }
   .pz-hero .pz-portrait { z-index: 2; margin: calc(var(--pzn) * -0.24 - 0.08 * min(560px, 100vw)) auto 0; }
 }
+
+/* Desktop hero: on windows shorter than 900px the whole hero shrinks in proportion (--pz-hu) so a laptop shows the same composition as a big
+   monitor, only smaller: name, torn seam, intro and portrait keep their places. At 900px tall and above --pz-hu is 1px, i.e. nothing changes. */
+@media (min-width: 901px) {
+  .pz-hero { --pz-hu: min(1px, calc(100svh / 900)); --pz-name: clamp(96px, min(21vw, calc((100svh - 430 * var(--pz-hu)) / 1.8)), 300px); --seam-x: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 95 * var(--pz-hu)); }
+  .pz-hero .pz-nav { padding-block: calc(20 * var(--pz-hu)); gap: calc(16 * var(--pz-hu)) calc(32 * var(--pz-hu)); }
+  .pz-hero .pz-logo { font-size: calc(30 * var(--pz-hu)); }
+  .pz-hero .pz-nav nav { gap: 4px calc(28 * var(--pz-hu)); font-size: calc(15 * var(--pz-hu)); }
+  .pz-hero .pz-lang { font-size: calc(13 * var(--pz-hu)); padding: calc(6 * var(--pz-hu)) calc(10 * var(--pz-hu)); }
+  .pz-hero a.pz-pill { min-height: calc(44 * var(--pz-hu)); padding: 0 calc(24 * var(--pz-hu)); font-size: calc(15 * var(--pz-hu)); }
+  .pz-hero a.pz-pill.is-solid, .pz-hero a.pz-pill.is-line { min-height: calc(50 * var(--pz-hu)); padding: 0 calc(28 * var(--pz-hu)); }
+  .pz-hero .pz-intro { width: calc(460 * var(--pz-hu) + var(--pz-gutter)); gap: calc(14 * var(--pz-hu)); padding-top: calc(20 * var(--pz-hu)); }
+  .pz-hero .pz-desc { font-size: calc(16.5 * var(--pz-hu)); }
+  .pz-hero .pz-ticker { height: calc(48 * var(--pz-hu)); font-size: calc(14 * var(--pz-hu)); }
+  .pz-hero .pz-portrait { bottom: calc(48 * var(--pz-hu)); width: min(900px, 86vw, calc(96svh - 48 * var(--pz-hu))); }
+  .pz-hero .pz-fx { inset: 0 0 calc(48 * var(--pz-hu)); }
+}
+
+/* ===== Data stream between the name and the portrait (desktop only) ===== */
+.pz-stream { display: none; }
+@media (min-width: 901px) {
+  .pz-hero .pz-stream { display: block; position: absolute; z-index: 0; top: 0; width: 300px; height: calc(100% - 48 * var(--pz-hu)); left: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 95 * var(--pz-hu) - 150px); pointer-events: none; }
+  .pz-stream svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 6px rgba(96, 165, 250, .35)); }
+  .pz-bits { position: absolute; left: 50%; top: 0; bottom: 0; width: 124px; margin-left: -62px; overflow: hidden; font: 400 13px/16px var(--pz-mono); letter-spacing: .5em; text-align: center; word-break: break-all; color: #60a5fa; opacity: .42; -webkit-mask-image: linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent), linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent, #000 32%, #000 68%, transparent), linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent); mask-composite: intersect; }
+  .pz-links { stroke: #60a5fa; stroke-width: 1; }
+  .pz-nodes { fill: #60a5fa; }
+}
+
+/* ===== Colour theme: Midnight Slate & Titanium =====
+   The layout is unchanged, only the colours. Variables first (they recolour most of the page), then the few rules where a light colour
+   was used as a background or a dark colour as text. */
+.pz {
+  --pz-blue: #1d4ed8; --pz-ink: #070d20; --pz-lilac: #0c1322; --pz-periwinkle: #60a5fa;
+  --pz-text-2: #cbd5e1; --pz-muted: #a3b1c6; --pz-rule: rgba(148, 163, 184, .25);
+  --pz-bg: #0a1128; --pz-bg2: #0c1322; --pz-surf: #101a36; --pz-surf2: #16223f; --pz-hair2: rgba(96, 165, 250, .32); --pz-glow: rgba(96, 165, 250, .3);
+  color: #fff; background: var(--pz-bg);
+}
+.pz-hero { background: linear-gradient(160deg, var(--pz-bg), var(--pz-bg2)); }
+.pz .pz-grid, .pz-hero .pz-grid { background-image: linear-gradient(rgba(148, 163, 184, .14) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, .14) 1px, transparent 1px); }
+.pz-portrait { filter: drop-shadow(3px 0 0 #60a5fa) drop-shadow(8px 0 16px rgba(96, 165, 250, .45)); }
+.pz-ticker { border-top: 1px solid var(--pz-hair2); }
+.pz a.pz-pill { background: linear-gradient(100deg, #1d4ed8, #2563eb); color: #fff; border-color: transparent; }
+.pz a.pz-pill:hover { background: transparent; color: #60a5fa; border-color: #60a5fa; }
+.pz a.pz-pill.is-line, .pz a.pz-pill.is-dark { background: transparent; color: #fff; border-color: var(--pz-hair2); }
+.pz a.pz-pill.is-line:hover, .pz a.pz-pill.is-dark:hover { background: transparent; color: #60a5fa; border-color: #60a5fa; }
+.pz .pz-title--statement span, .pz-stats dt, .pz-skill b, .pz-project__sub, .pz-cert__issuer a { color: #60a5fa; }
+/* poster-slides.css loads after this file, so these two need the extra specificity */
+.pz .pz-sec .pz-mark b { color: #fff; }
+.pz-stats, .pz-skillgroup { border-top-color: #fff; }
+.pz-jobs, .pz-job, .pz .pz-job, .pz-card__note { border-color: var(--pz-hair2); }
+.pz-bar { background: var(--pz-hair2); }
+.pz-bar div { background: linear-gradient(90deg, #1d4ed8, #60a5fa); box-shadow: 0 0 12px var(--pz-glow); }
+.pz-card.is-ink { background: var(--pz-surf2); box-shadow: inset 0 0 0 1px var(--pz-hair2); }
+.pz-card.is-blue { border: 1.5px solid transparent; background: linear-gradient(var(--pz-surf), var(--pz-surf)) padding-box, linear-gradient(135deg, #1d4ed8, #60a5fa) border-box; box-shadow: 0 0 44px -14px var(--pz-glow); }
+.pz-card.is-blue .pz-card__tag, .pz-card a { color: #60a5fa; }
+.pz-cert { background: var(--pz-surf); }
+.pz-cert__shot { background: var(--pz-ink); }
+.pz-project { background: var(--pz-surf); }
+.pz-project__links a:hover { color: #60a5fa; }
+.pz-sec.is-blue { background: radial-gradient(ellipse 60% 70% at 85% 10%, var(--pz-glow), transparent 70%), linear-gradient(160deg, var(--pz-bg2), var(--pz-ink)); }
+.pz-form { background: var(--pz-surf); color: #fff; border: 1px solid var(--pz-hair2); }
+.pz-form input, .pz-form textarea { background: var(--pz-ink); color: #fff; border-color: var(--pz-hair2); }
+.pz-form button, .pz-form button:hover:not(:disabled) { background: linear-gradient(100deg, #1d4ed8, #2563eb); color: #fff; }
+.pz-form button:hover:not(:disabled) { box-shadow: 0 0 24px var(--pz-glow); }

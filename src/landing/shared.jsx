@@ -213,6 +213,10 @@ export function useLandingEffects(ref, { reveal = [], count = [], drift = [], sp
     // Scroll-linked sideways drift: the element slides as it crosses the screen, centred when mid-screen.
     const sliding = []
     drift.forEach(([selector, factor]) => root.querySelectorAll(selector).forEach(el => sliding.push([el, factor])))
+    // On phones the browser scrolls on its own thread and scroll events arrive a frame late, so a title moved from JS visibly shakes
+    // while the finger moves slowly. There the scroll-linked motion is left out and the elements stay put.
+    const phone = window.matchMedia('(max-width: 900px)')
+    let still = false
     let ticking = false
     const onScroll = () => {
       if (ticking) return
@@ -222,6 +226,11 @@ export function useLandingEffects(ref, { reveal = [], count = [], drift = [], sp
         const y = window.scrollY
         const max = document.documentElement.scrollHeight - window.innerHeight
         if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`
+        if (phone.matches) {
+          if (!still) { still = true; sliding.forEach(([el]) => { el.style.translate = '' }); drifting.forEach(el => { el.style.translate = '' }) }
+          return
+        }
+        still = false
         sliding.forEach(([el, factor]) => {
           const rect = el.getBoundingClientRect()
           if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return
