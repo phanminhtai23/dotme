@@ -230,6 +230,81 @@ export function useLandingEffects(ref, { reveal = [], count = [], drift = [], sp
   }, [ref])
 }
 
+/** One wheel turn glides to the next (or previous) screen and stops exactly on it. A section taller than the window scrolls normally
+ *  until the end is close, then the next turn snaps. Touch, keyboard, the scrollbar and anchor links keep their native behavior,
+ *  and so does everything below 901px where sections are stacked rather than screens. */
+export function usePageScroll(ref, selector) {
+  useEffect(() => {
+    const root = ref.current
+    if (!root || motionOff()) return undefined
+    const wide = window.matchMedia('(min-width: 901px)')
+    const DURATION = 850
+    const SETTLE = 140
+    let busy = false
+    let lastWheel = 0
+    let animEnd = 0
+    let frame = 0
+
+    const ease = x => (x < 0.5 ? 4 * x * x * x : 1 - ((-2 * x + 2) ** 3) / 2)
+    const glide = to => {
+      const from = window.scrollY
+      const start = performance.now()
+      busy = true
+      animEnd = start + DURATION
+      cancelAnimationFrame(frame)
+      const step = now => {
+        const k = Math.min((now - start) / DURATION, 1)
+        window.scrollTo({ top: from + (to - from) * ease(k), behavior: 'instant' })
+        if (k < 1) frame = requestAnimationFrame(step)
+      }
+      frame = requestAnimationFrame(step)
+    }
+
+    const inScrollable = el => {
+      for (let node = el instanceof Element ? el : null; node && node !== document.body; node = node.parentElement) {
+        if (node.matches?.('textarea, select, [contenteditable="true"]')) return true
+        const { overflowY } = getComputedStyle(node)
+        if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight + 1) return true
+      }
+      return false
+    }
+
+    const onWheel = e => {
+      if (!wide.matches || e.ctrlKey || e.deltaY === 0 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return
+      const now = performance.now()
+      const gap = now - lastWheel
+      lastWheel = now
+      if (busy) {
+        if (now > animEnd && gap > SETTLE) busy = false
+        else { e.preventDefault(); return }
+      }
+      if (inScrollable(e.target)) return
+      const vh = window.innerHeight
+      const y = window.scrollY
+      const tops = [...root.querySelectorAll(selector)].map(el => ({ top: Math.round(el.getBoundingClientRect().top + y), h: el.offsetHeight }))
+      if (!tops.length) return
+      let cur = 0
+      tops.forEach((s, i) => { if (s.top <= y + 2) cur = i })
+      const { top, h } = tops[cur]
+      let target = null
+      if (e.deltaY > 0) {
+        const below = top + h - (y + vh)
+        if (below > vh * 0.35) return
+        if (tops[cur + 1]) target = tops[cur + 1].top
+      } else if (y > top + 2) {
+        if (y - top > vh) return
+        target = top
+      } else if (tops[cur - 1]) target = tops[cur - 1].top
+      if (target === null || Math.abs(target - y) < 2) return
+      e.preventDefault()
+      glide(target)
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    return () => { window.removeEventListener('wheel', onWheel); cancelAnimationFrame(frame) }
+  }, [ref, selector])
+}
+
 export function ScrollProgress() {
   return <div className="fx-progress" aria-hidden="true" />
 }

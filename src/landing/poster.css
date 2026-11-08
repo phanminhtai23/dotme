@@ -36,7 +36,13 @@
   .pz-hero .pz-portrait { right: 0; }
   .pz-hero .pz-intro { position: absolute; flex: none; width: 300px; padding: 0; left: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 40px); top: calc(88px + 0.9 * var(--pz-name) - 130px); }
 }
-.pz-portrait { position: absolute; z-index: 2; right: max(0px, calc((100vw - 1640px) / 2)); bottom: 48px; width: min(900px, 86vw, calc(96svh - 48px)); height: auto; }
+/* Torn-paper seam between the text and the portrait: the blue sheet is ripped open and white paper shows through. Wide windows only. */
+.pz-tear { display: none; }
+@media (min-width: 901px) {
+  .pz-hero .pz-tear { display: block; position: absolute; z-index: 0; top: 0; --tear-w: clamp(220px, 17vw, 340px); left: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 95px - var(--tear-w) / 2); width: var(--tear-w); height: calc(100% - 48px); overflow: visible; pointer-events: none; filter: drop-shadow(0 0 1px rgba(0, 0, 60, .35)) drop-shadow(-5px 4px 9px rgba(0, 0, 70, .28)); }
+}
+@media (min-aspect-ratio: 2 / 1) and (min-width: 1100px) and (max-width: 1699px) { .pz-hero .pz-tear { display: none; } }
+.pz-portrait { position: absolute; z-index: 2; right: max(0px, calc((100vw - 1640px) / 2)); bottom: 48px; width: min(900px, 86vw, calc(96svh - 48px)); height: auto; filter: drop-shadow(3px 0 0 rgba(120, 224, 255, .95)) drop-shadow(8px 0 14px rgba(70, 150, 255, .55)); }
 @media (min-width: 1700px) { .pz-portrait { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); mask-image: linear-gradient(to right, #000 88%, transparent); } }
 .pz-intro > * { flex-shrink: 0; }
 .pz-intro { position: relative; z-index: 3; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; width: calc(460px + var(--pz-gutter)); max-width: 100%; padding: 20px 0 0 var(--pz-gutter); }
@@ -119,8 +125,6 @@
 .pz-project__cover { height: 180px; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; background: var(--pz-blue); color: var(--pz-paper); }
 .pz-project__cover.is-ink { background: var(--pz-ink); }
 .pz-project__cover.is-lilac { background: var(--pz-periwinkle); color: var(--pz-ink); }
-.pz-project__cover.is-paper { background: var(--pz-paper); color: var(--pz-ink); box-shadow: inset 0 0 0 2px var(--pz-ink); }
-.pz-project__cover.is-night { background: var(--pz-ink); color: var(--pz-periwinkle); }
 .pz-project__cover p { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; }
 .pz-project__cover p span { border: 1px solid currentColor; border-radius: 999px; padding: 3px 12px; }
 .pz-project__cover b { font: 500 13px var(--pz-mono); }
@@ -166,6 +170,8 @@
 .fx .pz-name span { animation: pz-rise 1.2s cubic-bezier(.16, 1, .3, 1) both; }
 .fx .pz-name span:nth-child(2) { animation-delay: .12s; }
 .fx .pz-portrait { animation: pz-fade 1.1s ease .3s both; }
+.fx .pz-tear { animation: pz-tear-in 1.5s cubic-bezier(.65, 0, .25, 1) .4s both; }
+@keyframes pz-tear-in { from { clip-path: inset(0 -20% 100% -20%); } to { clip-path: inset(0 -20% 0 -20%); } }
 .fx .pz-intro > * { animation: pz-up .8s cubic-bezier(.16, 1, .3, 1) both; }
 .fx .pz-intro > :nth-child(1) { animation-delay: .45s; } .fx .pz-intro > :nth-child(2) { animation-delay: .53s; }
 .fx .pz-intro > :nth-child(3) { animation-delay: .61s; } .fx .pz-intro > :nth-child(4) { animation-delay: .69s; }
@@ -213,4 +219,55 @@
   .pz-hero .pz-portrait { position: absolute; right: 0; bottom: 48px; width: 50%; margin: 0; }
   .pz-hero .pz-intro { width: 52%; padding: 16px 0 48px var(--pz-gutter); }
   .pz-hero .pz-role { font-size: 32px; }
+}
+
+/* Small details on the hero cover: a faint grid, glowing streaks and pixels drifting away from the torn seam, and a ring badge. Wide windows only. */
+.pz-fx { display: none; }
+@media (min-width: 901px) {
+  .pz-hero { --seam-x: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 95px); }
+  .pz-hero .pz-fx { display: block; position: absolute; inset: 0 0 48px; z-index: 0; overflow: hidden; pointer-events: none; }
+  .pz-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(214, 219, 255, .15) 1px, transparent 1px), linear-gradient(90deg, rgba(214, 219, 255, .15) 1px, transparent 1px); background-size: 64px 64px; -webkit-mask-image: radial-gradient(ellipse 75% 85% at 62% 45%, #000 20%, transparent 78%); mask-image: radial-gradient(ellipse 75% 85% at 62% 45%, #000 20%, transparent 78%); }
+  .pz-fx__seam { position: absolute; top: 0; bottom: 0; left: var(--seam-x); right: 0; }
+  .pz-streak { position: absolute; left: 0; top: var(--y); width: var(--w); height: var(--h); border-radius: 2px; background: linear-gradient(90deg, rgba(223, 227, 251, .9), rgba(158, 166, 255, .55) 45%, transparent); box-shadow: 0 0 14px 1px rgba(158, 166, 255, .85); opacity: .7; transform-origin: left center; }
+  .pz-px { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); background: #dfe3fb; opacity: .75; }
+  .pz-px.is-hot { background: #fff; box-shadow: 0 0 12px 3px rgba(190, 198, 255, .9); }
+  .pz-badge { position: absolute; left: 11%; top: 15%; width: clamp(96px, 7.6vw, 132px); height: auto; overflow: visible; }
+  .pz-badge text { font: 500 9.5px var(--pz-mono); letter-spacing: .1em; fill: var(--pz-paper); }
+  .pz-badge__arrow { fill: none; stroke: var(--pz-paper); stroke-width: 3; stroke-linecap: square; }
+  .fx .pz-streak { animation: pz-streak var(--d) ease-in-out var(--delay) infinite alternate; }
+  .fx .pz-px { animation: pz-twinkle var(--d) ease-in-out var(--delay) infinite alternate; }
+  .fx .pz-badge text { transform-origin: 60px 60px; animation: pz-spin 26s linear infinite; }
+}
+@keyframes pz-streak { from { transform: scaleX(.55); opacity: .35; } to { transform: scaleX(1); opacity: .95; } }
+@keyframes pz-twinkle { from { opacity: .25; } to { opacity: 1; } }
+@keyframes pz-spin { to { transform: rotate(360deg); } }
+@media (min-aspect-ratio: 2 / 1) and (min-width: 1100px) and (max-width: 1699px) { .pz-hero .pz-fx__seam { display: none; } }
+@media (max-width: 1099px) { .pz-hero .pz-badge { display: none; } }
+/* the ring badge says "available" on wide windows, so the pill above the role goes away there; it stays wherever the badge is hidden */
+@media (min-width: 1100px) { .pz-chip { display: none; } }
+@media (min-aspect-ratio: 2 / 1) and (min-width: 1100px) and (max-width: 1699px) { .pz-chip { display: block; } }
+
+/* phones and tablets: the same grid, streaks and pixels, spread over the whole cover (there is no torn seam to start from) and kept quieter so the name stays readable */
+@media (max-width: 900px) {
+  .pz-hero .pz-fx { display: block; position: absolute; inset: 0 0 48px; z-index: 0; overflow: hidden; pointer-events: none; }
+  .pz-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(214, 219, 255, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(214, 219, 255, .13) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 55%, #000 25%, transparent 85%); mask-image: radial-gradient(ellipse 90% 70% at 50% 55%, #000 25%, transparent 85%); }
+  .pz-fx__seam { position: absolute; inset: 0; }
+  .pz-streak { position: absolute; left: 0; top: var(--y); width: calc(var(--w) * 1.6); height: var(--h); border-radius: 2px; background: linear-gradient(90deg, rgba(223, 227, 251, .8), rgba(158, 166, 255, .5) 45%, transparent); box-shadow: 0 0 12px 1px rgba(158, 166, 255, .8); opacity: .5; transform-origin: left center; }
+  .pz-streak:nth-of-type(even) { left: auto; right: 0; transform-origin: right center; background: linear-gradient(270deg, rgba(223, 227, 251, .8), rgba(158, 166, 255, .5) 45%, transparent); }
+  .pz-px { position: absolute; left: calc(var(--x) * 1.75); top: var(--y); width: var(--s); height: var(--s); background: #dfe3fb; opacity: .7; }
+  .pz-px.is-hot { background: #fff; box-shadow: 0 0 12px 3px rgba(190, 198, 255, .9); }
+  .pz-badge { display: none; }
+  .fx .pz-streak { animation: pz-streak var(--d) ease-in-out var(--delay) infinite alternate; }
+  .fx .pz-px { animation: pz-twinkle var(--d) ease-in-out var(--delay) infinite alternate; }
+
+  /* page-by-page scrolling by touch: near the end of a screen the window settles on the next one; a section taller than the window can still be read */
+  html:has(.pz) { scroll-snap-type: y mandatory; }
+  .pz .pz-hero, .pz .pz-sec { scroll-snap-align: start; }
+}
+
+/* phones: the name spans the full width and the portrait stands in front of it, so the head covers the lower half of the second line */
+@media (max-width: 600px) {
+  .pz-hero { --pzn: clamp(110px, 44vw, 240px); }
+  .pz .pz-name { font-size: var(--pzn); line-height: .9; }
+  .pz-hero .pz-portrait { z-index: 2; margin: calc(var(--pzn) * -0.24 - 0.08 * min(560px, 100vw)) auto 0; }
 }

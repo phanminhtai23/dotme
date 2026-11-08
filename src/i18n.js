@@ -7,7 +7,7 @@ export const t = {
     hero: {
       available: 'Sẵn sàng nhận việc',
       roles: ['Kỹ sư AI', 'Lập trình Full-Stack', 'Người xây dựng sản phẩm', 'Fan Open Source'],
-      desc: 'Tôi tạo ra những trải nghiệm kỹ thuật số tuyệt đẹp, tập trung vào hệ thống AI, kiến trúc có thể mở rộng và giao diện pixel-perfect.',
+      desc: 'Xây dựng hệ thống thông minh, pipeline RAG hiệu năng cao và kiến trúc LLM có thể mở rộng.',
       viewWork: 'Xem dự án',
       talk: 'Liên hệ',
       scroll: 'Cuộn',
@@ -164,7 +164,7 @@ export const t = {
     hero: {
       available: 'Available for work',
       roles: ['AI Engineer', 'Full-Stack Developer', 'Builder of Things', 'Open Source Fan'],
-      desc: 'I craft beautiful digital experiences with a focus on AI systems, scalable architecture, and pixel-perfect interfaces.',
+      desc: 'Building intelligent systems, high-performance RAG pipelines, and scalable LLM architectures.',
       viewWork: 'View My Work',
       talk: "Let's Talk",
       scroll: 'Scroll',

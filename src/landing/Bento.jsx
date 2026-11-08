@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { useLang } from '../LangContext'
 import { t } from '../i18n'
 import { useLandingData, SKILL_GROUPS, TAGS, STAT_VALUES, SOCIALS, GITHUB_URL } from './data'
-import { useRotatingRole, useContactForm, useLandingEffects, ScrollProgress, CertShot, LangSwitch, Bullets } from './shared'
+import { useRotatingRole, useContactForm, useLandingEffects, usePageScroll, ScrollProgress, CertShot, LangSwitch, Bullets } from './shared'
 import './bento.css'
 import './bento-slides.css'
 
@@ -40,6 +40,7 @@ export default function Bento() {
   const current = data.jobs.find(job => job.current) || data.jobs[0]
   const root = useRef(null)
   useLandingEffects(root, { ...FX, spy: { links: '.bn-nav nav a', ids: SECTIONS } })
+  usePageScroll(root, '.bn-sec')
 
   return (
     <div className="bn" id="top" ref={root}>

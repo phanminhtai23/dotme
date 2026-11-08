@@ -2,7 +2,9 @@ import { useRef } from 'react'
 import { useLang } from '../LangContext'
 import { t } from '../i18n'
 import { useLandingData, SKILL_GROUPS, TAGS, STAT_VALUES, SOCIALS, GITHUB_URL } from './data'
-import { useRotatingRole, useContactForm, useLandingEffects, ScrollProgress, CertShot, LangSwitch, Bullets } from './shared'
+import { useRotatingRole, useContactForm, useLandingEffects, usePageScroll, ScrollProgress, CertShot, LangSwitch, Bullets } from './shared'
+import { TEAR_FIBRE, TEAR_PAPER } from './tear'
+import { STREAKS, PIXELS } from './poster-fx'
 import './poster.css'
 import './poster-slides.css'
 
@@ -20,7 +22,10 @@ const FX = {
   count: ['.pz-stats dt'],
   drift: [['.pz-title', 140], ['.pz-stats dt', -50], ['.pz-job:nth-child(odd) h3', 60], ['.pz-job:nth-child(even) h3', -60]],
 }
-const COVERS = ['is-blue', 'is-ink', 'is-lilac', 'is-paper', 'is-night', 'is-blue']
+// One copy of the tags is narrower than a wide window, so the strip repeats enough times that the right edge never shows a gap while it scrolls.
+const COPIES = [0, 1, 2, 3, 4, 5]
+// Solid colours only, ordered so no colour sits directly above or below itself in the three-column grid.
+const COVERS = ['is-blue', 'is-ink', 'is-lilac', 'is-ink', 'is-lilac', 'is-blue']
 
 /** The small "02 / 07 — About" bar at the top of every section after the hero. */
 const Mark = ({ n, label }) => (
@@ -38,6 +43,7 @@ export default function Poster() {
   const aboutHead = tr.about.heading.split(tr.about.headingAccent)
   const root = useRef(null)
   useLandingEffects(root, { ...FX, spy: { links: '.pz-nav nav a', ids: SECTIONS } })
+  usePageScroll(root, '.pz-hero, .pz-sec')
 
   return (
     <div className="pz" id="top" ref={root}>
@@ -49,6 +55,45 @@ export default function Poster() {
           <LangSwitch lang={lang} setLang={setLang} className="pz-lang" />
           <a className="pz-pill" href="#contact">{tr.nav.hire}</a>
         </header>
+        <div className="pz-fx" aria-hidden="true">
+          <i className="pz-grid" />
+          <div className="pz-fx__seam">
+            {STREAKS.map((streak, i) => <i key={i} className="pz-streak" style={{ '--y': `${streak.y}%`, '--w': `${streak.w}%`, '--h': `${streak.h}px`, '--d': `${streak.d}s`, '--delay': `${streak.delay}s` }} />)}
+            {PIXELS.map((px, i) => <i key={i} className={`pz-px${px.hot ? ' is-hot' : ''}`} style={{ '--x': `${px.x}%`, '--y': `${px.y}%`, '--s': `${px.s}px`, '--d': `${px.d}s`, '--delay': `${px.delay}s` }} />)}
+            <svg className="pz-badge" viewBox="0 0 120 120">
+              <defs><path id="pz-ring" d="M60 60m-45 0a45 45 0 1 1 90 0a45 45 0 1 1-90 0" /></defs>
+              <text><textPath href="#pz-ring" textLength="280" lengthAdjust="spacing">{`${tr.hero.available} · ${tr.hero.available} · `.toUpperCase()}</textPath></text>
+              <path className="pz-badge__arrow" d="M50 50h20v20M50 70l20-20" />
+            </svg>
+          </div>
+        </div>
+        <svg className="pz-tear" viewBox="0 0 400 1000" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <filter id="pz-rough" x="-15%" y="-3%" width="130%" height="106%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.03 0.018" numOctaves="3" seed="4" result="wide" />
+              <feDisplacementMap in="SourceGraphic" in2="wide" scale="16" xChannelSelector="R" yChannelSelector="G" result="bent" />
+              <feTurbulence type="fractalNoise" baseFrequency="0.4 0.25" numOctaves="2" seed="9" result="fine" />
+              <feDisplacementMap in="bent" in2="fine" scale="5" xChannelSelector="G" yChannelSelector="R" />
+            </filter>
+            <filter id="pz-grain" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="2" />
+              <feColorMatrix type="matrix" values="0 0 0 0 .25  0 0 0 0 .28  0 0 0 0 .45  1.3 0 0 0 -.4" />
+            </filter>
+            <filter id="pz-soft" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur stdDeviation="7" /></filter>
+            <linearGradient id="pz-sheen" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stopColor="#d3d8ee" /><stop offset=".35" stopColor="#eef0f8" /><stop offset=".7" stopColor="#e6e9f4" /><stop offset="1" stopColor="#cfd4ec" />
+            </linearGradient>
+            <path id="pz-paper" d={TEAR_PAPER} />
+            <clipPath id="pz-clip"><use href="#pz-paper" /></clipPath>
+            <mask id="pz-outside"><rect x="-100" y="-60" width="600" height="1120" fill="#fff" /><use href="#pz-paper" fill="#000" /></mask>
+          </defs>
+          <g filter="url(#pz-rough)">
+            <path d={TEAR_FIBRE} fill="#c4cbef" />
+            <use href="#pz-paper" fill="url(#pz-sheen)" />
+            <g clipPath="url(#pz-clip)"><rect x="-100" y="-60" width="600" height="1120" filter="url(#pz-grain)" opacity=".4" /></g>
+            <g clipPath="url(#pz-clip)"><g filter="url(#pz-soft)"><rect x="-100" y="-60" width="600" height="1120" fill="#0a1180" opacity=".38" mask="url(#pz-outside)" /></g></g>
+          </g>
+        </svg>
         <h1 className="pz-name" data-parallax="0.16"><span>Kevin</span><span>Phan</span></h1>
         <img className="pz-portrait" data-parallax="0.08" src="/avatar.webp" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" />
         <div className="pz-intro">
@@ -61,7 +106,7 @@ export default function Poster() {
           </div>
         </div>
         <div className="pz-ticker" aria-hidden="true">
-          {[0, 1].map(copy => <ul key={copy} className="pz-track">{TAGS.map(tag => <li key={tag}>{tag}</li>)}</ul>)}
+          {COPIES.map(copy => <ul key={copy} className="pz-track">{TAGS.map(tag => <li key={tag}>{tag}</li>)}</ul>)}
         </div>
       </section>
 
