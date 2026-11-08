@@ -4,12 +4,15 @@ import { t } from '../i18n'
 import { useLandingData, SKILL_GROUPS, TAGS, STAT_VALUES, SOCIALS, GITHUB_URL } from './data'
 import { useRotatingRole, useContactForm, useLandingEffects, ScrollProgress, CertShot, LangSwitch, Bullets } from './shared'
 import './bento.css'
+import './bento-slides.css'
 
 const SECTIONS = ['about', 'experience', 'skills', 'edu', 'projects', 'contact']
+const STATUS_TONE = { 'Live': 'is-sky', 'Research': 'is-peach', 'Open Source': 'is-sky', 'Beta': 'is-peach', 'In Progress': 'is-dim' }
 const FX = {
   reveal: [
-    ['.bn-hero', 'left'], ['.bn-photo', 'right'], ['.bn-stat', 'pop'], ['.bn-now', 'drop'], ['.bn-stack', 'right'],
-    ['#about .bn-title', 'wipe-up'], ['.bn-cols p', 'fade'],
+    ['.bn-mark b', 'left-s'], ['.bn-mark span', 'right-s'],
+    ['.bn-hero', 'left'], ['.bn-photo', 'right'], ['.bn-stat', 'pop'],
+    ['.bn-abouttitle', 'left'], ['.bn-aboutbio', 'right'], ['.bn-now', 'drop'], ['.bn-stack', 'right'],
     ['#experience .bn-title', 'wipe'], ['.bn-job:nth-child(odd)', 'left'], ['.bn-job:nth-child(even)', 'right'],
     ['#skills .bn-title', 'wipe'], ['.bn-skills', 'flip'],
     ['#edu .bn-title', 'wipe'], ['.bn-edu', 'left'], ['.bn-pubs', 'right'], ['.bn-cert', 'drop'],
@@ -19,8 +22,11 @@ const FX = {
   count: ['.bn-stat b'],
   drift: [['.bn-title', 120]],
 }
-const PROJECT_SPANS = ['s7', 's5', 's4', 's4', 's4', 's12']
-const STATUS_TONE = { 'Live': 'is-sky', 'Research': 'is-peach', 'Open Source': 'is-sky', 'Beta': 'is-peach', 'In Progress': 'is-dim' }
+
+/** The small "02 / 07 — About" bar at the top of every section after the hero. */
+const Mark = ({ n, label }) => (
+  <div className="bn-mark" aria-hidden="true"><b>.me</b><span>{n} / 07 — {label}</span></div>
+)
 
 export default function Bento() {
   const { lang, setLang } = useLang()
@@ -30,6 +36,7 @@ export default function Bento() {
   const contact = useContactForm()
   const nav = tr.nav.links
   const edu = tr.edupub
+  const aboutHead = tr.about.heading.split(tr.about.headingAccent)
   const current = data.jobs.find(job => job.current) || data.jobs[0]
   const root = useRef(null)
   useLandingEffects(root, { ...FX, spy: { links: '.bn-nav nav a', ids: SECTIONS } })
@@ -38,57 +45,67 @@ export default function Bento() {
     <div className="bn" id="top" ref={root}>
       <ScrollProgress />
       <div className="bn-page">
-        <header className="bn-nav">
-          <a className="bn-logo" href="#top">.me</a>
-          <nav aria-label="Sections">{nav.map((label, i) => <a key={label} href={`#${SECTIONS[i]}`}>{label}</a>)}</nav>
-          <LangSwitch lang={lang} setLang={setLang} className="bn-lang" />
-          <a className="bn-btn" href="#contact">{tr.nav.hire}</a>
-        </header>
+        <section className="bn-sec bn-screen">
+          <header className="bn-nav">
+            <a className="bn-logo" href="#top">.me</a>
+            <nav aria-label="Sections">{nav.map((label, i) => <a key={label} href={`#${SECTIONS[i]}`}>{label}</a>)}</nav>
+            <LangSwitch lang={lang} setLang={setLang} className="bn-lang" />
+            <a className="bn-btn" href="#contact">{tr.nav.hire}</a>
+          </header>
 
-        <section className="bn-grid">
-          <div className="bn-tile s7 bn-hero">
-            <span className="bn-chip is-peach">{tr.hero.available}</span>
-            <div className="bn-hero__main">
-              <h1>Kevin<br />Phan</h1>
-              <p className="bn-role" aria-label={tr.hero.roles.join(', ')}>{role}<i aria-hidden="true" /></p>
-              <p className="bn-lead">{tr.hero.desc}</p>
+          <div className="bn-grid bn-grid--hero">
+            <div className="bn-tile s7 bn-hero">
+              <span className="bn-chip is-peach">{tr.hero.available}</span>
+              <div className="bn-hero__main">
+                <h1>Kevin<br />Phan</h1>
+                <p className="bn-role" aria-label={tr.hero.roles.join(', ')}>{role}<i aria-hidden="true" /></p>
+                <p className="bn-lead">{tr.hero.desc}</p>
+              </div>
+              <div className="bn-actions">
+                <a className="bn-btn" href="#projects">{tr.hero.viewWork}</a>
+                <a className="bn-btn is-ghost" href="#contact">{tr.hero.talk}</a>
+              </div>
             </div>
-            <div className="bn-actions">
-              <a className="bn-btn" href="#projects">{tr.hero.viewWork}</a>
-              <a className="bn-btn is-ghost" href="#contact">{tr.hero.talk}</a>
+            <div className="bn-tile s5 bn-photo">
+              <img src="/avatar.webp" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" />
+              {current?.location && <span className="bn-tag">{current.location}</span>}
             </div>
-          </div>
-          <div className="bn-tile s5 bn-photo">
-            <img src="/avatar.webp" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" />
-            {current?.location && <span className="bn-tag">{current.location}</span>}
-          </div>
-          {STAT_VALUES.map((value, i) => (
-            <div key={i} className="bn-tile s3 bn-stat">
-              <b className={i % 2 ? 'is-peach' : 'is-sky'}>{value}</b>
-              <span>{tr.about.stats[i]}</span>
-            </div>
-          ))}
-          {current && (
-            <div className="bn-tile s5 bn-now">
-              <p className="bn-label is-sky">{tr.experience.current}</p>
-              <h3>{current.role} · {current.company}</h3>
-              <p className="bn-mono">{current.period}{current.location ? `, ${current.location}` : ''}</p>
-            </div>
-          )}
-          <div className="bn-tile s7 bn-stack">
-            <p className="bn-label is-peach">Stack</p>
-            <ul>{TAGS.map(tag => <li key={tag}>{tag}</li>)}</ul>
+            {STAT_VALUES.map((value, i) => (
+              <div key={i} className="bn-tile s3 bn-stat">
+                <b className={i % 2 ? 'is-peach' : 'is-sky'}>{value}</b>
+                <span>{tr.about.stats[i]}</span>
+              </div>
+            ))}
           </div>
         </section>
 
         <section id="about" className="bn-sec">
-          <h2 className="bn-title bn-title--statement">{tr.about.heading}</h2>
-          <div className="bn-cols">{tr.about.bio.map((text, i) => <p key={i}>{text}</p>)}</div>
+          <Mark n="02" label={nav[0]} />
+          <div className="bn-grid bn-grid--about1">
+            <div className="bn-tile s7 bn-abouttitle">
+              <h2 className="bn-title">{aboutHead[0]}{aboutHead.length > 1 && <span>{tr.about.headingAccent}</span>}{aboutHead[1]}</h2>
+            </div>
+            <div className="bn-tile s5 bn-aboutbio">{tr.about.bio.map((text, i) => <p key={i}>{text}</p>)}</div>
+          </div>
+          <div className="bn-grid bn-grid--about2">
+            {current && (
+              <div className="bn-tile s5 bn-now">
+                <p className="bn-label is-sky">{tr.experience.current}</p>
+                <h3>{current.role} · {current.company}</h3>
+                <p className="bn-mono">{current.period}{current.location ? `, ${current.location}` : ''}</p>
+              </div>
+            )}
+            <div className="bn-tile s7 bn-stack">
+              <p className="bn-label is-peach">Stack</p>
+              <ul>{TAGS.map(tag => <li key={tag}>{tag}</li>)}</ul>
+            </div>
+          </div>
         </section>
 
         <section id="experience" className="bn-sec">
+          <Mark n="03" label={nav[1]} />
           <h2 className="bn-title">{nav[1]}</h2>
-          <div className="bn-stackcol">
+          <div className="bn-jobs" style={{ '--cols': Math.min(Math.max(data.jobs.length, 1), 3) }}>
             {data.jobs.map((job, i) => (
               <article key={job.id || i} className={`bn-tile bn-job ${job.current ? 'is-current' : ''}`}>
                 <div className="bn-job__when"><span>{job.period}</span><span>{job.location}</span></div>
@@ -103,32 +120,38 @@ export default function Bento() {
         </section>
 
         <section id="skills" className="bn-sec">
+          <Mark n="04" label={nav[2]} />
           <h2 className="bn-title">{nav[2]}</h2>
-          <div className="bn-grid">
+          <div className="bn-grid bn-grid--skills">
             {SKILL_GROUPS.map((group, gi) => (
               <div key={gi} className="bn-tile s4 bn-skills">
                 <h3>{group.name[lang]}</h3>
-                {group.skills.map(skill => (
-                  <div key={skill.name} className="bn-skill">
-                    <p><span>{skill.name}</span><b>{skill.level}%</b></p>
-                    <div className="bn-pips" aria-hidden="true">
-                      {Array.from({ length: 10 }, (_, i) => <i key={i} style={{ '--k': i }} className={i < Math.round(skill.level / 10) ? 'is-on' : ''} />)}
+                <div className="bn-skilllist">
+                  {group.skills.map(skill => (
+                    <div key={skill.name} className="bn-skill">
+                      <p><span>{skill.name}</span><b>{skill.level}%</b></p>
+                      <div className="bn-pips" aria-hidden="true">
+                        {Array.from({ length: 10 }, (_, i) => <i key={i} style={{ '--k': i }} className={i < Math.round(skill.level / 10) ? 'is-on' : ''} />)}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         </section>
 
         <section id="edu" className="bn-sec">
+          <Mark n="05" label={nav[3]} />
           <h2 className="bn-title">{edu.sectionLabel.replace(/^\d+\.\s*/, '')}</h2>
-          <div className="bn-grid">
+          <div className="bn-grid bn-grid--edu">
             <div className="bn-tile s5 bn-edu">
               <p className="bn-label is-sky">{edu.eduHeading}</p>
-              <h3>{edu.uniName}</h3>
-              <p>{edu.major}</p>
-              <p className="bn-mono">{edu.eduYear}</p>
+              <div>
+                <h3>{edu.uniName}</h3>
+                <p className="bn-edu__major">{edu.major}</p>
+                <p className="bn-mono">{edu.eduYear}</p>
+              </div>
               <div className="bn-reads">
                 <div><b className="is-sky">3.69</b><span>GPA / 4.0</span></div>
                 <div><b className="is-peach">9.5</b><span>{edu.thesisGrade} / 10</span></div>
@@ -147,9 +170,11 @@ export default function Bento() {
             </div>
             {data.certs.map((cert, i) => (
               <div key={i} className="bn-tile s3 bn-cert">
-                <p className="bn-label">{edu.certHeading}</p>
-                <h3>{cert.name}</h3>
-                <p>{cert.issuer}{cert.file?.url && <> <a href={cert.file.url} target="_blank" rel="noreferrer">PDF</a></>}</p>
+                <div className="bn-cert__text">
+                  <p className="bn-label">{edu.certHeading}</p>
+                  <h3>{cert.name}</h3>
+                  <p>{cert.issuer}{cert.file?.url && <> <a href={cert.file.url} target="_blank" rel="noreferrer">PDF</a></>}</p>
+                </div>
                 <CertShot cert={cert} className="bn-cert__shot" />
               </div>
             ))}
@@ -157,10 +182,14 @@ export default function Bento() {
         </section>
 
         <section id="projects" className="bn-sec">
-          <h2 className="bn-title">{nav[4]}</h2>
-          <div className="bn-grid">
+          <Mark n="06" label={nav[4]} />
+          <div className="bn-head">
+            <h2 className="bn-title">{nav[4]}</h2>
+            <a className="bn-btn is-ghost" href={GITHUB_URL} target="_blank" rel="noreferrer">{tr.projects.viewAll}</a>
+          </div>
+          <div className="bn-projects">
             {data.projects.map((project, i) => (
-              <article key={project.id ?? i} className={`bn-tile bn-project ${PROJECT_SPANS[i] || 's4'} ${i === 0 ? 'is-lead' : ''}`}>
+              <article key={project.id ?? i} className={`bn-tile bn-project ${i === 0 ? 'is-lead' : ''}`}>
                 <p className="bn-project__top"><span className={`bn-chip ${STATUS_TONE[project.status] || 'is-dim'}`}>{tr.projects.statusMap[project.status] || project.status}</span><b>{project.year}</b></p>
                 <div><h3>{project.title}</h3><p className="bn-project__sub">{project.subtitle[lang]}</p></div>
                 <p className="bn-project__desc">{project.description[lang]}</p>
@@ -172,19 +201,22 @@ export default function Bento() {
               </article>
             ))}
           </div>
-          <a className="bn-btn is-ghost" href={GITHUB_URL} target="_blank" rel="noreferrer">{tr.projects.viewAll}</a>
         </section>
 
         <section id="contact" className="bn-sec">
-          <div className="bn-grid">
+          <Mark n="07" label={nav[5]} />
+          <div className="bn-grid bn-grid--contact">
             <div className="bn-tile s7 bn-contact">
               <h2 className="bn-title bn-title--contact">{tr.contact.heading}</h2>
-              <p>{tr.contact.sub}</p>
-              {SOCIALS.map(s => (
-                <a key={s.name} href={s.url} className={s.name === 'Email' ? 'bn-contact__mail' : 'bn-contact__link'} {...(s.url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}>
-                  {s.name === 'Email' ? s.handle : `${s.name} ${s.handle}`}
-                </a>
-              ))}
+              <div className="bn-contact__info">
+                <p>{tr.contact.sub}</p>
+                {SOCIALS.filter(s => s.name === 'Email').map(s => <a key={s.name} href={s.url} className="bn-contact__mail">{s.handle}</a>)}
+                <div className="bn-contact__links">
+                  {SOCIALS.filter(s => s.name !== 'Email').map(s => (
+                    <a key={s.name} href={s.url} className="bn-contact__link" {...(s.url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}>{`${s.name} ${s.handle}`}</a>
+                  ))}
+                </div>
+              </div>
             </div>
             <form className="bn-tile s5 bn-form" onSubmit={contact.submit}>
               <h3>{tr.contact.formTitle}</h3>

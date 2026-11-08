@@ -1,0 +1,117 @@
+/* Poster sections drawn as 16:9 screens (1440x810), one idea per screen. Each section is as tall as the window and its content is scaled
+   to fit both the width and the height (--u), so it fills the window without needing fullscreen. The hero keeps its own layout in poster.css.
+   Below 901px these classes only add small structure and the stacked phone/tablet layout in poster.css applies. */
+.pz-mark { display: none; }
+.pz-title--statement span { color: var(--pz-blue); }
+.pz-about { display: flex; flex-direction: column; gap: 32px; }
+.pz-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.pz-head .pz-pill.is-dark { margin-top: 0; }
+.pz-skilllist { display: flex; flex-direction: column; gap: 18px; }
+.pz-certblock { display: grid; gap: 12px; }
+.pz .pz-certblock .pz-sub { margin-top: 0; }
+.pz-cert { gap: 10px; }
+.pz-cert__text { display: flex; flex-direction: column; gap: 4px; }
+.pz-contact__row { display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; }
+.pz-contact__row > * { flex: 1 1 420px; min-width: 0; }
+.pz-contact__main { display: flex; flex-direction: column; gap: 24px; }
+.pz-contact__links { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+
+@media (min-width: 901px) {
+  .pz { --u: max(min(calc(100vw / 1440), calc(100svh / 810), 1.25px), 0.55px); }
+  .pz .pz-sec { position: relative; display: flex; flex-direction: column; min-height: 100svh; padding: calc(76 * var(--u)) calc(64 * var(--u)) calc(44 * var(--u)); }
+  .pz .pz-wrap { max-width: none; width: 100%; margin: 0; flex: 1; min-height: 0; gap: calc(32 * var(--u)); }
+  .pz .pz-mark { display: flex; position: absolute; top: calc(24 * var(--u)); left: calc(64 * var(--u)); right: calc(64 * var(--u)); justify-content: space-between; align-items: center; font: 400 max(11px, calc(13 * var(--u))) var(--pz-mono); color: var(--pz-muted); }
+  .pz .pz-mark b { font: 400 calc(24 * var(--u)) var(--pz-display); color: var(--pz-ink); }
+  .pz .is-ink .pz-mark { color: var(--pz-periwinkle); }
+  .pz .is-ink .pz-mark b { color: var(--pz-paper); }
+  .pz .is-lilac .pz-mark { color: var(--pz-text-2); }
+  .pz .is-blue .pz-mark, .pz .is-blue .pz-mark b { color: var(--pz-paper); }
+
+  /* 02 about */
+  .pz .pz-about { flex: 1; min-height: 0; flex-direction: row; gap: calc(64 * var(--u)); }
+  .pz .pz-about .pz-title { flex: 1.2 1 0; max-width: none; font-size: calc(100 * var(--u)); line-height: .95; }
+  .pz .pz-about .pz-bio { flex: 1 1 0; max-width: none; gap: calc(20 * var(--u)); padding-top: calc(12 * var(--u)); font-size: max(14px, calc(17 * var(--u))); line-height: 1.65; }
+  .pz .pz-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(32 * var(--u)); padding-top: calc(20 * var(--u)); }
+  .pz .pz-stats > div { padding: 0; border: 0; }
+  .pz .pz-stats dt { font-size: calc(88 * var(--u)); }
+  .pz .pz-stats dd { font-size: max(13px, calc(15 * var(--u))); }
+
+  /* 03 experience */
+  .pz #experience .pz-wrap { gap: calc(36 * var(--u)); }
+  .pz #experience .pz-title { font-size: calc(96 * var(--u)); }
+  .pz .pz-jobs { flex: 1; display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: calc(40 * var(--u)); align-content: start; border-top: 0; }
+  .pz .pz-job { flex-direction: column; flex-wrap: nowrap; gap: calc(16 * var(--u)); padding: calc(22 * var(--u)) 0 0; border-top: 1px solid #3a3b4c; border-bottom: 0; }
+  .pz .pz-job__when { flex: none; font-size: max(11.5px, calc(13 * var(--u))); }
+  .pz .pz-job > div { flex: none; gap: calc(12 * var(--u)); }
+  .pz .pz-job h3 { font-size: calc(44 * var(--u)); }
+  .pz .pz-job .pz-job__role { margin-top: 0; font-size: max(13.5px, calc(16 * var(--u))); }
+  .pz .pz-job__list { gap: calc(8 * var(--u)); padding-left: calc(18 * var(--u)) !important; font-size: max(12.5px, calc(14.5 * var(--u))); line-height: 1.55; }
+
+  /* 04 skills */
+  .pz #skills .pz-wrap { gap: calc(40 * var(--u)); }
+  .pz #skills .pz-title { font-size: calc(120 * var(--u)); }
+  .pz .pz-skills { flex: 1; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(48 * var(--u)); }
+  .pz .pz-skillgroup { justify-content: space-between; gap: calc(20 * var(--u)); padding-top: calc(20 * var(--u)); }
+  .pz .pz-skillgroup h3 { font-size: calc(34 * var(--u)); margin: 0; }
+  .pz .pz-skilllist { gap: calc(22 * var(--u)); }
+  .pz .pz-skill p { font-size: max(13px, calc(16 * var(--u))); }
+  .pz .pz-skill b { font-size: max(12px, calc(14 * var(--u))); }
+  .pz .pz-bar { height: calc(8 * var(--u)); margin-top: calc(8 * var(--u)); }
+
+  /* 05 education */
+  .pz #edu .pz-wrap { gap: calc(22 * var(--u)); }
+  .pz .pz-cards { flex: 1; flex-wrap: nowrap; gap: calc(24 * var(--u)); min-height: 0; }
+  .pz .pz-card { flex: 1 1 0; justify-content: space-between; gap: calc(18 * var(--u)); padding: calc(36 * var(--u)) calc(40 * var(--u)); border-radius: calc(20 * var(--u)); }
+  .pz .pz-card__tag { font-size: max(13px, calc(15 * var(--u))); }
+  .pz .pz-card__tag em { font-size: max(11.5px, calc(13 * var(--u))); }
+  .pz .pz-card h3 { font-size: calc(50 * var(--u)); line-height: 1.02; }
+  .pz .pz-card .pz-card__pub { font-size: calc(38 * var(--u)); line-height: 1.1; }
+  .pz .pz-card .pz-card__major { margin-top: calc(8 * var(--u)); font-size: max(14px, calc(18 * var(--u))); }
+  .pz .pz-card .pz-mono { margin-top: calc(4 * var(--u)); font-size: max(12px, calc(14 * var(--u))); }
+  .pz .pz-reads { gap: calc(48 * var(--u)); }
+  .pz .pz-reads b { font-size: calc(72 * var(--u)); }
+  .pz .pz-reads span { font-size: max(12px, calc(14 * var(--u))); }
+  .pz .pz-card__note { padding-top: calc(16 * var(--u)); font-size: max(13px, calc(15 * var(--u))); line-height: 1.6; }
+  .pz .pz-card p, .pz .pz-card a { font-size: max(13px, calc(15 * var(--u))); }
+  .pz .pz-certblock { gap: calc(12 * var(--u)); }
+  .pz .pz-sub { font-size: calc(28 * var(--u)); }
+  .pz .pz-certs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(16 * var(--u)); }
+  .pz .pz-cert { flex-direction: row; align-items: center; justify-content: space-between; gap: calc(12 * var(--u)); padding: calc(16 * var(--u)) calc(20 * var(--u)); border-radius: calc(14 * var(--u)); }
+  .pz .pz-cert__name { font-size: max(14px, calc(18 * var(--u))); }
+  .pz .pz-cert__issuer { font-size: max(12px, calc(14 * var(--u))); }
+  .pz .pz-cert__shot { width: calc(64 * var(--u)); margin: 0; flex: none; }
+
+  /* 06 projects */
+  .pz #projects .pz-wrap { gap: calc(18 * var(--u)); }
+  .pz .pz-head { flex: none; flex-wrap: nowrap; }
+  .pz #projects .pz-title { font-size: calc(72 * var(--u)); }
+  .pz .pz-head .pz-pill.is-dark { min-height: calc(46 * var(--u)); padding: 0 calc(24 * var(--u)); font-size: max(13px, calc(15 * var(--u))); }
+  .pz .pz-projects { flex: 1; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(calc(290 * var(--u)), 1fr); gap: calc(14 * var(--u)); }
+  .pz .pz-project { border-radius: calc(18 * var(--u)); }
+  .pz .pz-project__cover { height: calc(84 * var(--u)); padding: calc(12 * var(--u)) calc(18 * var(--u)); }
+  .pz .pz-project__cover p { font-size: max(11px, calc(12 * var(--u))); }
+  .pz .pz-project__cover p span { padding: calc(2 * var(--u)) calc(10 * var(--u)); }
+  .pz .pz-project__cover h3 { font-size: calc(34 * var(--u)); line-height: 1; }
+  .pz .pz-project__body { gap: calc(7 * var(--u)); padding: calc(14 * var(--u)) calc(18 * var(--u)); }
+  .pz .pz-project__sub { font-size: max(13px, calc(14 * var(--u))); }
+  .pz .pz-project__desc { font-size: max(12px, calc(13 * var(--u))); line-height: 1.5; }
+  .pz .pz-project .pz-mono { font-size: max(11px, calc(11.5 * var(--u))); line-height: 1.5; }
+  .pz .pz-project__links { gap: calc(18 * var(--u)); font-size: max(13px, calc(14 * var(--u))); }
+
+  /* 07 contact */
+  .pz #contact .pz-wrap { gap: calc(20 * var(--u)); }
+  .pz .pz-contact__row { flex: 1; flex-wrap: nowrap; gap: calc(64 * var(--u)); align-items: stretch; min-height: 0; }
+  .pz .pz-contact__main { flex: 1.15 1 0; justify-content: space-between; gap: calc(24 * var(--u)); }
+  .pz .pz-title--huge { font-size: calc(150 * var(--u)); line-height: .9; }
+  .pz .pz-contact__info { gap: calc(20 * var(--u)); }
+  .pz .pz-contact__info > p { max-width: 46ch; font-size: max(14px, calc(18 * var(--u))); }
+  .pz .pz-contact__mail { font-size: max(22px, calc(38 * var(--u))); }
+  .pz .pz-contact__links { gap: calc(8 * var(--u)) calc(28 * var(--u)); font-size: max(14px, calc(16 * var(--u))); }
+  .pz .pz-form { flex: 0 0 calc(480 * var(--u)); justify-content: center; gap: calc(10 * var(--u)); padding: calc(30 * var(--u)) calc(34 * var(--u)); border-radius: calc(20 * var(--u)); }
+  .pz .pz-form h3 { margin-bottom: calc(4 * var(--u)); font-size: calc(30 * var(--u)); }
+  .pz .pz-form label { font-size: max(13px, calc(14 * var(--u))); }
+  .pz .pz-form input, .pz .pz-form textarea { min-height: calc(46 * var(--u)); }
+  .pz .pz-form textarea { min-height: calc(110 * var(--u)); resize: none; }
+  .pz .pz-form button { min-height: calc(52 * var(--u)); }
+  .pz .pz-foot { margin-top: 0; padding-top: calc(14 * var(--u)); font-size: max(12px, calc(14 * var(--u))); }
+}

@@ -4,21 +4,28 @@ import { t } from '../i18n'
 import { useLandingData, SKILL_GROUPS, TAGS, STAT_VALUES, SOCIALS, GITHUB_URL } from './data'
 import { useRotatingRole, useContactForm, useLandingEffects, ScrollProgress, CertShot, LangSwitch, Bullets } from './shared'
 import './poster.css'
+import './poster-slides.css'
 
 const SECTIONS = ['about', 'experience', 'skills', 'edu', 'projects', 'contact']
 const FX = {
   reveal: [
+    ['.pz-mark b', 'left-s'], ['.pz-mark span', 'right-s'],
     ['.pz-title--statement', 'wipe-up'], ['.pz-bio p', 'fade'], ['.pz-stats > div', 'pop'],
     ['#experience .pz-title', 'wipe'], ['.pz-job:nth-child(odd)', 'left'], ['.pz-job:nth-child(even)', 'right'], ['.pz-job__list li', 'left-s'],
     ['#skills .pz-title', 'wipe'], ['.pz-skillgroup', 'flip'],
     ['.pz-card.is-ink', 'left'], ['.pz-card.is-blue', 'right'], ['.pz-sub', 'wipe'], ['.pz-cert', 'drop'],
     ['#projects .pz-title', 'wipe'], ['.pz-project', 'tilt'],
-    ['.pz-title--huge', 'wipe-up'], ['.pz-contact__info > p, .pz-contact__info > a', 'fade'], ['.pz-form', 'right'],
+    ['.pz-title--huge', 'wipe-up'], ['.pz-contact__info > *', 'fade'], ['.pz-form', 'right'],
   ],
   count: ['.pz-stats dt'],
   drift: [['.pz-title', 140], ['.pz-stats dt', -50], ['.pz-job:nth-child(odd) h3', 60], ['.pz-job:nth-child(even) h3', -60]],
 }
 const COVERS = ['is-blue', 'is-ink', 'is-lilac', 'is-paper', 'is-night', 'is-blue']
+
+/** The small "02 / 07 — About" bar at the top of every section after the hero. */
+const Mark = ({ n, label }) => (
+  <div className="pz-mark" aria-hidden="true"><b>.ME</b><span>{n} / 07 — {label}</span></div>
+)
 
 export default function Poster() {
   const { lang, setLang } = useLang()
@@ -28,6 +35,7 @@ export default function Poster() {
   const contact = useContactForm()
   const nav = tr.nav.links
   const edu = tr.edupub
+  const aboutHead = tr.about.heading.split(tr.about.headingAccent)
   const root = useRef(null)
   useLandingEffects(root, { ...FX, spy: { links: '.pz-nav nav a', ids: SECTIONS } })
 
@@ -58,21 +66,23 @@ export default function Poster() {
       </section>
 
       <section id="about" className="pz-sec">
+        <Mark n="02" label={nav[0]} />
         <div className="pz-wrap">
-          <h2 className="pz-title pz-title--statement">{tr.about.heading}</h2>
-          <div className="pz-split">
+          <div className="pz-about">
+            <h2 className="pz-title pz-title--statement">{aboutHead[0]}{aboutHead.length > 1 && <span>{tr.about.headingAccent}</span>}{aboutHead[1]}</h2>
             <div className="pz-bio">{tr.about.bio.map((text, i) => <p key={i}>{text}</p>)}</div>
-            <dl className="pz-stats">
-              {STAT_VALUES.map((value, i) => <div key={i}><dt>{value}</dt><dd>{tr.about.stats[i]}</dd></div>)}
-            </dl>
           </div>
+          <dl className="pz-stats">
+            {STAT_VALUES.map((value, i) => <div key={i}><dt>{value}</dt><dd>{tr.about.stats[i]}</dd></div>)}
+          </dl>
         </div>
       </section>
 
       <section id="experience" className="pz-sec is-ink">
+        <Mark n="03" label={nav[1]} />
         <div className="pz-wrap">
           <h2 className="pz-title">{nav[1]}</h2>
-          <div className="pz-jobs">
+          <div className="pz-jobs" style={{ '--cols': Math.min(Math.max(data.jobs.length, 1), 3) }}>
             {data.jobs.map((job, i) => (
               <article key={job.id || i} className="pz-job">
                 <p className="pz-job__when">{job.period}<br />{job.location}{job.current && <><br /><b>{tr.experience.current}</b></>}</p>
@@ -88,32 +98,38 @@ export default function Poster() {
       </section>
 
       <section id="skills" className="pz-sec">
+        <Mark n="04" label={nav[2]} />
         <div className="pz-wrap">
           <h2 className="pz-title">{nav[2]}</h2>
           <div className="pz-skills">
             {SKILL_GROUPS.map((group, gi) => (
               <div key={gi} className="pz-skillgroup">
                 <h3>{group.name[lang]}</h3>
-                {group.skills.map(skill => (
-                  <div key={skill.name} className="pz-skill">
-                    <p><span>{skill.name}</span><b>{skill.level}%</b></p>
-                    <div className="pz-bar"><div style={{ '--lv': skill.level / 100 }} /></div>
-                  </div>
-                ))}
+                <div className="pz-skilllist">
+                  {group.skills.map(skill => (
+                    <div key={skill.name} className="pz-skill">
+                      <p><span>{skill.name}</span><b>{skill.level}%</b></p>
+                      <div className="pz-bar"><div style={{ '--lv': skill.level / 100 }} /></div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="edu" className="pz-sec pz-sec--tight">
+      <section id="edu" className="pz-sec">
+        <Mark n="05" label={nav[3]} />
         <div className="pz-wrap">
           <div className="pz-cards">
             <article className="pz-card is-ink">
               <p className="pz-card__tag">{edu.eduHeading}</p>
-              <h3>{edu.uniName}</h3>
-              <p>{edu.major}</p>
-              <p className="pz-mono">{edu.eduYear}</p>
+              <div>
+                <h3>{edu.uniName}</h3>
+                <p className="pz-card__major">{edu.major}</p>
+                <p className="pz-mono">{edu.eduYear}</p>
+              </div>
               <div className="pz-reads">
                 <div><b>3.69</b><span>GPA / 4.0</span></div>
                 <div><b>9.5</b><span>{edu.thesisGrade} / 10</span></div>
@@ -129,22 +145,30 @@ export default function Poster() {
               </article>
             ))}
           </div>
-          <h3 className="pz-sub">{edu.certHeading}</h3>
-          <div className="pz-certs">
-            {data.certs.map((cert, i) => (
-              <div key={i} className="pz-cert">
-                <p className="pz-cert__name">{cert.name}</p>
-                <p className="pz-cert__issuer">{cert.issuer}{cert.file?.url && <> <a href={cert.file.url} target="_blank" rel="noreferrer">PDF</a></>}</p>
-                <CertShot cert={cert} className="pz-cert__shot" />
-              </div>
-            ))}
+          <div className="pz-certblock">
+            <h3 className="pz-sub">{edu.certHeading}</h3>
+            <div className="pz-certs">
+              {data.certs.map((cert, i) => (
+                <div key={i} className="pz-cert">
+                  <div className="pz-cert__text">
+                    <p className="pz-cert__name">{cert.name}</p>
+                    <p className="pz-cert__issuer">{cert.issuer}{cert.file?.url && <> <a href={cert.file.url} target="_blank" rel="noreferrer">PDF</a></>}</p>
+                  </div>
+                  <CertShot cert={cert} className="pz-cert__shot" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       <section id="projects" className="pz-sec is-lilac">
+        <Mark n="06" label={nav[4]} />
         <div className="pz-wrap">
-          <h2 className="pz-title">{nav[4]}</h2>
+          <div className="pz-head">
+            <h2 className="pz-title">{nav[4]}</h2>
+            <a className="pz-pill is-dark" href={GITHUB_URL} target="_blank" rel="noreferrer">{tr.projects.viewAll}</a>
+          </div>
           <div className="pz-projects">
             {data.projects.map((project, i) => (
               <article key={project.id ?? i} className="pz-project">
@@ -164,21 +188,24 @@ export default function Poster() {
               </article>
             ))}
           </div>
-          <a className="pz-pill is-dark" href={GITHUB_URL} target="_blank" rel="noreferrer">{tr.projects.viewAll}</a>
         </div>
       </section>
 
       <section id="contact" className="pz-sec is-blue pz-contact">
+        <Mark n="07" label={nav[5]} />
         <div className="pz-wrap">
-          <h2 className="pz-title pz-title--huge">{tr.contact.heading}</h2>
-          <div className="pz-split">
-            <div className="pz-contact__info">
-              <p>{tr.contact.sub}</p>
-              {SOCIALS.map(s => (
-                <a key={s.name} href={s.url} className={s.name === 'Email' ? 'pz-contact__mail' : 'pz-contact__link'} {...(s.url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}>
-                  {s.name === 'Email' ? s.handle : `${s.name} ${s.handle}`}
-                </a>
-              ))}
+          <div className="pz-contact__row">
+            <div className="pz-contact__main">
+              <h2 className="pz-title pz-title--huge">{tr.contact.heading}</h2>
+              <div className="pz-contact__info">
+                <p>{tr.contact.sub}</p>
+                {SOCIALS.filter(s => s.name === 'Email').map(s => <a key={s.name} href={s.url} className="pz-contact__mail">{s.handle}</a>)}
+                <div className="pz-contact__links">
+                  {SOCIALS.filter(s => s.name !== 'Email').map(s => (
+                    <a key={s.name} href={s.url} className="pz-contact__link" {...(s.url.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {})}>{`${s.name} ${s.handle}`}</a>
+                  ))}
+                </div>
+              </div>
             </div>
             <form className="pz-form" onSubmit={contact.submit}>
               <h3>{tr.contact.formTitle}</h3>
