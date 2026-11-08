@@ -13,7 +13,7 @@
 .pz-mono { font-family: var(--pz-mono); font-size: 13px; line-height: 1.7; color: var(--pz-muted); }
 
 /* hero */
-.pz-hero { --pz-gutter: max(48px, calc((100vw - 1440px) / 2)); --pz-name: clamp(96px, min(21vw, calc((100svh - 430px) / 1.8)), 300px); position: relative; overflow: clip; display: flex; flex-direction: column; background: var(--pz-blue); color: var(--pz-paper); min-height: clamp(620px, 100svh, 1000px); }
+.pz-hero { --pz-gutter: max(48px, calc((100vw - 1760px) / 2)); --pz-name: clamp(96px, min(21vw, calc((100svh - 430px) / 1.8)), 300px); position: relative; overflow: clip; display: flex; flex-direction: column; background: var(--pz-blue); color: var(--pz-paper); min-height: clamp(620px, 100svh, 1000px); }
 .pz-nav { position: relative; z-index: 3; flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; padding: 20px var(--pz-gutter); }
 .pz-logo { font-family: var(--pz-display); font-size: 30px; margin-right: auto; }
 .pz-nav nav { display: flex; flex-wrap: wrap; gap: 4px 28px; font-size: 15px; font-weight: 500; }
@@ -36,7 +36,7 @@
   .pz-hero .pz-portrait { right: 0; }
   .pz-hero .pz-intro { position: absolute; flex: none; width: 300px; padding: 0; left: calc(var(--pz-gutter) + 2.1 * var(--pz-name) + 40px); top: calc(88px + 0.9 * var(--pz-name) - 130px); }
 }
-.pz-portrait { position: absolute; z-index: 2; right: max(0px, calc((100vw - 1320px) / 2)); bottom: 48px; width: min(900px, 86vw, calc(96svh - 48px)); height: auto; }
+.pz-portrait { position: absolute; z-index: 2; right: max(0px, calc((100vw - 1640px) / 2)); bottom: 48px; width: min(900px, 86vw, calc(96svh - 48px)); height: auto; }
 @media (min-width: 1700px) { .pz-portrait { -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); mask-image: linear-gradient(to right, #000 88%, transparent); } }
 .pz-intro > * { flex-shrink: 0; }
 .pz-intro { position: relative; z-index: 3; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; width: calc(460px + var(--pz-gutter)); max-width: 100%; padding: 20px 0 0 var(--pz-gutter); }
