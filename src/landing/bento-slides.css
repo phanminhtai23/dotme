@@ -148,9 +148,3 @@
   .bn .bn-form button { min-height: calc(52 * var(--u)); margin-top: calc(6 * var(--u)); }
   .bn .bn-foot { margin-top: 0; font-size: max(12px, calc(14 * var(--u))); }
 }
-
-/* page-by-page scrolling by touch: near the end of a screen the window settles on the next one; a section taller than the window can still be read */
-@media (max-width: 900px) {
-  html:has(.bn) { scroll-snap-type: y mandatory; }
-  .bn .bn-sec { scroll-snap-align: start; }
-}

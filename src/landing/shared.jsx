@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { api } from '../api'
 import { certificateThumbnailUrl } from './data'
 import './fx.css'
@@ -57,20 +58,32 @@ export function useContactForm() {
   return { form, setField, submit, sending, sent }
 }
 
-/** Certificate picture that opens a full-size overlay. */
+/** Certificate picture that opens a full-size overlay. The overlay is rendered on <body>: inside a card it would be positioned and clipped
+ *  by the card's reveal animation (transform / clip-path make a fixed element relative to that card). */
 export function CertShot({ cert, className }) {
   const [open, setOpen] = useState(false)
+  useEffect(() => {
+    if (!open) return undefined
+    const onKey = e => { if (e.key === 'Escape') setOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
   if (!cert.image?.url) return null
   return (
     <>
-      <button type="button" className={className} onClick={() => setOpen(true)} aria-label={cert.name}>
+      <button type="button" className={className} onClick={() => setOpen(true)} aria-label={cert.name} style={{ WebkitTapHighlightColor: 'transparent' }}>
         <img src={certificateThumbnailUrl(cert.image.url)} alt="" loading="lazy" decoding="async" />
       </button>
-      {open && (
+      {open && createPortal(
         <div role="dialog" aria-modal="true" aria-label={cert.name} onClick={() => setOpen(false)}
-          style={{ position:'fixed', inset:0, zIndex:9999, background:'rgba(0,0,0,0.9)', display:'flex', alignItems:'center', justifyContent:'center', padding:20, cursor:'zoom-out' }}>
-          <img src={cert.image.url} alt={cert.name} style={{ maxWidth:'92vw', maxHeight:'92vh', objectFit:'contain', borderRadius:12 }} />
-        </div>
+          style={{ position:'fixed', inset:0, zIndex:9999, background:'rgba(236,238,248,0.9)', WebkitBackdropFilter:'blur(14px)', backdropFilter:'blur(14px)', display:'flex', alignItems:'center', justifyContent:'center', padding:20, cursor:'zoom-out', overscrollBehavior:'contain' }}>
+          <button type="button" autoFocus aria-label="Đóng / Close" title="Đóng / Close" onClick={() => setOpen(false)}
+            style={{ position:'fixed', top:'max(16px, env(safe-area-inset-top))', right:'max(16px, env(safe-area-inset-right))', width:52, height:52, borderRadius:'50%', border:'2px solid #fff', background:'#0b0d12', color:'#fff', display:'grid', placeItems:'center', cursor:'pointer', padding:0, boxShadow:'0 6px 24px rgba(10,20,90,0.45)', WebkitTapHighlightColor:'transparent' }}>
+            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M4 4l14 14M18 4L4 18" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" /></svg>
+          </button>
+          <img src={cert.image.url} alt={cert.name} style={{ maxWidth:'92vw', maxHeight:'92dvh', objectFit:'contain', borderRadius:12, boxShadow:'0 20px 60px rgba(10,20,90,0.35)' }} />
+        </div>,
+        document.body,
       )}
     </>
   )
@@ -278,6 +291,7 @@ export function usePageScroll(ref, selector) {
         if (now > animEnd && gap > SETTLE) busy = false
         else { e.preventDefault(); return }
       }
+      if (e.target instanceof Element && e.target.closest('[aria-modal="true"]')) { e.preventDefault(); return }
       if (inScrollable(e.target)) return
       const vh = window.innerHeight
       const y = window.scrollY
