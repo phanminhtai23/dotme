@@ -25,7 +25,7 @@ function Thumb({ id, name }) {
   }, [])
 
   return (
-    <div className="ad-lp-thumb" ref={box} style={{ height: FRAME_H * scale }}>
+    <div className="dm-lp-thumb" ref={box} style={{ height: FRAME_H * scale }}>
       <iframe
         title={`Xem trước ${name}`}
         src={`/preview/${id}?embed=1`}
@@ -69,20 +69,20 @@ export default function AdminLanding() {
     <section className="admin-section" aria-label="Giao diện trang chủ">
       <p className="admin-section__total">Chọn giao diện hiển thị ở trang chủ. Mỗi bản dùng chung nội dung, chỉ khác cách trình bày.</p>
       {notice && <div role={notice.type === 'error' ? 'alert' : 'status'} className={`admin-section__notice ${notice.type === 'error' ? 'is-error' : ''}`}>{notice.text}</div>}
-      <div className="ad-versions">
+      <div className="dm-versions">
         {LANDING_VERSIONS.map(version => {
           const active = version.id === current
           return (
-            <article key={version.id} className={`admin-section__panel ad-version ${active ? 'is-active' : ''}`}>
+            <article key={version.id} className={`admin-section__panel dm-version ${active ? 'is-active' : ''}`}>
               <Thumb id={version.id} name={version.name} />
-              <div className="ad-version__head">
+              <div className="dm-version__head">
                 <h3>{version.name}</h3>
                 {active && <span className="admin-section__badge is-green"><AdminIcon name="check" size={12} />Đang dùng</span>}
               </div>
-              <p className="ad-version__desc">{version.description}</p>
-              <div className="ad-version__actions">
-                <a className="ad-btn ad-btn--sm" href={`/preview/${version.id}`} target="_blank" rel="noreferrer"><AdminIcon name="eye" size={15} />Xem trước</a>
-                <button type="button" className="ad-btn ad-btn--sm ad-btn--primary" disabled={active || Boolean(saving)} onClick={() => apply(version)}>
+              <p className="dm-version__desc">{version.description}</p>
+              <div className="dm-version__actions">
+                <a className="dm-btn dm-btn--sm" href={`/preview/${version.id}`} target="_blank" rel="noreferrer"><AdminIcon name="eye" size={15} />Xem trước</a>
+                <button type="button" className="dm-btn dm-btn--sm dm-btn--primary" disabled={active || Boolean(saving)} onClick={() => apply(version)}>
                   {saving === version.id ? 'Đang áp dụng...' : active ? 'Đang áp dụng' : 'Áp dụng'}
                 </button>
               </div>

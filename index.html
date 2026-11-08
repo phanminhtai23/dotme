@@ -8,6 +8,42 @@
     <link rel="preload" as="font" type="font/woff2" href="/fonts/be-vietnam-pro-400-latin.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/be-vietnam-pro-500-latin.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/anton-400-latin.woff2" crossorigin />
+    <script>
+      // If the app has not put anything visible on screen after a few seconds (a script that failed to load, an error, or an
+      // extension hiding the page), show what happened instead of a blank page.
+      (function () {
+        var problems = [];
+        window.addEventListener('error', function (e) {
+          var t = e.target;
+          if (t && (t.src || t.href)) problems.push('Không tải được: ' + (t.src || t.href));
+          else if (e.message) problems.push('Lỗi: ' + e.message);
+        }, true);
+        window.addEventListener('unhandledrejection', function (e) { problems.push('Lỗi: ' + (e.reason && e.reason.message || e.reason)); });
+        setTimeout(function () {
+          var root = document.getElementById('root');
+          if (!root || (root.innerText || '').replace(/\s/g, '').length > 20) return;
+          var box = document.createElement('div');
+          box.setAttribute('role', 'alert');
+          box.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:24px;background:#0b0d12;color:#e8eaf0;font:15px/1.5 system-ui,sans-serif';
+          var card = document.createElement('div');
+          card.style.cssText = 'max-width:640px;width:100%;background:#12151c;border:1px solid #343b4b;border-radius:12px;padding:24px';
+          var h = document.createElement('h1');
+          h.style.cssText = 'margin:0;font-size:20px';
+          h.textContent = 'Trang chưa hiển thị được nội dung';
+          var p = document.createElement('p');
+          p.style.cssText = 'margin:8px 0 0;color:#b3b9c8';
+          p.textContent = 'Thử tải lại, hoặc tắt tiện ích chặn quảng cáo / chế độ tối của trình duyệt cho trang này. Chụp màn hình này gửi người quản trị nếu vẫn bị.';
+          var pre = document.createElement('pre');
+          pre.style.cssText = 'margin:12px 0 0;padding:12px;background:#0b0d12;border-radius:8px;font-size:12px;white-space:pre-wrap;overflow:auto;max-height:220px';
+          pre.textContent = (problems.length ? problems.join('
+') : 'Không có lỗi nào được ghi lại.') + '
+
+' + location.href + '
+' + navigator.userAgent;
+          card.appendChild(h); card.appendChild(p); card.appendChild(pre); box.appendChild(card); document.body.appendChild(box);
+        }, 6000);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

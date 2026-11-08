@@ -17,34 +17,34 @@ async function saveContent(section, initial, payload) {
 }
 
 function Label({ children }) {
-  return <span className="ad-label">{children}</span>
+  return <span className="dm-label">{children}</span>
 }
 
 function Field({ label, children }) {
-  return <div className="ad-field"><Label>{label}</Label>{children}</div>
+  return <div className="dm-field"><Label>{label}</Label>{children}</div>
 }
 
 function GradBtn({ children, onClick, color='purple', style={}, type='button', disabled=false }) {
   return (
-    <button type={type} onClick={onClick} disabled={disabled} className={`ad-btn ${color === 'red' ? 'ad-btn--danger' : 'ad-btn--primary'}`} style={style}>{children}</button>
+    <button type={type} onClick={onClick} disabled={disabled} className={`dm-btn ${color === 'red' ? 'dm-btn--danger' : 'dm-btn--primary'}`} style={style}>{children}</button>
   )
 }
 
 function CancelBtn({ onClose }) {
-  return <button type="button" className="ad-btn" onClick={onClose}>Huỷ</button>
+  return <button type="button" className="dm-btn" onClick={onClose}>Huỷ</button>
 }
 
 function SaveLabel({ saving }) {
-  return saving ? <><AdminIcon name="loader" size={15} className="ad-spin" /> Đang lưu...</> : <><AdminIcon name="save" size={15} /> Lưu</>
+  return saving ? <><AdminIcon name="loader" size={15} className="dm-spin" /> Đang lưu...</> : <><AdminIcon name="save" size={15} /> Lưu</>
 }
 
 function Modal({ title, onClose, children }) {
   return (
-    <div className="ad-modal-backdrop" style={{ zIndex:300 }} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="ad-modal ad-modal--lg" role="dialog" aria-modal="true" aria-label={title} onMouseDown={e => e.stopPropagation()}>
-        <div className="ad-modal__head">
+    <div className="dm-modal-backdrop" style={{ zIndex:300 }} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="dm-modal dm-modal--lg" role="dialog" aria-modal="true" aria-label={title} onMouseDown={e => e.stopPropagation()}>
+        <div className="dm-modal__head">
           <h3>{title}</h3>
-          <button type="button" className="ad-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
+          <button type="button" className="dm-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
         </div>
         {children}
       </div>
@@ -70,22 +70,22 @@ function ExperienceForm({ initial, onSave, onClose }) {
   }
 
   return (
-    <form onSubmit={handle} className="ad-form">
-      <div className="ad-grid-2">
-        <Field label="Công ty"><input className="ad-input" value={form.company} required onChange={e => setForm(f=>({...f,company:e.target.value}))} /></Field>
-        <Field label="Chức vụ"><input className="ad-input" value={form.role} required onChange={e => setForm(f=>({...f,role:e.target.value}))} /></Field>
-        <Field label="Thời gian (vd: Jan 2026 – Present)"><input className="ad-input" value={form.period} onChange={e => setForm(f=>({...f,period:e.target.value}))} /></Field>
-        <Field label="Địa điểm"><input className="ad-input" value={form.location} onChange={e => setForm(f=>({...f,location:e.target.value}))} /></Field>
+    <form onSubmit={handle} className="dm-form">
+      <div className="dm-grid-2">
+        <Field label="Công ty"><input className="dm-input" value={form.company} required onChange={e => setForm(f=>({...f,company:e.target.value}))} /></Field>
+        <Field label="Chức vụ"><input className="dm-input" value={form.role} required onChange={e => setForm(f=>({...f,role:e.target.value}))} /></Field>
+        <Field label="Thời gian (vd: Jan 2026 – Present)"><input className="dm-input" value={form.period} onChange={e => setForm(f=>({...f,period:e.target.value}))} /></Field>
+        <Field label="Địa điểm"><input className="dm-input" value={form.location} onChange={e => setForm(f=>({...f,location:e.target.value}))} /></Field>
       </div>
-      <label className="ad-check">
+      <label className="dm-check">
         <input type="checkbox" checked={form.current} onChange={e => setForm(f=>({...f,current:e.target.checked}))} />
         Đang làm hiện tại
       </label>
       <Field label="Bullets (mỗi dòng 1 mục, HTML được phép: <strong>text</strong>)">
-        <textarea className="ad-input" value={form.bullets} onChange={e => setForm(f=>({...f,bullets:e.target.value}))} placeholder="Mô tả công việc 1&#10;Mô tả công việc 2" />
+        <textarea className="dm-input" value={form.bullets} onChange={e => setForm(f=>({...f,bullets:e.target.value}))} placeholder="Mô tả công việc 1&#10;Mô tả công việc 2" />
       </Field>
-      {error && <div role="alert" className="ad-alert">Không thể lưu: {error}</div>}
-      <div className="ad-actions">
+      {error && <div role="alert" className="dm-alert">Không thể lưu: {error}</div>}
+      <div className="dm-actions">
         <GradBtn type="submit" disabled={saving} style={{ flex:1 }}><SaveLabel saving={saving} /></GradBtn>
         <CancelBtn onClose={onClose} />
       </div>
@@ -114,41 +114,41 @@ function ProjectForm({ initial, onSave, onClose }) {
   }
 
   return (
-    <form onSubmit={handle} className="ad-form">
-      <div className="ad-grid-2">
-        <Field label="Tên dự án"><input className="ad-input" value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} /></Field>
-        <div className="ad-field">
+    <form onSubmit={handle} className="dm-form">
+      <div className="dm-grid-2">
+        <Field label="Tên dự án"><input className="dm-input" value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} /></Field>
+        <div className="dm-field">
           <Label>Icon (emoji)</Label>
-          <input className="ad-input" value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} maxLength={4} />
+          <input className="dm-input" value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} maxLength={4} />
         </div>
-        <Field label="Subtitle (VI)"><input className="ad-input" value={form.subtitleVi} onChange={e => setForm(f=>({...f,subtitleVi:e.target.value}))} /></Field>
-        <Field label="Subtitle (EN)"><input className="ad-input" value={form.subtitleEn} onChange={e => setForm(f=>({...f,subtitleEn:e.target.value}))} /></Field>
+        <Field label="Subtitle (VI)"><input className="dm-input" value={form.subtitleVi} onChange={e => setForm(f=>({...f,subtitleVi:e.target.value}))} /></Field>
+        <Field label="Subtitle (EN)"><input className="dm-input" value={form.subtitleEn} onChange={e => setForm(f=>({...f,subtitleEn:e.target.value}))} /></Field>
       </div>
-      <Field label="Mô tả (VI)"><textarea className="ad-input" value={form.descVi} onChange={e => setForm(f=>({...f,descVi:e.target.value}))} /></Field>
-      <Field label="Mô tả (EN)"><textarea className="ad-input" value={form.descEn} onChange={e => setForm(f=>({...f,descEn:e.target.value}))} /></Field>
-      <Field label="Tags (phân cách bằng dấu phẩy)"><input className="ad-input" value={form.tags} onChange={e => setForm(f=>({...f,tags:e.target.value}))} placeholder="React, FastAPI, Docker" /></Field>
-      <div className="ad-grid-3">
+      <Field label="Mô tả (VI)"><textarea className="dm-input" value={form.descVi} onChange={e => setForm(f=>({...f,descVi:e.target.value}))} /></Field>
+      <Field label="Mô tả (EN)"><textarea className="dm-input" value={form.descEn} onChange={e => setForm(f=>({...f,descEn:e.target.value}))} /></Field>
+      <Field label="Tags (phân cách bằng dấu phẩy)"><input className="dm-input" value={form.tags} onChange={e => setForm(f=>({...f,tags:e.target.value}))} placeholder="React, FastAPI, Docker" /></Field>
+      <div className="dm-grid-3">
         <div>
           <Label>Màu</Label>
-          <div className="ad-swatches">
+          <div className="dm-swatches">
             {COLOR_PRESETS.map(c => (
-              <button key={c} type="button" className="ad-swatch" style={{ '--swatch':c }} aria-pressed={form.color===c} aria-label={`Màu ${c}`} onClick={() => setForm(f=>({...f,color:c}))} />
+              <button key={c} type="button" className="dm-swatch" style={{ '--swatch':c }} aria-pressed={form.color===c} aria-label={`Màu ${c}`} onClick={() => setForm(f=>({...f,color:c}))} />
             ))}
           </div>
         </div>
         <Field label="Status">
-          <select className="ad-input" value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}>
+          <select className="dm-input" value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </Field>
-        <Field label="Năm"><input className="ad-input" value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} maxLength={4} /></Field>
+        <Field label="Năm"><input className="dm-input" value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} maxLength={4} /></Field>
       </div>
-      <div className="ad-grid-2">
-        <Field label="GitHub URL"><input className="ad-input" value={form.githubUrl} onChange={e => setForm(f=>({...f,githubUrl:e.target.value}))} placeholder="https://github.com/..." /></Field>
-        <Field label="Live URL"><input className="ad-input" value={form.liveUrl} onChange={e => setForm(f=>({...f,liveUrl:e.target.value}))} placeholder="https://..." /></Field>
+      <div className="dm-grid-2">
+        <Field label="GitHub URL"><input className="dm-input" value={form.githubUrl} onChange={e => setForm(f=>({...f,githubUrl:e.target.value}))} placeholder="https://github.com/..." /></Field>
+        <Field label="Live URL"><input className="dm-input" value={form.liveUrl} onChange={e => setForm(f=>({...f,liveUrl:e.target.value}))} placeholder="https://..." /></Field>
       </div>
-      {error && <div role="alert" className="ad-alert">Không thể lưu: {error}</div>}
-      <div className="ad-actions">
+      {error && <div role="alert" className="dm-alert">Không thể lưu: {error}</div>}
+      <div className="dm-actions">
         <GradBtn type="submit" disabled={saving} style={{ flex:1 }}><SaveLabel saving={saving} /></GradBtn>
         <CancelBtn onClose={onClose} />
       </div>
@@ -184,20 +184,20 @@ function SingleUpload({ label, value, onChange, accept, kind }) {
   }
 
   return (
-    <div className="ad-field">
+    <div className="dm-field">
       <Label>{label}</Label>
       {value ? (
-        <div className="ad-upload-row">
+        <div className="dm-upload-row">
           {kind === 'image' ? (
-            <img className="ad-upload-row__img" src={value.url} alt="" />
+            <img className="dm-upload-row__img" src={value.url} alt="" />
           ) : (
-            <a className="ad-upload-row__file" href={value.url} target="_blank" rel="noreferrer"><AdminIcon name="file" size={15} /> {value.name || 'Xem file'}</a>
+            <a className="dm-upload-row__file" href={value.url} target="_blank" rel="noreferrer"><AdminIcon name="file" size={15} /> {value.name || 'Xem file'}</a>
           )}
-          <button type="button" className="ad-btn ad-btn--danger ad-btn--sm" onClick={remove}>Xóa</button>
+          <button type="button" className="dm-btn dm-btn--danger dm-btn--sm" onClick={remove}>Xóa</button>
         </div>
       ) : (
-        <label className={`ad-upload-btn ${uploading ? 'is-busy' : ''}`}>
-          {uploading ? <><AdminIcon name="loader" size={15} className="ad-spin" /> Đang tải...</> : <><AdminIcon name="upload" size={15} /> {kind === 'image' ? 'Tải ảnh' : 'Tải PDF'}</>}
+        <label className={`dm-upload-btn ${uploading ? 'is-busy' : ''}`}>
+          {uploading ? <><AdminIcon name="loader" size={15} className="dm-spin" /> Đang tải...</> : <><AdminIcon name="upload" size={15} /> {kind === 'image' ? 'Tải ảnh' : 'Tải PDF'}</>}
           <input type="file" accept={accept} hidden onChange={e => handleFile(e.target.files[0])} />
         </label>
       )}
@@ -219,26 +219,26 @@ function CertForm({ initial, onSave, onClose }) {
   }
 
   return (
-    <form onSubmit={handle} className="ad-form">
-      <div className="ad-grid-2">
-        <Field label="Tên chứng chỉ"><input className="ad-input" value={form.name} required onChange={e => setForm(f=>({...f,name:e.target.value}))} /></Field>
-        <Field label="Tổ chức cấp"><input className="ad-input" value={form.issuer} onChange={e => setForm(f=>({...f,issuer:e.target.value}))} /></Field>
-        <Field label="Icon (emoji)"><input className="ad-input" value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} maxLength={4} /></Field>
+    <form onSubmit={handle} className="dm-form">
+      <div className="dm-grid-2">
+        <Field label="Tên chứng chỉ"><input className="dm-input" value={form.name} required onChange={e => setForm(f=>({...f,name:e.target.value}))} /></Field>
+        <Field label="Tổ chức cấp"><input className="dm-input" value={form.issuer} onChange={e => setForm(f=>({...f,issuer:e.target.value}))} /></Field>
+        <Field label="Icon (emoji)"><input className="dm-input" value={form.icon} onChange={e => setForm(f=>({...f,icon:e.target.value}))} maxLength={4} /></Field>
         <div>
           <Label>Màu accent</Label>
-          <div className="ad-swatches">
+          <div className="dm-swatches">
             {COLOR_PRESETS.map(c => (
-              <button key={c} type="button" className="ad-swatch" style={{ '--swatch':c }} aria-pressed={form.color===c} aria-label={`Màu ${c}`} onClick={() => setForm(f=>({...f,color:c}))} />
+              <button key={c} type="button" className="dm-swatch" style={{ '--swatch':c }} aria-pressed={form.color===c} aria-label={`Màu ${c}`} onClick={() => setForm(f=>({...f,color:c}))} />
             ))}
           </div>
         </div>
       </div>
-      <div className="ad-grid-2">
+      <div className="dm-grid-2">
         <SingleUpload label="Ảnh chứng chỉ (hiện cạnh tên)" kind="image" accept="image/*" value={form.image} onChange={image => setForm(f => ({ ...f, image }))} />
         <SingleUpload label="File PDF chứng chỉ" kind="pdf" accept="application/pdf" value={form.file} onChange={file => setForm(f => ({ ...f, file }))} />
       </div>
-      {error && <div role="alert" className="ad-alert">Không thể lưu: {error}</div>}
-      <div className="ad-actions">
+      {error && <div role="alert" className="dm-alert">Không thể lưu: {error}</div>}
+      <div className="dm-actions">
         <GradBtn type="submit" disabled={saving} style={{ flex:1 }}><SaveLabel saving={saving} /></GradBtn>
         <CancelBtn onClose={onClose} />
       </div>
@@ -274,18 +274,18 @@ function PubForm({ initial, onSave, onClose }) {
   }
 
   return (
-    <form onSubmit={handle} className="ad-form">
-      <Field label="Tên bài báo / paper"><textarea className="ad-input" style={{ minHeight:60 }} value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} /></Field>
+    <form onSubmit={handle} className="dm-form">
+      <Field label="Tên bài báo / paper"><textarea className="dm-input" style={{ minHeight:60 }} value={form.title} required onChange={e => setForm(f=>({...f,title:e.target.value}))} /></Field>
       <Field label="Tác giả (mỗi dòng 1 người, *Tên = highlight)">
-        <textarea className="ad-input" value={form.authorsRaw} onChange={e => setForm(f=>({...f,authorsRaw:e.target.value}))} placeholder="Tran Van A&#10;*Nguyen Van B (tác giả chính)&#10;Le Van C" />
+        <textarea className="dm-input" value={form.authorsRaw} onChange={e => setForm(f=>({...f,authorsRaw:e.target.value}))} placeholder="Tran Van A&#10;*Nguyen Van B (tác giả chính)&#10;Le Van C" />
       </Field>
-      <div className="ad-grid-2" style={!isMobile ? { gridTemplateColumns:'1fr 3fr' } : undefined}>
-        <Field label="Năm"><input className="ad-input" value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} maxLength={4} /></Field>
-        <Field label="Hội nghị / Journal"><input className="ad-input" value={form.conference} onChange={e => setForm(f=>({...f,conference:e.target.value}))} /></Field>
+      <div className="dm-grid-2" style={!isMobile ? { gridTemplateColumns:'1fr 3fr' } : undefined}>
+        <Field label="Năm"><input className="dm-input" value={form.year} onChange={e => setForm(f=>({...f,year:e.target.value}))} maxLength={4} /></Field>
+        <Field label="Hội nghị / Journal"><input className="dm-input" value={form.conference} onChange={e => setForm(f=>({...f,conference:e.target.value}))} /></Field>
       </div>
-      <Field label="Link (tùy chọn)"><input className="ad-input" value={form.link} onChange={e => setForm(f=>({...f,link:e.target.value}))} placeholder="https://..." /></Field>
-      {error && <div role="alert" className="ad-alert">Không thể lưu: {error}</div>}
-      <div className="ad-actions">
+      <Field label="Link (tùy chọn)"><input className="dm-input" value={form.link} onChange={e => setForm(f=>({...f,link:e.target.value}))} placeholder="https://..." /></Field>
+      {error && <div role="alert" className="dm-alert">Không thể lưu: {error}</div>}
+      <div className="dm-actions">
         <GradBtn type="submit" disabled={saving} style={{ flex:1 }}><SaveLabel saving={saving} /></GradBtn>
         <CancelBtn onClose={onClose} />
       </div>

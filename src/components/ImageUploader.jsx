@@ -41,20 +41,20 @@ export default function ImageUploader({ images = [], onChange, label = 'Album �
 
   return (
     <div>
-      <span className="ad-uploader__label">{label} ({images.length} ảnh)</span>
+      <span className="dm-uploader__label">{label} ({images.length} ảnh)</span>
 
-      <div className="ad-uploader__grid">
+      <div className="dm-uploader__grid">
         {images.map((img, i) => (
-          <div key={i} className="ad-thumb" onClick={() => setLightbox(img.url)}>
+          <div key={i} className="dm-thumb" onClick={() => setLightbox(img.url)}>
             <img src={img.url} alt={img.name || ''} />
             <button type="button" aria-label={`Xóa ảnh ${img.name || i + 1}`} onClick={e => { e.stopPropagation(); remove(i) }}><AdminIcon name="close" size={12} /></button>
           </div>
         ))}
 
         {/* Upload button */}
-        <label className={`ad-uploader__add ${uploading ? 'is-busy' : ''}`}>
+        <label className={`dm-uploader__add ${uploading ? 'is-busy' : ''}`}>
           {uploading ? (
-            <AdminIcon name="loader" size={20} className="ad-spin" />
+            <AdminIcon name="loader" size={20} className="dm-spin" />
           ) : (
             <>
               <AdminIcon name="upload" size={20} />
@@ -68,7 +68,7 @@ export default function ImageUploader({ images = [], onChange, label = 'Album �
 
       {/* Lightbox */}
       {lightbox && (
-        <div className="ad-lightbox" onClick={() => setLightbox(null)}>
+        <div className="dm-lightbox" onClick={() => setLightbox(null)}>
           <img src={lightbox} alt="" />
         </div>
       )}

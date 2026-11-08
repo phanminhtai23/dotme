@@ -50,13 +50,13 @@ function LangToggleAdmin() {
   return (
     <button
       type="button"
-      className="ad-foot-link"
+      className="dm-foot-link"
       onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
       title={lang === 'vi' ? 'Switch to English' : 'Chuyển sang tiếng Việt'}
     >
       <AdminIcon name="message" size={17} />
       {lang === 'vi' ? 'Ngôn ngữ' : 'Language'}
-      <span className="ad-foot-link__value">{lang === 'vi' ? 'VI' : 'EN'}</span>
+      <span className="dm-foot-link__value">{lang === 'vi' ? 'VI' : 'EN'}</span>
     </button>
   )
 }
@@ -64,10 +64,10 @@ function LangToggleAdmin() {
 function ThemeToggle({ theme, onToggle }) {
   const dark = theme === 'dark'
   return (
-    <button type="button" className="ad-foot-link" onClick={onToggle} aria-label={dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}>
+    <button type="button" className="dm-foot-link" onClick={onToggle} aria-label={dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}>
       <AdminIcon name={dark ? 'sun' : 'moon'} size={17} />
       Giao diện
-      <span className="ad-foot-link__value">{dark ? 'Tối' : 'Sáng'}</span>
+      <span className="dm-foot-link__value">{dark ? 'Tối' : 'Sáng'}</span>
     </button>
   )
 }
@@ -93,50 +93,50 @@ function AccountModal({ mode, initial, onSave, onClose }) {
   }
 
   return (
-    <div className="ad-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="ad-modal" role="dialog" aria-modal="true" aria-label={mode === 'add' ? 'Thêm tài khoản' : 'Chỉnh sửa tài khoản'}
+    <div className="dm-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="dm-modal" role="dialog" aria-modal="true" aria-label={mode === 'add' ? 'Thêm tài khoản' : 'Chỉnh sửa tài khoản'}
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}>
-        <div className="ad-modal__head">
+        <div className="dm-modal__head">
           <h3>{mode === 'add' ? 'Thêm tài khoản' : 'Chỉnh sửa tài khoản'}</h3>
-          <button type="button" className="ad-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
+          <button type="button" className="dm-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
         </div>
-        <form onSubmit={handle} className="ad-form">
+        <form onSubmit={handle} className="dm-form">
           {mode === 'add' && (
-            <div className="ad-field">
-              <label className="ad-label" htmlFor="acc-username">Tên đăng nhập</label>
-              <input id="acc-username" className="ad-input" type="text" placeholder="Username *" required value={form.username}
+            <div className="dm-field">
+              <label className="dm-label" htmlFor="acc-username">Tên đăng nhập</label>
+              <input id="acc-username" className="dm-input" type="text" placeholder="Username *" required value={form.username}
                 onChange={e => setForm(f => ({ ...f, username: e.target.value }))} />
             </div>
           )}
-          <div className="ad-field">
-            <label className="ad-label" htmlFor="acc-display">Tên hiển thị</label>
-            <input id="acc-display" className="ad-input" type="text" placeholder="Tên hiển thị" value={form.displayName}
+          <div className="dm-field">
+            <label className="dm-label" htmlFor="acc-display">Tên hiển thị</label>
+            <input id="acc-display" className="dm-input" type="text" placeholder="Tên hiển thị" value={form.displayName}
               onChange={e => setForm(f => ({ ...f, displayName: e.target.value }))} />
           </div>
-          <div className="ad-field">
-            <label className="ad-label" htmlFor="acc-password">Mật khẩu</label>
-            <input id="acc-password" className="ad-input" type="password" placeholder={mode === 'edit' ? 'Mật khẩu mới (để trống nếu không đổi)' : 'Mật khẩu *'}
+          <div className="dm-field">
+            <label className="dm-label" htmlFor="acc-password">Mật khẩu</label>
+            <input id="acc-password" className="dm-input" type="password" placeholder={mode === 'edit' ? 'Mật khẩu mới (để trống nếu không đổi)' : 'Mật khẩu *'}
               required={mode === 'add'} value={form.password}
               onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
           </div>
-          <div className="ad-field">
-            <label className="ad-label" htmlFor="acc-role">Vai trò</label>
-            <select id="acc-role" className="ad-input" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
+          <div className="dm-field">
+            <label className="dm-label" htmlFor="acc-role">Vai trò</label>
+            <select id="acc-role" className="dm-input" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
               <option value="user">User</option>
               <option value="admin">Admin</option>
               <option value="superadmin">Super Admin</option>
             </select>
           </div>
-          <div className="ad-field">
-            <label className="ad-label" htmlFor="acc-expires">Hết hạn <span className="ad-hint">(để trống = không giới hạn)</span></label>
-            <input id="acc-expires" className="ad-input" type="date" value={form.expiresAt || ''}
+          <div className="dm-field">
+            <label className="dm-label" htmlFor="acc-expires">Hết hạn <span className="dm-hint">(để trống = không giới hạn)</span></label>
+            <input id="acc-expires" className="dm-input" type="date" value={form.expiresAt || ''}
               onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))} />
           </div>
-          {err && <div role="alert" className="ad-alert">{err}</div>}
-          <div className="ad-actions">
-            <button className="ad-btn ad-btn--primary">{mode === 'add' ? 'Thêm' : 'Lưu'}</button>
-            <button type="button" className="ad-btn" onClick={onClose}>Huỷ</button>
+          {err && <div role="alert" className="dm-alert">{err}</div>}
+          <div className="dm-actions">
+            <button className="dm-btn dm-btn--primary">{mode === 'add' ? 'Thêm' : 'Lưu'}</button>
+            <button type="button" className="dm-btn" onClick={onClose}>Huỷ</button>
           </div>
         </form>
       </div>
@@ -181,42 +181,42 @@ function LinkModal({ accounts, onSave, onClose }) {
   }
 
   return (
-    <div className="ad-modal-backdrop" onMouseDown={(e) => { if (!created && e.target === e.currentTarget) onClose() }}>
-      <div className="ad-modal ad-modal--md" role="dialog" aria-modal="true" aria-label="Gán quyền truy cập"
+    <div className="dm-modal-backdrop" onMouseDown={(e) => { if (!created && e.target === e.currentTarget) onClose() }}>
+      <div className="dm-modal dm-modal--md" role="dialog" aria-modal="true" aria-label="Gán quyền truy cập"
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}>
         {created ? (
           <>
-            <div className="ad-created">
-              <div className="ad-created__emoji" aria-hidden="true">{PAGE_TYPES[created.type].emoji}</div>
+            <div className="dm-created">
+              <div className="dm-created__emoji" aria-hidden="true">{PAGE_TYPES[created.type].emoji}</div>
               <h3>Đã tạo link thành công</h3>
               <p>Chia sẻ link này cho <strong>{created.ownerUsername}</strong></p>
             </div>
-            <div className="ad-linkbox">
+            <div className="dm-linkbox">
               <code>{origin}{created.path}</code>
-              <button type="button" onClick={copyLink} className={`ad-btn ad-btn--sm ${copied ? 'is-done' : ''}`}>
+              <button type="button" onClick={copyLink} className={`dm-btn dm-btn--sm ${copied ? 'is-done' : ''}`}>
                 <AdminIcon name={copied ? 'check' : 'copy'} size={14} />{copied ? 'Đã copy' : 'Copy'}
               </button>
             </div>
-            <dl className="ad-facts">
+            <dl className="dm-facts">
               <div><dt>Chủ</dt><dd>{created.ownerUsername}</dd></div>
               <div><dt>Loại</dt><dd>{PAGE_TYPES[created.type].emoji} {PAGE_TYPES[created.type].label}</dd></div>
               <div><dt>Trò chơi</dt><dd>{selectedGame.emoji} {selectedGame.name}</dd></div>
               <div><dt>Tên</dt><dd>{created.name}</dd></div>
               <div><dt>Hết hạn</dt><dd>{created.expiresAt || 'Không giới hạn'}</dd></div>
             </dl>
-            <button type="button" className="ad-btn ad-btn--primary ad-btn--block" onClick={onClose}>Xong</button>
+            <button type="button" className="dm-btn dm-btn--primary dm-btn--block" onClick={onClose}>Xong</button>
           </>
         ) : (
           <>
-            <div className="ad-modal__head">
+            <div className="dm-modal__head">
               <h3>Gán quyền truy cập</h3>
-              <button type="button" className="ad-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
+              <button type="button" className="dm-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
             </div>
-            <form onSubmit={handle} className="ad-form">
-              <div className="ad-field">
-                <label className="ad-label" htmlFor="lnk-owner">Tài khoản</label>
-                <select id="lnk-owner" className="ad-input" value={form.ownerUsername} onChange={e => setForm(f => ({ ...f, ownerUsername:e.target.value }))}>
+            <form onSubmit={handle} className="dm-form">
+              <div className="dm-field">
+                <label className="dm-label" htmlFor="lnk-owner">Tài khoản</label>
+                <select id="lnk-owner" className="dm-input" value={form.ownerUsername} onChange={e => setForm(f => ({ ...f, ownerUsername:e.target.value }))}>
                   {accounts.map(a => (
                     <option key={a.username} value={a.username}>
                       {a.displayName || a.username} (@{a.username})
@@ -225,26 +225,26 @@ function LinkModal({ accounts, onSave, onClose }) {
                 </select>
               </div>
 
-              <div className="ad-field">
-                <span className="ad-label">Loại trang</span>
-                <div className="ad-choices">
+              <div className="dm-field">
+                <span className="dm-label">Loại trang</span>
+                <div className="dm-choices">
                   {Object.entries(PAGE_TYPES).map(([key, meta]) => (
-                    <button key={key} type="button" className="ad-choice" aria-pressed={form.type === key} style={{ '--choice-accent':meta.color }}
+                    <button key={key} type="button" className="dm-choice" aria-pressed={form.type === key} style={{ '--choice-accent':meta.color }}
                       onClick={() => setForm(f => ({ ...f, type:key, gameId:DEFAULT_GAME_BY_TYPE[key], difficulty:'medium' }))}>
-                      <span className="ad-choice__icon" aria-hidden="true">{meta.emoji}</span>
+                      <span className="dm-choice__icon" aria-hidden="true">{meta.emoji}</span>
                       <strong>{meta.label}</strong>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="ad-field">
-                <span className="ad-label">Trò chơi cho link này</span>
-                <div className="ad-choices ad-choices--wide">
+              <div className="dm-field">
+                <span className="dm-label">Trò chơi cho link này</span>
+                <div className="dm-choices dm-choices--wide">
                   {GAME_OPTIONS.map(game => (
-                    <button key={game.id} type="button" className="ad-choice ad-choice--row" aria-pressed={form.gameId === game.id}
+                    <button key={game.id} type="button" className="dm-choice dm-choice--row" aria-pressed={form.gameId === game.id}
                       onClick={() => setForm(f => ({ ...f, gameId:game.id, difficulty:'medium' }))}>
-                      <span className="ad-choice__icon" aria-hidden="true">{game.emoji}</span>
+                      <span className="dm-choice__icon" aria-hidden="true">{game.emoji}</span>
                       <span>
                         <strong>{game.name}</strong>
                         <small>{game.description}</small>
@@ -254,13 +254,13 @@ function LinkModal({ accounts, onSave, onClose }) {
                 </div>
               </div>
 
-              <div className="ad-field">
-                <span className="ad-label">Độ khó trò chơi</span>
-                <div className="ad-choices">
+              <div className="dm-field">
+                <span className="dm-label">Độ khó trò chơi</span>
+                <div className="dm-choices">
                   {Object.entries(DIFFICULTY[form.gameId] || DIFFICULTY['balloon-pop']).map(([key, meta]) => (
-                    <button key={key} type="button" className="ad-choice" aria-pressed={form.difficulty === key} style={{ '--choice-accent':meta.color }}
+                    <button key={key} type="button" className="dm-choice" aria-pressed={form.difficulty === key} style={{ '--choice-accent':meta.color }}
                       onClick={() => setForm(f => ({ ...f, difficulty:key }))}>
-                      <span className="ad-choice__icon" aria-hidden="true">{meta.icon}</span>
+                      <span className="dm-choice__icon" aria-hidden="true">{meta.icon}</span>
                       <strong>{meta.label}</strong>
                       <small>{meta.desc}</small>
                     </button>
@@ -268,38 +268,38 @@ function LinkModal({ accounts, onSave, onClose }) {
                 </div>
               </div>
 
-              <div className="ad-field">
-                <label className="ad-label" htmlFor="lnk-name">Tên người nhận <span className="ad-hint">(hiển thị trên trang)</span></label>
-                <input id="lnk-name" className="ad-input" type="text" placeholder="Vd: Nguyễn Văn A, em Lan..." required value={form.name}
+              <div className="dm-field">
+                <label className="dm-label" htmlFor="lnk-name">Tên người nhận <span className="dm-hint">(hiển thị trên trang)</span></label>
+                <input id="lnk-name" className="dm-input" type="text" placeholder="Vd: Nguyễn Văn A, em Lan..." required value={form.name}
                   onChange={e => setForm(f => ({ ...f, name:e.target.value }))} />
               </div>
 
-              <div className="ad-field">
-                <label className="ad-label" htmlFor="lnk-message">Lời nhắn riêng <span className="ad-hint">(không bắt buộc)</span></label>
-                <textarea id="lnk-message" className="ad-input"
+              <div className="dm-field">
+                <label className="dm-label" htmlFor="lnk-message">Lời nhắn riêng <span className="dm-hint">(không bắt buộc)</span></label>
+                <textarea id="lnk-message" className="dm-input"
                   placeholder="Viết vài dòng dành riêng cho người nhận..."
                   value={form.message}
                   maxLength={500}
                   rows={4}
                   onChange={e => setForm(f => ({ ...f, message:e.target.value }))}
                 />
-                <div className="ad-counter">{form.message.length}/500</div>
+                <div className="dm-counter">{form.message.length}/500</div>
               </div>
 
-              <div className="ad-field">
-                <label className="ad-label" htmlFor="lnk-expires">Hết hạn <span className="ad-hint">(để trống = không giới hạn)</span></label>
-                <input id="lnk-expires" className="ad-input" type="date" value={form.expiresAt}
+              <div className="dm-field">
+                <label className="dm-label" htmlFor="lnk-expires">Hết hạn <span className="dm-hint">(để trống = không giới hạn)</span></label>
+                <input id="lnk-expires" className="dm-input" type="date" value={form.expiresAt}
                   onChange={e => setForm(f => ({ ...f, expiresAt:e.target.value }))} />
               </div>
 
-              <div className="ad-divider">
+              <div className="dm-divider">
                 <ImageUploader images={images} onChange={setImages} label="Album ảnh cho trang này" />
               </div>
 
-              {err && <div role="alert" className="ad-alert">{err}</div>}
-              <div className="ad-actions">
-                <button className="ad-btn ad-btn--primary" disabled={saving}><AdminIcon name="link" size={15} />{saving ? 'Đang tạo...' : 'Tạo link'}</button>
-                <button type="button" className="ad-btn" onClick={onClose}>Huỷ</button>
+              {err && <div role="alert" className="dm-alert">{err}</div>}
+              <div className="dm-actions">
+                <button className="dm-btn dm-btn--primary" disabled={saving}><AdminIcon name="link" size={15} />{saving ? 'Đang tạo...' : 'Tạo link'}</button>
+                <button type="button" className="dm-btn" onClick={onClose}>Huỷ</button>
               </div>
             </form>
           </>
@@ -489,30 +489,30 @@ function AdminInner() {
     <div className="admin-root" data-theme={theme}>
       {/* Mobile top bar */}
       {isMobile && (
-        <div className="ad-topbar">
-          <button type="button" className="ad-topbar__btn" onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu">
+        <div className="dm-topbar">
+          <button type="button" className="dm-topbar__btn" onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu">
             <AdminIcon name="menu" size={18} />
           </button>
-          <div className="ad-topbar__title">{activeTab?.label}</div>
+          <div className="dm-topbar__title">{activeTab?.label}</div>
         </div>
       )}
 
       {/* Drawer backdrop */}
       {isMobile && mobileMenuOpen && (
-        <div className="ad-backdrop" onClick={() => setMobileMenuOpen(false)} />
+        <div className="dm-backdrop" onClick={() => setMobileMenuOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside className={`ad-sidebar ${isMobile && mobileMenuOpen ? 'is-open' : ''}`} aria-label="Điều hướng quản trị">
-        <div className="ad-brand">
-          <div className="ad-brand__mark"><span>.</span>me</div>
-          <div className="ad-brand__role">Admin panel</div>
+      <aside className={`dm-sidebar ${isMobile && mobileMenuOpen ? 'is-open' : ''}`} aria-label="Điều hướng quản trị">
+        <div className="dm-brand">
+          <div className="dm-brand__mark"><span>.</span>me</div>
+          <div className="dm-brand__role">Admin panel</div>
         </div>
-        <div className="ad-user">
-          <div className="ad-user__avatar" aria-hidden="true">{displayName.trim().charAt(0).toLocaleUpperCase('vi') || '?'}</div>
+        <div className="dm-user">
+          <div className="dm-user__avatar" aria-hidden="true">{displayName.trim().charAt(0).toLocaleUpperCase('vi') || '?'}</div>
           <div style={{ minWidth: 0 }}>
-            <div className="ad-user__name">{displayName}</div>
-            <div className={`ad-user__status ${statusClass}`} role="status">
+            <div className="dm-user__name">{displayName}</div>
+            <div className={`dm-user__status ${statusClass}`} role="status">
               <i aria-hidden="true" />
               {serverOnline === null ? 'Đang kiểm tra...' : serverOnline ? 'Server online' : 'Server offline'}
             </div>
@@ -521,37 +521,37 @@ function AdminInner() {
 
         {/* Offline warning banner */}
         {serverOnline === false && (
-          <div className="ad-offline">
+          <div className="dm-offline">
             <strong>Server chưa chạy.</strong><br/>
             Mở terminal, chạy: <code>npm run dev</code>
           </div>
         )}
 
-        <nav className="ad-nav" aria-label="Các mục quản trị">
+        <nav className="dm-nav" aria-label="Các mục quản trị">
           {TABS.map(item => (
-            <button key={item.id} type="button" className="ad-nav__item" aria-current={tab === item.id ? 'page' : undefined}
+            <button key={item.id} type="button" className="dm-nav__item" aria-current={tab === item.id ? 'page' : undefined}
               onClick={() => { setTab(item.id); setMobileMenuOpen(false) }}>
               <AdminIcon name={item.icon} />{item.label}
               {item.id === 'messages' && messages.length > 0 && (
-                <span className="ad-nav__badge">{messages.length}</span>
+                <span className="dm-nav__badge">{messages.length}</span>
               )}
             </button>
           ))}
         </nav>
 
-        <div className="ad-sidebar__foot">
+        <div className="dm-sidebar__foot">
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
           <LangToggleAdmin />
-          <a href="/" className="ad-foot-link"><AdminIcon name="home" size={17} />{plainLabel(tr.home)}</a>
-          <button type="button" className="ad-foot-link is-danger" onClick={() => { logout(); navigate('/login') }}>
+          <a href="/" className="dm-foot-link"><AdminIcon name="home" size={17} />{plainLabel(tr.home)}</a>
+          <button type="button" className="dm-foot-link is-danger" onClick={() => { logout(); navigate('/login') }}>
             <AdminIcon name="logout" size={17} />{plainLabel(tr.logout)}
           </button>
         </div>
       </aside>
 
       {/* Main */}
-      <main className="ad-main">
-        <header className="ad-page-head">
+      <main className="dm-main">
+        <header className="dm-page-head">
           <h1>{activeTab?.label}</h1>
           <p>{new Date().toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</p>
         </header>

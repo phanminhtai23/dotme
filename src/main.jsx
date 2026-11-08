@@ -8,11 +8,13 @@ import LandingPreview from './pages/LandingPreview.jsx'
 import Birthday from './pages/Birthday.jsx'
 import Motivation from './pages/Motivation.jsx'
 import Love from './pages/Love.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import './fonts.css'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <ErrorBoundary>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
@@ -24,5 +26,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/love/:id" element={<Love />} />
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   </React.StrictMode>,
 )
