@@ -230,8 +230,6 @@
 @keyframes pz-twinkle { from { opacity: .25; } to { opacity: 1; } }
 @keyframes pz-spin { to { transform: rotate(360deg); } }
 @media (max-width: 1099px) { .pz-hero .pz-badge { display: none; } }
-/* the ring badge says "available" on wide windows, so the pill above the role goes away there; it stays wherever the badge is hidden */
-@media (min-width: 1100px) { .pz-chip { display: none; } }
 
 /* phones and tablets: the same grid, streaks and pixels, spread over the whole cover (there is no torn seam to start from) and kept quieter so the name stays readable */
 @media (max-width: 900px) {
@@ -318,3 +316,18 @@
 .pz-form input, .pz-form textarea { background: var(--pz-ink); color: #fff; border-color: var(--pz-hair2); }
 .pz-form button, .pz-form button:hover:not(:disabled) { background: linear-gradient(100deg, #1d4ed8, #2563eb); color: #fff; }
 .pz-form button:hover:not(:disabled) { box-shadow: 0 0 24px var(--pz-glow); }
+
+/* the pill above the role stays on every size, next to the ring badge; the ticker items are separated by bullets */
+.pz-track li::after { content: '•'; margin-left: 48px; color: var(--pz-muted); }
+.pz-net { display: none; }
+@media (min-width: 901px) {
+  .pz-hero .pz-net { display: block; position: absolute; z-index: 0; top: 0; right: 0; width: 520px; height: calc(100% - 48 * var(--pz-hu)); pointer-events: none; }
+}
+
+/* Page scrollbar in the theme colours (set on <html> by Poster.jsx; the site-wide purple one stays for the other pages).
+   Firefox has no ::-webkit-scrollbar, so it gets scrollbar-color instead; Chrome would ignore the webkit rules if that were set too. */
+/* index.css sets overflow-x on <body>, which makes body (not html) the element that owns the page scrollbar, so both are styled. */
+html.pz-page::-webkit-scrollbar-track, html.pz-page body::-webkit-scrollbar-track { background: #070d20; }
+html.pz-page::-webkit-scrollbar-thumb, html.pz-page body::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #60a5fa, #1d4ed8); }
+@supports not selector(::-webkit-scrollbar) { html.pz-page { scrollbar-color: #2563eb #070d20; } }
+

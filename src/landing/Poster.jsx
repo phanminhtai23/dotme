@@ -1,9 +1,9 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLang } from '../LangContext'
 import { t } from '../i18n'
 import { useLandingData, SKILL_GROUPS, TAGS, STAT_VALUES, SOCIALS, GITHUB_URL } from './data'
 import { useRotatingRole, useContactForm, useLandingEffects, usePageScroll, ScrollProgress, CertShot, LangSwitch, Bullets } from './shared'
-import { BITS, WAVES, WAVE_GLOW, LINKS, NODES } from './stream'
+import { BITS, WAVES, WAVE_GLOW, LINKS, NODES, NET_LINES, NET_NODES } from './stream'
 import { PIXELS } from './poster-fx'
 import './poster.css'
 import './poster-slides.css'
@@ -44,6 +44,11 @@ export default function Poster() {
   const root = useRef(null)
   useLandingEffects(root, { ...FX, spy: { links: '.pz-nav nav a', ids: SECTIONS } })
   usePageScroll(root, '.pz-hero, .pz-sec')
+  // The page scrollbar belongs to <html>, so it gets the Poster colours only while this version is on screen.
+  useEffect(() => {
+    document.documentElement.classList.add('pz-page')
+    return () => document.documentElement.classList.remove('pz-page')
+  }, [])
 
   return (
     <div className="pz" id="top" ref={root}>
@@ -55,6 +60,10 @@ export default function Poster() {
           <LangSwitch lang={lang} setLang={setLang} className="pz-lang" />
           <a className="pz-pill" href="#contact">{tr.nav.hire}</a>
         </header>
+        <svg className="pz-net" viewBox="0 0 520 762" preserveAspectRatio="xMaxYMin slice" aria-hidden="true">
+          <g className="pz-links" fill="none" opacity=".3">{NET_LINES.map((d, i) => <path key={i} d={d} strokeLinejoin="round" />)}</g>
+          <g className="pz-nodes" opacity=".5">{NET_NODES.map(([cx, cy, r], i) => <circle key={i} cx={cx} cy={cy} r={r} />)}</g>
+        </svg>
         <div className="pz-fx" aria-hidden="true">
           <i className="pz-grid" />
           <div className="pz-fx__seam">
