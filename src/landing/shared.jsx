@@ -154,7 +154,7 @@ export function useLandingEffects(ref, { reveal = [], count = [], drift = [], sp
         io.unobserve(el)
         if (el.dataset.fxFinal !== undefined) runCount(el)
       }
-    }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' })
+    }, { threshold: 0, rootMargin: '0px 0px -8% 0px' })
 
     // Per run, not per element: React StrictMode runs this effect twice in development.
     const seen = new WeakSet()
