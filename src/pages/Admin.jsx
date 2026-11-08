@@ -13,12 +13,16 @@ import AdminAccounts from '../components/AdminAccounts'
 import AdminAnalytics from '../components/AdminAnalytics'
 import AdminMessages from '../components/AdminMessages'
 import AdminDashboard from '../components/AdminDashboard'
+import AdminLanding from '../components/AdminLanding'
+import AdminIcon from '../components/AdminIcons'
 import { LangProvider, useLang } from '../LangContext'
 import { t } from '../i18n'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import '../admin-theme.css'
 
 const DEFAULT_MAX_PLAYS = 3
 const MAX_EXTRA_PLAYS = 1000
+const THEME_KEY = 'dotme_admin_theme'
 
 function getExtraPlays(value) {
   return Number.isSafeInteger(value)
@@ -26,52 +30,44 @@ function getExtraPlays(value) {
     : 0
 }
 
+// Stored choice wins; otherwise follow the OS; dark when neither is available.
+function initialTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_KEY)
+    if (stored === 'light' || stored === 'dark') return stored
+  } catch { /* storage blocked */ }
+  try {
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light'
+  } catch { /* no matchMedia */ }
+  return 'dark'
+}
+
+// i18n labels carry decorative leading emoji/arrows; the sidebar uses SVG icons instead.
+const plainLabel = (text) => String(text).replace(/^[^\p{L}\p{N}]+/u, '')
+
 function LangToggleAdmin() {
   const { lang, setLang } = useLang()
   return (
     <button
+      type="button"
+      className="ad-foot-link"
       onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
-      style={{
-        display:'flex', alignItems:'center', gap:5,
-        background:'rgba(139,92,246,0.08)', border:'1px solid rgba(139,92,246,0.2)',
-        borderRadius:8, padding:'8px 12px', color:'#a78bfa',
-        fontSize:12, fontWeight:700, cursor:'pointer', transition:'all 0.2s',
-        fontFamily:'Inter, sans-serif',
-      }}
-      onMouseEnter={e => e.currentTarget.style.background='rgba(139,92,246,0.16)'}
-      onMouseLeave={e => e.currentTarget.style.background='rgba(139,92,246,0.08)'}
+      title={lang === 'vi' ? 'Switch to English' : 'Chuyển sang tiếng Việt'}
     >
-      {lang === 'vi' ? '🇻🇳 VI' : '🇺🇸 EN'}
+      <AdminIcon name="message" size={17} />
+      {lang === 'vi' ? 'Ngôn ngữ' : 'Language'}
+      <span className="ad-foot-link__value">{lang === 'vi' ? 'VI' : 'EN'}</span>
     </button>
   )
 }
 
-// ─── helpers ───────────────────────────────────────────────────────────────
-
-const INPUT = {
-  width:'100%', boxSizing:'border-box',
-  background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)',
-  borderRadius:10, padding:'11px 16px', color:'#f0f0ff',
-  fontSize:14, fontFamily:'Inter, sans-serif', outline:'none', transition:'border-color 0.2s',
-}
-const focus = (e) => { e.target.style.borderColor = 'rgba(139,92,246,0.6)' }
-const blur  = (e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)' }
-
-function GradBtn({ children, onClick, color = 'purple', disabled = false, style = {} }) {
-  const bg = color === 'green' ? 'linear-gradient(135deg,#10b981,#22d3ee)'
-           : color === 'red'   ? 'linear-gradient(135deg,#ef4444,#dc2626)'
-           : 'linear-gradient(135deg,#8B5CF6,#ec4899)'
+function ThemeToggle({ theme, onToggle }) {
+  const dark = theme === 'dark'
   return (
-    <button onClick={onClick} disabled={disabled} style={{
-      background: bg, color:'#fff', border:'none', borderRadius:10,
-      padding:'10px 20px', fontSize:14, fontWeight:700, fontFamily:'Inter, sans-serif',
-      cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1,
-      transition:'all 0.2s', ...style,
-    }}
-    onMouseEnter={e => { if (!disabled) e.currentTarget.style.transform='translateY(-2px)' }}
-    onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)' }}
-    >
-      {children}
+    <button type="button" className="ad-foot-link" onClick={onToggle} aria-label={dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}>
+      <AdminIcon name={dark ? 'sun' : 'moon'} size={17} />
+      Giao diện
+      <span className="ad-foot-link__value">{dark ? 'Tối' : 'Sáng'}</span>
     </button>
   )
 }
@@ -81,7 +77,6 @@ function GradBtn({ children, onClick, color = 'purple', disabled = false, style 
 function AccountModal({ mode, initial, onSave, onClose }) {
   const [form, setForm] = useState(initial ? { ...initial, password:'' } : { username:'', password:'', displayName:'', role:'user', expiresAt:'' })
   const [err, setErr] = useState('')
-  const { isMobile } = useBreakpoint()
 
   const handle = async (e) => {
     e.preventDefault(); setErr('')
@@ -98,58 +93,50 @@ function AccountModal({ mode, initial, onSave, onClose }) {
   }
 
   return (
-    <div style={{
-      position:'fixed', inset:0, zIndex:200,
-      background:'rgba(0,0,0,0.75)', backdropFilter:'blur(8px)',
-      display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 12 : 24,
-    }}
-    onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{
-        background:'#0d0d1a', border:'1px solid rgba(255,255,255,0.1)',
-        borderRadius:20, padding: isMobile ? 22 : 36, width:'100%', maxWidth:440,
-        maxHeight:'90vh', overflowY:'auto',
-        fontFamily:'Inter, sans-serif',
-      }}
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={(e) => e.stopPropagation()}>
-        <h3 style={{ fontWeight:800, fontSize:20, color:'#f0f0ff', marginBottom:24 }}>
-          {mode === 'add' ? '+ Thêm tài khoản' : '✏️ Chỉnh sửa tài khoản'}
-        </h3>
-        <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
+    <div className="ad-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="ad-modal" role="dialog" aria-modal="true" aria-label={mode === 'add' ? 'Thêm tài khoản' : 'Chỉnh sửa tài khoản'}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}>
+        <div className="ad-modal__head">
+          <h3>{mode === 'add' ? 'Thêm tài khoản' : 'Chỉnh sửa tài khoản'}</h3>
+          <button type="button" className="ad-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
+        </div>
+        <form onSubmit={handle} className="ad-form">
           {mode === 'add' && (
-            <input type="text" placeholder="Username *" required value={form.username}
-              onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
-              style={INPUT} onFocus={focus} onBlur={blur} />
+            <div className="ad-field">
+              <label className="ad-label" htmlFor="acc-username">Tên đăng nhập</label>
+              <input id="acc-username" className="ad-input" type="text" placeholder="Username *" required value={form.username}
+                onChange={e => setForm(f => ({ ...f, username: e.target.value }))} />
+            </div>
           )}
-          <input type="text" placeholder="Tên hiển thị" value={form.displayName}
-            onChange={e => setForm(f => ({ ...f, displayName: e.target.value }))}
-            style={INPUT} onFocus={focus} onBlur={blur} />
-          <input type="password" placeholder={mode === 'edit' ? 'Mật khẩu mới (để trống nếu không đổi)' : 'Mật khẩu *'}
-            required={mode === 'add'} value={form.password}
-            onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-            style={INPUT} onFocus={focus} onBlur={blur} />
-          <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
-            style={{ ...INPUT, background:'#1a1a2e', color:'#f0f0ff', colorScheme:'dark' }}>
-            <option value="user"    style={{ background:'#1a1a2e', color:'#f0f0ff' }}>User</option>
-            <option value="admin"   style={{ background:'#1a1a2e', color:'#f0f0ff' }}>Admin</option>
-            <option value="superadmin" style={{ background:'#1a1a2e', color:'#f0f0ff' }}>Super Admin</option>
-          </select>
-          <div>
-            <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:6, letterSpacing:'0.05em' }}>
-              HẾT HẠN (để trống = không giới hạn)
-            </label>
-            <input type="date" value={form.expiresAt || ''}
-              onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))}
-              style={{ ...INPUT, colorScheme:'dark' }} onFocus={focus} onBlur={blur} />
+          <div className="ad-field">
+            <label className="ad-label" htmlFor="acc-display">Tên hiển thị</label>
+            <input id="acc-display" className="ad-input" type="text" placeholder="Tên hiển thị" value={form.displayName}
+              onChange={e => setForm(f => ({ ...f, displayName: e.target.value }))} />
           </div>
-          {err && <div style={{ fontSize:13, color:'#fca5a5', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:8, padding:'10px 14px' }}>⚠️ {err}</div>}
-          <div style={{ display:'flex', gap:10, marginTop:4 }}>
-            <GradBtn style={{ flex:1 }}>{mode === 'add' ? 'Thêm' : 'Lưu'}</GradBtn>
-            <button type="button" onClick={onClose} style={{
-              flex:1, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)',
-              borderRadius:10, color:'#8888aa', fontSize:14, fontWeight:600,
-              fontFamily:'Inter, sans-serif', cursor:'pointer', padding:'10px',
-            }}>Huỷ</button>
+          <div className="ad-field">
+            <label className="ad-label" htmlFor="acc-password">Mật khẩu</label>
+            <input id="acc-password" className="ad-input" type="password" placeholder={mode === 'edit' ? 'Mật khẩu mới (để trống nếu không đổi)' : 'Mật khẩu *'}
+              required={mode === 'add'} value={form.password}
+              onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+          </div>
+          <div className="ad-field">
+            <label className="ad-label" htmlFor="acc-role">Vai trò</label>
+            <select id="acc-role" className="ad-input" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+              <option value="superadmin">Super Admin</option>
+            </select>
+          </div>
+          <div className="ad-field">
+            <label className="ad-label" htmlFor="acc-expires">Hết hạn <span className="ad-hint">(để trống = không giới hạn)</span></label>
+            <input id="acc-expires" className="ad-input" type="date" value={form.expiresAt || ''}
+              onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))} />
+          </div>
+          {err && <div role="alert" className="ad-alert">{err}</div>}
+          <div className="ad-actions">
+            <button className="ad-btn ad-btn--primary">{mode === 'add' ? 'Thêm' : 'Lưu'}</button>
+            <button type="button" className="ad-btn" onClick={onClose}>Huỷ</button>
           </div>
         </form>
       </div>
@@ -166,7 +153,6 @@ function LinkModal({ accounts, onSave, onClose }) {
   const [copied, setCopied] = useState(false)
   const [err, setErr] = useState('')
   const [saving, setSaving] = useState(false)
-  const { isMobile } = useBreakpoint()
 
   const handle = async (e) => {
     e.preventDefault()
@@ -195,181 +181,126 @@ function LinkModal({ accounts, onSave, onClose }) {
   }
 
   return (
-    <div style={{
-      position:'fixed', inset:0, zIndex:200,
-      background:'rgba(0,0,0,0.75)', backdropFilter:'blur(8px)',
-      display:'flex', alignItems:'center', justifyContent:'center', padding: isMobile ? 12 : 24,
-    }}
-    onMouseDown={(e) => { if (!created && e.target === e.currentTarget) onClose() }}>
-      <div style={{
-        background:'#0d0d1a', border:'1px solid rgba(255,255,255,0.1)',
-        borderRadius:20, padding: isMobile ? 20 : 36, width:'100%', maxWidth:500,
-        fontFamily:'Inter, sans-serif', maxHeight:'90vh', overflowY:'auto',
-      }}
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={(e) => e.stopPropagation()}>
+    <div className="ad-modal-backdrop" onMouseDown={(e) => { if (!created && e.target === e.currentTarget) onClose() }}>
+      <div className="ad-modal ad-modal--md" role="dialog" aria-modal="true" aria-label="Gán quyền truy cập"
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}>
         {created ? (
           <>
-            <div style={{ textAlign:'center', marginBottom:24 }}>
-              <div style={{ fontSize:52, marginBottom:12 }}>{PAGE_TYPES[created.type].emoji}</div>
-              <h3 style={{ fontWeight:800, fontSize:20, color:'#f0f0ff', marginBottom:8 }}>Đã tạo link thành công! 🎉</h3>
-              <p style={{ color:'#8888aa', fontSize:14 }}>Chia sẻ link này cho <strong style={{ color:'#f0f0ff' }}>{created.ownerUsername}</strong></p>
+            <div className="ad-created">
+              <div className="ad-created__emoji" aria-hidden="true">{PAGE_TYPES[created.type].emoji}</div>
+              <h3>Đã tạo link thành công</h3>
+              <p>Chia sẻ link này cho <strong>{created.ownerUsername}</strong></p>
             </div>
-            <div style={{
-              background:'rgba(255,255,255,0.04)', border:'1px solid rgba(139,92,246,0.3)',
-              borderRadius:12, padding:'14px 18px', marginBottom:16,
-              display:'flex', alignItems:'center', gap:12,
-            }}>
-              <span style={{ fontSize:13, color:'#a78bfa', fontFamily:'monospace', flex:1, wordBreak:'break-all' }}>
-                {origin}{created.path}
-              </span>
-              <button onClick={copyLink} style={{
-                background: copied ? 'rgba(16,185,129,0.2)' : 'rgba(139,92,246,0.2)',
-                border:`1px solid ${copied ? 'rgba(16,185,129,0.4)' : 'rgba(139,92,246,0.4)'}`,
-                borderRadius:8, padding:'8px 14px', color: copied ? '#6ee7b7' : '#a78bfa',
-                fontSize:12, fontWeight:700, fontFamily:'Inter, sans-serif', cursor:'pointer', flexShrink:0,
-              }}>
-                {copied ? '✓ Đã copy' : '📋 Copy'}
+            <div className="ad-linkbox">
+              <code>{origin}{created.path}</code>
+              <button type="button" onClick={copyLink} className={`ad-btn ad-btn--sm ${copied ? 'is-done' : ''}`}>
+                <AdminIcon name={copied ? 'check' : 'copy'} size={14} />{copied ? 'Đã copy' : 'Copy'}
               </button>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, fontSize:13, color:'#8888aa', marginBottom:24 }}>
-              <span>👤 Chủ: <strong style={{ color:'#f0f0ff' }}>{created.ownerUsername}</strong></span>
-              <span>📌 Loại: <strong style={{ color:PAGE_TYPES[created.type].color }}>{PAGE_TYPES[created.type].emoji} {PAGE_TYPES[created.type].label}</strong></span>
-              <span>🎮 Trò chơi: <strong style={{ color:'#a7f3d0' }}>{selectedGame.emoji} {selectedGame.name}</strong></span>
-              <span>👑 Tên: <strong style={{ color:'#f0f0ff' }}>{created.name}</strong></span>
-              <span>⏰ Hết hạn: <strong style={{ color:'#f0f0ff' }}>{created.expiresAt || 'Không giới hạn'}</strong></span>
-            </div>
-            <button onClick={onClose} style={{
-              width:'100%', background:'linear-gradient(135deg,#8B5CF6,#22d3ee)',
-              border:'none', borderRadius:10, padding:'13px',
-              color:'#fff', fontSize:15, fontWeight:700, fontFamily:'Inter, sans-serif', cursor:'pointer',
-            }}>Xong ✓</button>
+            <dl className="ad-facts">
+              <div><dt>Chủ</dt><dd>{created.ownerUsername}</dd></div>
+              <div><dt>Loại</dt><dd>{PAGE_TYPES[created.type].emoji} {PAGE_TYPES[created.type].label}</dd></div>
+              <div><dt>Trò chơi</dt><dd>{selectedGame.emoji} {selectedGame.name}</dd></div>
+              <div><dt>Tên</dt><dd>{created.name}</dd></div>
+              <div><dt>Hết hạn</dt><dd>{created.expiresAt || 'Không giới hạn'}</dd></div>
+            </dl>
+            <button type="button" className="ad-btn ad-btn--primary ad-btn--block" onClick={onClose}>Xong</button>
           </>
         ) : (
           <>
-            <h3 style={{ fontWeight:800, fontSize:20, color:'#f0f0ff', marginBottom:24 }}>🔑 Gán quyền truy cập</h3>
-            <form onSubmit={handle} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-              <div>
-                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:6, letterSpacing:'0.05em' }}>TÀI KHOẢN</label>
-                <select value={form.ownerUsername} onChange={e => setForm(f => ({ ...f, ownerUsername:e.target.value }))}
-                  style={{ ...INPUT, background:'#1a1a2e', color:'#f0f0ff', colorScheme:'dark' }}>
+            <div className="ad-modal__head">
+              <h3>Gán quyền truy cập</h3>
+              <button type="button" className="ad-modal__close" onClick={onClose} aria-label="Đóng"><AdminIcon name="close" size={18} /></button>
+            </div>
+            <form onSubmit={handle} className="ad-form">
+              <div className="ad-field">
+                <label className="ad-label" htmlFor="lnk-owner">Tài khoản</label>
+                <select id="lnk-owner" className="ad-input" value={form.ownerUsername} onChange={e => setForm(f => ({ ...f, ownerUsername:e.target.value }))}>
                   {accounts.map(a => (
-                    <option key={a.username} value={a.username} style={{ background:'#1a1a2e', color:'#f0f0ff' }}>
+                    <option key={a.username} value={a.username}>
                       {a.displayName || a.username} (@{a.username})
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div>
-                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:10, letterSpacing:'0.05em' }}>LOẠI TRANG</label>
-                <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+              <div className="ad-field">
+                <span className="ad-label">Loại trang</span>
+                <div className="ad-choices">
                   {Object.entries(PAGE_TYPES).map(([key, meta]) => (
-                    <button key={key} type="button" onClick={() => setForm(f => ({ ...f, type:key, gameId:DEFAULT_GAME_BY_TYPE[key], difficulty:'medium' }))} style={{
-                      flex: isMobile ? '1 1 30%' : 1, background: form.type === key ? `${meta.color}18` : 'rgba(255,255,255,0.04)',
-                      border:`1px solid ${form.type === key ? meta.color + '55' : 'rgba(255,255,255,0.1)'}`,
-                      borderRadius:12, padding:'12px 8px', cursor:'pointer',
-                      color: form.type === key ? meta.color : '#8888aa', fontFamily:'Inter, sans-serif',
-                      transition:'all 0.2s', display:'flex', flexDirection:'column', alignItems:'center', gap:4,
-                    }}>
-                      <span style={{ fontSize:24 }}>{meta.emoji}</span>
-                      <span style={{ fontSize:11, fontWeight:600, lineHeight:1.3, textAlign:'center' }}>{meta.label}</span>
+                    <button key={key} type="button" className="ad-choice" aria-pressed={form.type === key} style={{ '--choice-accent':meta.color }}
+                      onClick={() => setForm(f => ({ ...f, type:key, gameId:DEFAULT_GAME_BY_TYPE[key], difficulty:'medium' }))}>
+                      <span className="ad-choice__icon" aria-hidden="true">{meta.emoji}</span>
+                      <strong>{meta.label}</strong>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:10, letterSpacing:'0.05em' }}>TRÒ CHƠI CHO LINK NÀY</label>
-                <div style={{ display:'grid', gridTemplateColumns:isMobile ? '1fr' : '1fr 1fr', gap:8 }}>
+              <div className="ad-field">
+                <span className="ad-label">Trò chơi cho link này</span>
+                <div className="ad-choices ad-choices--wide">
                   {GAME_OPTIONS.map(game => (
-                    <button key={game.id} type="button" onClick={() => setForm(f => ({ ...f, gameId:game.id, difficulty:'medium' }))} style={{
-                      display:'flex', alignItems:'center', gap:10, padding:'12px 10px', textAlign:'left',
-                      background:form.gameId === game.id ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.04)',
-                      border:`1px solid ${form.gameId === game.id ? 'rgba(52,211,153,0.55)' : 'rgba(255,255,255,0.1)'}`,
-                      borderRadius:10, color:form.gameId === game.id ? '#a7f3d0' : '#8888aa',
-                      fontFamily:'Inter, sans-serif', cursor:'pointer',
-                    }}>
-                      <span style={{ fontSize:23 }}>{game.emoji}</span>
+                    <button key={game.id} type="button" className="ad-choice ad-choice--row" aria-pressed={form.gameId === game.id}
+                      onClick={() => setForm(f => ({ ...f, gameId:game.id, difficulty:'medium' }))}>
+                      <span className="ad-choice__icon" aria-hidden="true">{game.emoji}</span>
                       <span>
-                        <strong style={{ display:'block', fontSize:12 }}>{game.name}</strong>
-                        <small style={{ display:'block', marginTop:3, fontSize:10, lineHeight:1.4, opacity:0.75 }}>{game.description}</small>
+                        <strong>{game.name}</strong>
+                        <small>{game.description}</small>
                       </span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Difficulty picker */}
-              <div>
-                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:10, letterSpacing:'0.05em' }}>ĐỘ KHÓ TRÒ CHƠI</label>
-                <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+              <div className="ad-field">
+                <span className="ad-label">Độ khó trò chơi</span>
+                <div className="ad-choices">
                   {Object.entries(DIFFICULTY[form.gameId] || DIFFICULTY['balloon-pop']).map(([key, meta]) => (
-                    <button key={key} type="button" onClick={() => setForm(f => ({ ...f, difficulty:key }))} style={{
-                      flex: isMobile ? '1 1 30%' : 1, background: form.difficulty === key ? `${meta.color}20` : 'rgba(255,255,255,0.04)',
-                      border:`1px solid ${form.difficulty === key ? meta.color+'66' : 'rgba(255,255,255,0.1)'}`,
-                      borderRadius:10, padding:'10px 6px', cursor:'pointer',
-                      color: form.difficulty === key ? meta.color : '#8888aa', fontFamily:'Inter, sans-serif',
-                      transition:'all 0.2s', display:'flex', flexDirection:'column', alignItems:'center', gap:3,
-                    }}>
-                      <span style={{ fontSize:18 }}>{meta.icon}</span>
-                      <span style={{ fontSize:11, fontWeight:700 }}>{meta.label}</span>
-                      <span style={{ fontSize:9, opacity:0.7, textAlign:'center', lineHeight:1.3 }}>{meta.desc}</span>
+                    <button key={key} type="button" className="ad-choice" aria-pressed={form.difficulty === key} style={{ '--choice-accent':meta.color }}
+                      onClick={() => setForm(f => ({ ...f, difficulty:key }))}>
+                      <span className="ad-choice__icon" aria-hidden="true">{meta.icon}</span>
+                      <strong>{meta.label}</strong>
+                      <small>{meta.desc}</small>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:6, letterSpacing:'0.05em' }}>
-                  TÊN NGƯỜI NHẬN (hiển thị trên trang)
-                </label>
-                <input type="text" placeholder="Vd: Nguyễn Văn A, em Lan..." required value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name:e.target.value }))}
-                  style={INPUT} onFocus={focus} onBlur={blur} />
+              <div className="ad-field">
+                <label className="ad-label" htmlFor="lnk-name">Tên người nhận <span className="ad-hint">(hiển thị trên trang)</span></label>
+                <input id="lnk-name" className="ad-input" type="text" placeholder="Vd: Nguyễn Văn A, em Lan..." required value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name:e.target.value }))} />
               </div>
 
-              <div>
-                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:6, letterSpacing:'0.05em' }}>
-                  LỜI NHẮN RIÊNG (không bắt buộc)
-                </label>
-                <textarea
+              <div className="ad-field">
+                <label className="ad-label" htmlFor="lnk-message">Lời nhắn riêng <span className="ad-hint">(không bắt buộc)</span></label>
+                <textarea id="lnk-message" className="ad-input"
                   placeholder="Viết vài dòng dành riêng cho người nhận..."
                   value={form.message}
                   maxLength={500}
                   rows={4}
                   onChange={e => setForm(f => ({ ...f, message:e.target.value }))}
-                  style={{ ...INPUT, resize:'vertical', lineHeight:1.6 }}
-                  onFocus={focus}
-                  onBlur={blur}
                 />
-                <div style={{ textAlign:'right', fontSize:11, color:'#666680', marginTop:4 }}>
-                  {form.message.length}/500
-                </div>
+                <div className="ad-counter">{form.message.length}/500</div>
               </div>
 
-              <div>
-                <label style={{ fontSize:12, color:'#8888aa', display:'block', marginBottom:6, letterSpacing:'0.05em' }}>
-                  HẾT HẠN (để trống = không giới hạn)
-                </label>
-                <input type="date" value={form.expiresAt}
-                  onChange={e => setForm(f => ({ ...f, expiresAt:e.target.value }))}
-                  style={{ ...INPUT, colorScheme:'dark' }} onFocus={focus} onBlur={blur} />
+              <div className="ad-field">
+                <label className="ad-label" htmlFor="lnk-expires">Hết hạn <span className="ad-hint">(để trống = không giới hạn)</span></label>
+                <input id="lnk-expires" className="ad-input" type="date" value={form.expiresAt}
+                  onChange={e => setForm(f => ({ ...f, expiresAt:e.target.value }))} />
               </div>
 
-              <div style={{ borderTop:'1px solid rgba(255,255,255,0.07)', paddingTop:16 }}>
+              <div className="ad-divider">
                 <ImageUploader images={images} onChange={setImages} label="Album ảnh cho trang này" />
               </div>
 
-              <div style={{ display:'flex', gap:10, marginTop:4 }}>
-                <GradBtn disabled={saving} style={{ flex:1, opacity:saving ? 0.65 : 1 }}>🔗 {saving ? 'Đang tạo...' : 'Tạo link'}</GradBtn>
-                <button type="button" onClick={onClose} style={{
-                  flex:1, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)',
-                  borderRadius:10, color:'#8888aa', fontSize:14, fontWeight:600,
-                  fontFamily:'Inter, sans-serif', cursor:'pointer', padding:'10px',
-                }}>Huỷ</button>
+              {err && <div role="alert" className="ad-alert">{err}</div>}
+              <div className="ad-actions">
+                <button className="ad-btn ad-btn--primary" disabled={saving}><AdminIcon name="link" size={15} />{saving ? 'Đang tạo...' : 'Tạo link'}</button>
+                <button type="button" className="ad-btn" onClick={onClose}>Huỷ</button>
               </div>
-              {err && <div role="alert" style={{ fontSize:13, color:'#fca5a5', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:8, padding:'10px 14px' }}>⚠️ {err}</div>}
             </form>
           </>
         )}
@@ -398,18 +329,25 @@ function AdminInner() {
   const [serverOnline, setServerOnline] = useState(null)
   const [storage, setStorage] = useState(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [theme, setTheme] = useState(initialTheme)
   const session = getSession()
   const { isMobile } = useBreakpoint()
   const { lang } = useLang()
   const tr = t[lang].admin
   const TABS = [
-    { id:'dashboard', label:tr.tabs.dashboard, icon:'📊' },
-    { id:'analytics', label:tr.tabs.analytics, icon:'📈' },
-    { id:'accounts',  label:tr.tabs.accounts,  icon:'👥' },
-    { id:'links',     label:tr.tabs.links,     icon:'🔑' },
-    { id:'messages',  label:tr.tabs.messages,  icon:'💬' },
-    { id:'content',   label:tr.tabs.content,   icon:'✏️' },
+    { id:'dashboard', label:tr.tabs.dashboard, icon:'dashboard' },
+    { id:'analytics', label:tr.tabs.analytics, icon:'analytics' },
+    { id:'accounts',  label:tr.tabs.accounts,  icon:'users' },
+    { id:'links',     label:tr.tabs.links,     icon:'key' },
+    { id:'messages',  label:tr.tabs.messages,  icon:'message' },
+    { id:'content',   label:tr.tabs.content,   icon:'edit' },
+    { id:'landing',   label:tr.tabs.landing,   icon:'eye' },
   ]
+  const toggleTheme = () => setTheme(current => {
+    const next = current === 'dark' ? 'light' : 'dark'
+    try { localStorage.setItem(THEME_KEY, next) } catch { /* storage blocked */ }
+    return next
+  })
 
   const refresh = useCallback(() => {
     const apiBase = import.meta.env.VITE_API_BASE_URL || '/api'
@@ -540,140 +478,83 @@ function AdminInner() {
 
   if (!analytics) return null
 
-  const origin = window.location.origin
   const uniqueViewers = new Set(
     analytics.history.map(item => item.visitorId || item.ip || `anon-${item.createdAt || ''}`)
   ).size
+  const activeTab = TABS.find(item => item.id === tab)
+  const displayName = session?.displayName || session?.username || ''
+  const statusClass = serverOnline === null ? '' : serverOnline ? 'is-online' : 'is-offline'
 
   return (
-    <div style={{ height: isMobile ? 'auto' : '100vh', minHeight:'100vh', background:'#06060f', display:'flex', flexDirection: isMobile ? 'column' : 'row', fontFamily:'Inter, sans-serif', color:'#f0f0ff' }}>
+    <div className="admin-root" data-theme={theme}>
       {/* Mobile top bar */}
       {isMobile && (
-        <div style={{
-          position:'sticky', top:0, zIndex:120, display:'flex', alignItems:'center', justifyContent:'space-between',
-          padding:'12px 16px', background:'rgba(6,6,15,0.95)', backdropFilter:'blur(10px)',
-          borderBottom:'1px solid rgba(255,255,255,0.07)', flexShrink:0,
-        }}>
-          <button onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu" style={{
-            background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8,
-            width:38, height:38, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', color:'#f0f0ff', cursor:'pointer',
-          }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <div className="ad-topbar">
+          <button type="button" className="ad-topbar__btn" onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu">
+            <AdminIcon name="menu" size={18} />
           </button>
-          <div style={{ fontFamily:'Syne, sans-serif', fontSize:15, fontWeight:800, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', padding:'0 10px' }}>
-            {TABS.find(t => t.id === tab)?.icon} {TABS.find(t => t.id === tab)?.label}
-          </div>
-          <div style={{ width:38, flexShrink:0 }} />
+          <div className="ad-topbar__title">{activeTab?.label}</div>
         </div>
       )}
 
       {/* Drawer backdrop */}
       {isMobile && mobileMenuOpen && (
-        <div onClick={() => setMobileMenuOpen(false)} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:130 }} />
+        <div className="ad-backdrop" onClick={() => setMobileMenuOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside style={{
-        width:240, flexShrink:0, background: isMobile ? '#0a0a16' : 'rgba(255,255,255,0.02)',
-        borderRight:'1px solid rgba(255,255,255,0.07)',
-        display:'flex', flexDirection:'column', padding:'28px 14px 20px', gap:4,
-        ...(isMobile ? {
-          position:'fixed', top:0, bottom:0, left: mobileMenuOpen ? 0 : -260, zIndex:140,
-          transition:'left 0.25s ease', overflowY:'auto',
-        } : {}),
-      }}>
-        <div style={{ paddingLeft:12, marginBottom:28 }}>
-          <div style={{
-            fontFamily:'Syne, sans-serif', fontSize:22, fontWeight:800,
-            background:'linear-gradient(135deg,#8B5CF6,#22D3EE)',
-            WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
-          }}>
-            .me
-          </div>
-          <div style={{ fontSize:10, color:'#555577', marginTop:2, letterSpacing:'0.08em' }}>ADMIN PANEL</div>
-          <div style={{ fontSize:12, color:'#8888aa', marginTop:6 }}>
-            👤 {session?.displayName || session?.username}
-          </div>
-          {/* Server status */}
-          <div style={{
-            marginTop:10, display:'flex', alignItems:'center', gap:6,
-            fontSize:11, fontWeight:600,
-            color: serverOnline === null ? '#555577' : serverOnline ? '#10b981' : '#ef4444',
-          }}>
-            <div style={{
-              width:6, height:6, borderRadius:'50%',
-              background: serverOnline === null ? '#555577' : serverOnline ? '#10b981' : '#ef4444',
-              animation: serverOnline === null ? 'none' : serverOnline ? 'pulse 2s infinite' : 'none',
-            }} />
-            {serverOnline === null ? 'Đang kiểm tra...' : serverOnline ? 'Server online' : '⚠ Server offline'}
+      <aside className={`ad-sidebar ${isMobile && mobileMenuOpen ? 'is-open' : ''}`} aria-label="Điều hướng quản trị">
+        <div className="ad-brand">
+          <div className="ad-brand__mark"><span>.</span>me</div>
+          <div className="ad-brand__role">Admin panel</div>
+        </div>
+        <div className="ad-user">
+          <div className="ad-user__avatar" aria-hidden="true">{displayName.trim().charAt(0).toLocaleUpperCase('vi') || '?'}</div>
+          <div style={{ minWidth: 0 }}>
+            <div className="ad-user__name">{displayName}</div>
+            <div className={`ad-user__status ${statusClass}`} role="status">
+              <i aria-hidden="true" />
+              {serverOnline === null ? 'Đang kiểm tra...' : serverOnline ? 'Server online' : 'Server offline'}
+            </div>
           </div>
         </div>
 
         {/* Offline warning banner */}
         {serverOnline === false && (
-          <div style={{
-            background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)',
-            borderRadius:10, padding:'10px 12px', marginBottom:4,
-            fontSize:11, color:'#fca5a5', lineHeight:1.5,
-          }}>
-            <strong>Server chưa chạy!</strong><br/>
-            Mở terminal, chạy:<br/>
-            <code style={{ background:'rgba(0,0,0,0.3)', padding:'2px 6px', borderRadius:4, fontFamily:'monospace', fontSize:10 }}>
-              npm run dev
-            </code>
+          <div className="ad-offline">
+            <strong>Server chưa chạy.</strong><br/>
+            Mở terminal, chạy: <code>npm run dev</code>
           </div>
         )}
 
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => { setTab(t.id); setMobileMenuOpen(false) }} style={{
-            background: tab === t.id ? 'rgba(139,92,246,0.15)' : 'transparent',
-            border: tab === t.id ? '1px solid rgba(139,92,246,0.3)' : '1px solid transparent',
-            borderRadius:10, padding:'11px 14px', color: tab === t.id ? '#a78bfa' : '#8888aa',
-            fontSize:14, fontWeight: tab === t.id ? 600 : 400, fontFamily:'Inter, sans-serif',
-            cursor:'pointer', display:'flex', alignItems:'center', gap:10, textAlign:'left', transition:'all 0.2s',
-          }}
-          onMouseEnter={e => { if (tab !== t.id) { e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#f0f0ff' } }}
-          onMouseLeave={e => { if (tab !== t.id) { e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#8888aa' } }}
-          >
-            <span>{t.icon}</span>{t.label}
-            {t.id === 'messages' && messages.length > 0 && (
-              <span style={{ marginLeft:'auto', background:'#ec4899', color:'#fff', borderRadius:99, fontSize:10, fontWeight:700, padding:'2px 7px' }}>
-                {messages.length}
-              </span>
-            )}
-          </button>
-        ))}
+        <nav className="ad-nav" aria-label="Các mục quản trị">
+          {TABS.map(item => (
+            <button key={item.id} type="button" className="ad-nav__item" aria-current={tab === item.id ? 'page' : undefined}
+              onClick={() => { setTab(item.id); setMobileMenuOpen(false) }}>
+              <AdminIcon name={item.icon} />{item.label}
+              {item.id === 'messages' && messages.length > 0 && (
+                <span className="ad-nav__badge">{messages.length}</span>
+              )}
+            </button>
+          ))}
+        </nav>
 
-        <div style={{ flex:1 }} />
-        <div style={{ borderTop:'1px solid rgba(255,255,255,0.06)', paddingTop:14, display:'flex', flexDirection:'column', gap:6 }}>
+        <div className="ad-sidebar__foot">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
           <LangToggleAdmin />
-          <a href="/" style={{ display:'flex', alignItems:'center', gap:8, color:'#555577', fontSize:13, textDecoration:'none', padding:'8px 12px', borderRadius:8, transition:'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.color='#f0f0ff'; e.currentTarget.style.background='rgba(255,255,255,0.05)' }}
-            onMouseLeave={e => { e.currentTarget.style.color='#555577'; e.currentTarget.style.background='transparent' }}
-          >{tr.home}</a>
-          <button onClick={() => { logout(); navigate('/login') }} style={{
-            background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:10,
-            padding:'10px 14px', color:'#fca5a5', fontSize:13, fontFamily:'Inter, sans-serif', cursor:'pointer',
-            display:'flex', alignItems:'center', gap:8, transition:'all 0.2s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background='rgba(239,68,68,0.16)'}
-          onMouseLeave={e => e.currentTarget.style.background='rgba(239,68,68,0.08)'}
-          >{tr.logout}</button>
+          <a href="/" className="ad-foot-link"><AdminIcon name="home" size={17} />{plainLabel(tr.home)}</a>
+          <button type="button" className="ad-foot-link is-danger" onClick={() => { logout(); navigate('/login') }}>
+            <AdminIcon name="logout" size={17} />{plainLabel(tr.logout)}
+          </button>
         </div>
       </aside>
 
       {/* Main */}
-      <main style={{ flex:1, minWidth:0, padding: isMobile ? '18px 14px 40px' : 36, overflowY:'auto', overflowX:'hidden' }}>
-        <div style={{ marginBottom: isMobile ? 12 : 18 }}>
-          {!isMobile && (
-            <h1 style={{ fontFamily:'Syne, sans-serif', fontSize:26, fontWeight:800, marginBottom:4 }}>
-              {TABS.find(t => t.id === tab)?.icon} {TABS.find(t => t.id === tab)?.label}
-            </h1>
-          )}
-          <p style={{ color:'#555577', fontSize:13 }}>
-            {new Date().toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}
-          </p>
-        </div>
+      <main className="ad-main">
+        <header className="ad-page-head">
+          <h1>{activeTab?.label}</h1>
+          <p>{new Date().toLocaleDateString('vi-VN', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}</p>
+        </header>
 
         {/* ── DASHBOARD ── */}
         {tab === 'dashboard' && (
@@ -716,6 +597,8 @@ function AdminInner() {
         {/* Content */}
         {tab === 'content' && <AdminContent />}
 
+        {tab === 'landing' && <AdminLanding />}
+
         {/* ── MESSAGES ── */}
         {tab === 'messages' && (
           <AdminMessages messages={messages} notice={messageNotice} onDelete={handleDeleteMsg} onDeleteAll={handleDeleteAllMessages} />
@@ -732,12 +615,6 @@ function AdminInner() {
       {modal === 'add-link' && (
         <LinkModal accounts={accounts} onSave={refresh} onClose={() => setModal(null)} />
       )}
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Inter:wght@400;600;700;800&display=swap');
-        * { scrollbar-width: thin; scrollbar-color: #8B5CF6 transparent; box-sizing: border-box; }
-        html, body { overflow-x: hidden; }
-      `}</style>
     </div>
   )
 }

@@ -1,0 +1,9 @@
+.ad-versions { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.ad-version { display: flex; flex-direction: column; gap: 14px; }
+.ad-version.is-active { border-color: var(--ad-green-line); }
+.ad-lp-thumb { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--ad-border); border-radius: var(--ad-radius-sm); background: var(--ad-raised); pointer-events: none; }
+.ad-lp-thumb iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: top left; background: #fff; }
+.ad-version__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ad-version__head h3 { margin: 0; font-size: 16px; color: var(--ad-text); }
+.ad-version__desc { margin: 0; font-size: 13px; line-height: 1.55; color: var(--ad-muted); flex-grow: 1; }
+.ad-version__actions { display: flex; flex-wrap: wrap; gap: 8px; }

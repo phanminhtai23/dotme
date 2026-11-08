@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import AdminIconButton from './AdminIconButton'
+import AdminIcon from './AdminIcons'
 import './AdminSections.css'
 
 const roles = {
@@ -19,8 +20,8 @@ export default function AdminAccounts({ accounts, notice, onAdd, onEdit, onDelet
       <div className="admin-accounts__toolbar">
         <span className="admin-section__total">{search ? `${filtered.length} kết quả` : `${accounts.length} tài khoản`}</span>
         <div className="admin-accounts__tools">
-          <label className="admin-accounts__search"><span aria-hidden="true">⌕</span><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Tìm tên hoặc tài khoản..." aria-label="Tìm tài khoản" /></label>
-          <button type="button" className="admin-section__primary" onClick={onAdd}><span aria-hidden="true">+</span> Thêm tài khoản</button>
+          <label className="admin-accounts__search"><AdminIcon name="search" size={16} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Tìm tên hoặc tài khoản..." aria-label="Tìm tài khoản" /></label>
+          <button type="button" className="admin-section__primary" onClick={onAdd}><AdminIcon name="plus" size={16} /> Thêm tài khoản</button>
         </div>
       </div>
       {filtered.length === 0 ? (

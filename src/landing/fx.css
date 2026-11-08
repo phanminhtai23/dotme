@@ -1,0 +1,25 @@
+/* Shared scroll effects. `.fx` is added to a version's root only when motion is allowed.
+   Each data-reveal value is its own entrance, so different sections do not all move the same way. */
+.fx [data-reveal] {
+  opacity: 0; transform: translateY(90px) scale(.94); filter: blur(8px);
+  transition: opacity 1s cubic-bezier(.16, 1, .3, 1), transform 1.1s cubic-bezier(.16, 1, .3, 1), filter .9s ease, translate .25s ease, scale .25s ease, border-color .25s ease, background-color .25s ease, color .25s ease, box-shadow .25s ease, clip-path 1.1s cubic-bezier(.77, 0, .18, 1);
+}
+.fx [data-reveal='left'] { transform: translateX(-140px); }
+.fx [data-reveal='right'] { transform: translateX(140px); }
+.fx [data-reveal='left-s'] { transform: translateX(-48px); filter: none; }
+.fx [data-reveal='right-s'] { transform: translateX(48px); filter: none; }
+.fx [data-reveal='zoom'] { transform: scale(.82); }
+.fx [data-reveal='pop'] { transform: scale(.55); filter: none; }
+.fx [data-reveal='drop'] { transform: translateY(-80px) scale(.96); }
+.fx [data-reveal='flip'] { transform: perspective(900px) rotateX(-38deg) translateY(60px); transform-origin: 50% 100%; filter: none; }
+.fx [data-reveal='tilt'] { transform: translateY(80px) rotate(5deg) scale(.94); transform-origin: 0 100%; }
+.fx [data-reveal='fade'] { transform: none; filter: none; }
+/* Clip wipes: the box stays opaque and is uncovered from one side. The generous negative insets keep descenders. */
+.fx [data-reveal='wipe'] { opacity: 1; transform: none; filter: none; clip-path: inset(-20% 100% -20% -5%); }
+.fx [data-reveal='wipe-up'] { opacity: 1; transform: translateY(24px); filter: none; clip-path: inset(100% -5% -20% -5%); }
+.fx [data-reveal].is-in {
+  opacity: 1; transform: none; filter: none; clip-path: inset(-20% -5% -20% -5%);
+  transition-delay: calc(var(--i, 0) * 120ms), calc(var(--i, 0) * 120ms), calc(var(--i, 0) * 120ms), 0s, 0s, 0s, 0s, 0s, 0s, calc(var(--i, 0) * 120ms);
+}
+.fx [data-reveal='fade'].is-in, .fx [data-reveal='left-s'].is-in, .fx [data-reveal='right-s'].is-in { transition-duration: .8s; }
+.fx-progress { position: fixed; top: 0; left: 0; right: 0; z-index: 10000; height: 5px; transform-origin: left; transform: scaleX(0); background: var(--fx-progress, currentColor); pointer-events: none; }

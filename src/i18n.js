@@ -141,7 +141,7 @@ export const t = {
       ],
     },
     admin: {
-      tabs: { dashboard:'Dashboard', analytics:'Phân tích', links:'Quản lý link', accounts:'Tài khoản', messages:'Tin nhắn', content:'Nội dung' },
+      tabs: { dashboard:'Dashboard', analytics:'Phân tích', links:'Quản lý link', accounts:'Tài khoản', messages:'Tin nhắn', content:'Nội dung', landing:'Giao diện' },
       stats: { views:'Lượt xem', today:'Hôm nay', accounts:'Tài khoản', messages:'Tin nhắn' },
       storage: 'Dung lượng lưu trữ',
       storageLabels: { total:'Tổng', uploads:'Ảnh tải lên', sqlite:'Cơ sở dữ liệu SQLite', counts:'Links / TK / Tin nhắn' },
@@ -292,7 +292,7 @@ export const t = {
       ],
     },
     admin: {
-      tabs: { dashboard:'Dashboard', analytics:'Analytics', links:'Manage Links', accounts:'Accounts', messages:'Messages', content:'Content' },
+      tabs: { dashboard:'Dashboard', analytics:'Analytics', links:'Manage Links', accounts:'Accounts', messages:'Messages', content:'Content', landing:'Landing' },
       stats: { views:'Page Views', today:'Today', accounts:'Accounts', messages:'Messages' },
       storage: 'Storage',
       storageLabels: { total:'Total', uploads:'Uploaded files', sqlite:'SQLite database', counts:'Links / Accounts / Msgs' },

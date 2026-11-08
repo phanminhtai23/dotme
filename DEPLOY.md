@@ -96,3 +96,24 @@ sudo -u opc pm2 status
 ```
 
 The API binds only to `127.0.0.1:3002`; Nginx is its public entry point.
+
+## Sync data between this machine and the server
+
+The SQLite database holds the content sections, accounts, links, messages, visit history and uploaded images.
+Two commands copy all of it in one direction. They overwrite, they do not merge, so run the one that matches
+where the newer data lives:
+
+```bash
+npm run sync:up     # local  -> server
+npm run sync:down   # server -> local (stop npm run dev first)
+```
+
+Both read `SSH_SERVER` from `.env` (the host name in `~/.ssh/config`, for example `SSH_SERVER=oracle`).
+Optional: `SSH_REMOTE_DIR` (default `/home/opc/projects/dotme`), `SSH_PM2_APP` (default `dotme-api`) and
+`SSH_REMOTE_PORT` (default `3002`).
+
+Each run takes a consistent snapshot of the database (safe while the app is running), checks its integrity,
+prints a side-by-side summary and asks for `yes` before changing anything; add `-- --yes` to skip the
+question. The data that is about to be overwritten is first saved under `server/data/backups/` on the machine
+being overwritten. `sync:up` stops the pm2 app while it swaps the file, restarts it and waits for the health
+check; if that fails it prints the backup path to restore.

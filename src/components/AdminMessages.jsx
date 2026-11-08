@@ -10,7 +10,7 @@ export default function AdminMessages({ messages, notice, onDelete, onDeleteAll 
         <div className="admin-messages__list">{[...messages].reverse().map((message, index) => {
           const name = message.name || 'Ẩn danh'
           return <article className="admin-message" key={message.id || index}>
-            <div className="admin-message__head"><div className="admin-message__identity"><div className="admin-message__avatar" aria-hidden="true">{name.trim().charAt(0).toLocaleUpperCase('vi') || '?'}</div><div><h3>{name}</h3><p>{message.createdAt ? new Date(message.createdAt).toLocaleString('vi-VN') : '—'}{message.ip && <span> · {message.ip}</span>}</p></div></div><AdminIconButton action="delete" label={`Xóa tin nhắn của ${name}`} onClick={() => onDelete(message.id)} /></div>
+            <div className="admin-message__head"><div className="admin-message__identity"><div className="admin-message__avatar" aria-hidden="true">{name.trim().charAt(0).toLocaleUpperCase('vi') || '?'}</div><div><h3>{name}</h3><p>{message.createdAt ? new Date(message.createdAt).toLocaleString('vi-VN') : '—'}{message.ip && <span> — {message.ip}</span>}</p></div></div><AdminIconButton action="delete" label={`Xóa tin nhắn của ${name}`} onClick={() => onDelete(message.id)} /></div>
             <p className="admin-message__body">{message.message}</p>
           </article>
         })}</div>
