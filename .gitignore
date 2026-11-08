@@ -14,5 +14,6 @@ README.local.md
 # on deploy overwrites live data (messages, accounts, etc.) with stale commits.
 server/data/*.json
 server/data/*.sqlite*
+server/data/backups/
 server/uploads/*
 !server/uploads/.gitkeep
