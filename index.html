@@ -39,11 +39,7 @@
           p.textContent = 'Thử tải lại, hoặc tắt tiện ích chặn quảng cáo / chế độ tối của trình duyệt cho trang này. Chụp màn hình này gửi người quản trị nếu vẫn bị.';
           var pre = document.createElement('pre');
           pre.style.cssText = 'margin:12px 0 0;padding:12px;background:#0b0d12;border-radius:8px;font-size:12px;white-space:pre-wrap;overflow:auto;max-height:220px';
-          pre.textContent = (problems.length ? problems.join('
-') : 'Không có lỗi nào được ghi lại.') + '
-
-' + location.href + '
-' + navigator.userAgent;
+          pre.textContent = (problems.length ? problems.join('\n') : 'Không có lỗi nào được ghi lại.') + '\n\n' + location.href + '\n' + navigator.userAgent;
           card.appendChild(h); card.appendChild(p); card.appendChild(pre); box.appendChild(card); document.body.appendChild(box);
         }, 6000);
       })();
