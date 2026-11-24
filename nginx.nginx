@@ -27,6 +27,23 @@ server {
     root /home/opc/projects/dotme/dist;
     index index.html;
 
+    # Vite filenames contain content hashes, so these assets can be cached until their URL changes.
+    location ^~ /assets/ {
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+    }
+
+    # Fonts and the portrait use stable filenames, so keep a shorter cache lifetime for safe updates.
+    location ^~ /fonts/ {
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=2592000" always;
+    }
+
+    location ~* ^/avatar(-[0-9]+)?\.webp$ {
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=2592000" always;
+    }
+
     location /api/ {
         proxy_pass http://127.0.0.1:3002;
         proxy_http_version 1.1;

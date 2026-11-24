@@ -45,6 +45,10 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
+When the Nginx configuration changes, repeat the copy, config test, and reload
+steps above. Hashed Vite assets are served with a one-year immutable cache;
+fonts and the portrait use a 30-day cache.
+
 The config uses ports 80/443 with the distinct `kevinphan.me` host name and
 proxies only `/api/` and `/uploads/` to the app's private port `3002`.
 It does not bind a separate app port or replace other Nginx virtual hosts.
