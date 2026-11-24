@@ -8,7 +8,18 @@ export default function LandingView({ version, track = true }) {
   const id = isLandingVersion(version) ? version : DEFAULT_VERSION
   const Version = LANDING_VERSIONS.find(item => item.id === id).load
 
-  useEffect(() => { if (track) trackVisit() }, [track])
+  useEffect(() => {
+    if (!track) return undefined
+    let cancel
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(trackVisit, { timeout: 3000 })
+      cancel = () => window.cancelIdleCallback(id)
+    } else {
+      const id = window.setTimeout(trackVisit, 2000)
+      cancel = () => window.clearTimeout(id)
+    }
+    return cancel
+  }, [track])
 
   return (
     <LangProvider>

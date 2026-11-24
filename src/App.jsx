@@ -13,22 +13,20 @@ function cachedVersion() {
 }
 
 export default function App() {
-  const [version, setVersion] = useState(cachedVersion)
+  // Render the current public design immediately; fetch the admin-selected version in parallel.
+  const [version, setVersion] = useState(() => cachedVersion() || DEFAULT_VERSION)
 
   useEffect(() => {
     let cancelled = false
-    // Without a cached choice, wait briefly for the server so visitors do not see the wrong version first.
-    const fallback = setTimeout(() => { if (!cancelled) setVersion(current => current ?? DEFAULT_VERSION) }, 1500)
     api.getLandingVersion()
       .then(({ version: next }) => {
         if (cancelled || !isLandingVersion(next)) return
         setVersion(next)
         try { localStorage.setItem(CACHE_KEY, next) } catch { /* storage blocked */ }
       })
-      .catch(() => { if (!cancelled) setVersion(current => current ?? DEFAULT_VERSION) })
-    return () => { cancelled = true; clearTimeout(fallback) }
+      .catch(() => {})
+    return () => { cancelled = true }
   }, [])
 
-  if (!version) return null
   return <LandingView version={version} />
 }

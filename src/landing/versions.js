@@ -1,6 +1,6 @@
 import { lazy } from 'react'
 
-export const DEFAULT_VERSION = 'classic'
+export const DEFAULT_VERSION = 'poster'
 
 export const LANDING_VERSIONS = [
   { id: 'classic', name: 'Classic', description: 'Bản hiện tại: nền tối, điểm nhấn tím, hero căn giữa.', load: lazy(() => import('./Classic')) },
