@@ -1,0 +1,18 @@
+# Kevin Phan
+
+> Personal portfolio of Kevin Phan, an AI Engineer based in Vietnam.
+
+This website presents Kevin's professional experience, education, research publications, selected projects, technical skills, and contact information.
+
+## Portfolio
+
+- [Home](https://kevinphan.me/): Overview and links to all portfolio sections.
+- [About](https://kevinphan.me/#about): Background and professional summary.
+- [Experience](https://kevinphan.me/#experience): Employment history and responsibilities.
+- [Projects](https://kevinphan.me/#projects): Selected software and AI projects.
+- [Education and publications](https://kevinphan.me/#edu): Academic background, research, and certificates.
+
+## Contact and code
+
+- [GitHub](https://github.com/phanminhtai23): Public repositories and project source code.
+- [Email](mailto:kevinphan68.work@gmail.com): Contact Kevin Phan.

@@ -37,7 +37,7 @@ export default function Editorial() {
       <ScrollProgress />
       <aside className="ed-rail">
         <a className="ed-logo" href="#top">.me</a>
-        <div className="ed-photo"><img src="/avatar.webp" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" /></div>
+        <div className="ed-photo"><img src="/avatar.webp" srcSet="/avatar-480.webp 480w, /avatar-768.webp 768w, /avatar.webp 1024w" sizes="(max-width: 999px) 90px, 283px" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" decoding="async" /></div>
         <div className="ed-who">
           <p className="ed-who__name">Kevin Phan</p>
           <p className="ed-who__role" aria-label={tr.hero.roles.join(', ')}>{role}<i aria-hidden="true" /></p>

@@ -51,7 +51,7 @@ export default function Poster() {
   }, [])
 
   return (
-    <div className="pz" id="top" ref={root}>
+    <main className="pz" id="top" ref={root}>
       <ScrollProgress />
       <section className="pz-hero">
         <header className="pz-nav">
@@ -93,7 +93,7 @@ export default function Poster() {
           </svg>
         </div>
         <h1 className="pz-name" data-parallax="0.16"><span>Kevin</span><span>Phan</span></h1>
-        <img className="pz-portrait" data-parallax="0.08" src="/avatar.webp" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" />
+        <img className="pz-portrait" data-parallax="0.08" src="/avatar.webp" srcSet="/avatar-480.webp 480w, /avatar-768.webp 768w, /avatar.webp 1024w" sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 721px" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" decoding="async" />
         <div className="pz-intro">
           <span className="pz-chip">{tr.hero.available}</span>
           <p className="pz-role" aria-label={tr.hero.roles.join(', ')}>{role}<i aria-hidden="true" /></p>
@@ -264,6 +264,6 @@ export default function Poster() {
           <footer className="pz-foot"><span>© 2026 Kevin Phan. {tr.footer.credit}</span><a href="#top">{tr.footer.backTop}</a></footer>
         </div>
       </section>
-    </div>
+    </main>
   )
 }

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kevinphan.me/sitemap.xml
+Agentmap: https://kevinphan.me/.well-known/ard.json

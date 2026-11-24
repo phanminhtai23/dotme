@@ -43,7 +43,7 @@ export default function Bento() {
   usePageScroll(root, '.bn-sec')
 
   return (
-    <div className="bn" id="top" ref={root}>
+    <main className="bn" id="top" ref={root}>
       <ScrollProgress />
       <div className="bn-page">
         <section className="bn-sec bn-screen">
@@ -68,7 +68,7 @@ export default function Bento() {
               </div>
             </div>
             <div className="bn-tile s5 bn-photo">
-              <img src="/avatar.webp" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" />
+              <img src="/avatar.webp" srcSet="/avatar-480.webp 480w, /avatar-768.webp 768w, /avatar.webp 1024w" sizes="(max-width: 700px) calc(100vw - 48px), 560px" width="1024" height="1024" alt="Kevin Phan" fetchpriority="high" decoding="async" />
               {current?.location && <span className="bn-tag">{current.location}</span>}
             </div>
             {STAT_VALUES.map((value, i) => (
@@ -233,6 +233,6 @@ export default function Bento() {
           <footer className="bn-foot"><span>© 2026 Kevin Phan. {tr.footer.credit}</span><a href="#top">{tr.footer.backTop}</a></footer>
         </section>
       </div>
-    </div>
+    </main>
   )
 }

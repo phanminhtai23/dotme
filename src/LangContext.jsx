@@ -1,9 +1,13 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 const LangCtx = createContext({ lang: 'vi', setLang: () => {} })
 
 export function LangProvider({ children }) {
   const [lang, setLang] = useState(() => localStorage.getItem('dotme_lang') || 'en')
+
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
 
   const changeLang = (l) => {
     setLang(l)

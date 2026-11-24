@@ -5,6 +5,8 @@ dist
 README.local.md
 *.webp
 !public/avatar.webp
+!public/avatar-480.webp
+!public/avatar-768.webp
 *.jpg
 *.png
 *.nginx
