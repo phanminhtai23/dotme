@@ -48,6 +48,8 @@ sudo systemctl reload nginx
 When the Nginx configuration changes, repeat the copy, config test, and reload
 steps above. Hashed Vite assets are served with a one-year immutable cache;
 fonts and the portrait use a 30-day cache.
+`robots.txt` is served with `Cache-Control: no-store` so crawlers always receive
+the current plain-text file.
 
 The config uses ports 80/443 with the distinct `kevinphan.me` host name and
 proxies only `/api/` and `/uploads/` to the app's private port `3002`.

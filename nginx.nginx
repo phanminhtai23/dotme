@@ -27,6 +27,12 @@ server {
     root /home/opc/projects/dotme/dist;
     index index.html;
 
+    # robots.txt must be fetched fresh so a cached SPA fallback cannot mask it.
+    location = /robots.txt {
+        try_files $uri =404;
+        add_header Cache-Control "no-store" always;
+    }
+
     # Vite filenames contain content hashes, so these assets can be cached until their URL changes.
     location ^~ /assets/ {
         try_files $uri =404;
