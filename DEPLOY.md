@@ -53,9 +53,10 @@ The config uses ports 80/443 with the distinct `kevinphan.me` host name and
 proxies only `/api/` and `/uploads/` to the app's private port `3002`.
 It does not bind a separate app port or replace other Nginx virtual hosts.
 The server must have a valid certificate for `kevinphan.me` and
-`www.kevinphan.me`. With Cloudflare, use **Full (strict)** and install a
-Cloudflare Origin Certificate (or another trusted certificate) at the paths
-in `nginx.nginx` before enabling the config.
+`www.kevinphan.me`. With Cloudflare, use **Full (strict)**. The current Nginx
+configuration expects the certificate at
+`/etc/pki/tls/certs/kevinphan.me.pem` and the private key at
+`/etc/pki/tls/private/kevinphan.me.key`.
 
 In Cloudflare DNS, point `kevinphan.me` (and `www` if used) to the server's
 public IP with proxy enabled. Cloudflare proxying does not replace the origin

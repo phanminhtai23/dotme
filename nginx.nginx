@@ -13,8 +13,8 @@ server {
     listen 443 ssl;
     server_name kevinphan.me www.kevinphan.me;
 
-    ssl_certificate /etc/letsencrypt/live/kevinphan.me/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/kevinphan.me/privkey.pem;
+    ssl_certificate /etc/pki/tls/certs/kevinphan.me.pem;
+    ssl_certificate_key /etc/pki/tls/private/kevinphan.me.key;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
