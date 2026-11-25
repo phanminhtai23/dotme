@@ -64,10 +64,20 @@ export function useLandingData(lang) {
   const [pubs, setPubs] = useState(null)
 
   useEffect(() => {
-    fetchSection('experience', setJobs)
-    fetchSection('projects', data => setProjects(data.map(apiToProject)))
-    fetchSection('certificates', setCerts)
-    fetchSection('publications', setPubs)
+    const loadSections = () => {
+      fetchSection('experience', setJobs)
+      fetchSection('projects', data => setProjects(data.map(apiToProject)))
+      fetchSection('certificates', setCerts)
+      fetchSection('publications', setPubs)
+    }
+
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(loadSections, { timeout: 2500 })
+      return () => window.cancelIdleCallback(idleId)
+    }
+
+    const timeoutId = window.setTimeout(loadSections, 1500)
+    return () => window.clearTimeout(timeoutId)
   }, [])
 
   const fallbackPub = { id:'static', title:tr.pubTitle, authors:tr.authorList, year:'2025', conference:tr.conference, link:'https://goodtechs.eai-conferences.org/2025/' }
