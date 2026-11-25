@@ -10,15 +10,18 @@ export default function LandingView({ version, track = true }) {
 
   useEffect(() => {
     if (!track) return undefined
-    let cancel
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(trackVisit, { timeout: 3000 })
-      cancel = () => window.cancelIdleCallback(id)
-    } else {
-      const id = window.setTimeout(trackVisit, 2000)
-      cancel = () => window.clearTimeout(id)
+    let idleId
+    const timeoutId = window.setTimeout(() => {
+      if ('requestIdleCallback' in window) {
+        idleId = window.requestIdleCallback(trackVisit, { timeout: 2000 })
+      } else {
+        trackVisit()
+      }
+    }, 5000)
+    return () => {
+      window.clearTimeout(timeoutId)
+      if (idleId !== undefined) window.cancelIdleCallback(idleId)
     }
-    return cancel
   }, [track])
 
   return (

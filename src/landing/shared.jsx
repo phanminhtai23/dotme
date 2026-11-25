@@ -11,14 +11,27 @@ const motionOff = () =>
 /** Typewriter over a list of roles; reduced motion shows the whole list at once. */
 export function useRotatingRole(roles, resetKey) {
   const [idx, setIdx] = useState(0)
-  const [text, setText] = useState('')
-  const [typing, setTyping] = useState(true)
+  const [text, setText] = useState(() => roles[0] || '')
+  const [typing, setTyping] = useState(false)
+  const [started, setStarted] = useState(false)
   const still = motionOff()
 
-  useEffect(() => { setIdx(0); setText(''); setTyping(true) }, [resetKey])
+  useEffect(() => {
+    setIdx(0)
+    setText(roles[0] || '')
+    setTyping(false)
+    setStarted(false)
+  }, [resetKey, roles])
 
+  // Keep the first role complete and visible during the initial paint and LCP window.
   useEffect(() => {
     if (still) return undefined
+    const timer = setTimeout(() => setStarted(true), 6000)
+    return () => clearTimeout(timer)
+  }, [resetKey, still])
+
+  useEffect(() => {
+    if (still || !started) return undefined
     const role = roles[idx] || ''
     let i = typing ? 0 : role.length
     let timer
@@ -34,7 +47,7 @@ export function useRotatingRole(roles, resetKey) {
     }
     timer = setTimeout(step, typing ? 400 : 300)
     return () => clearTimeout(timer)
-  }, [idx, typing, roles, still])
+  }, [idx, typing, roles, still, started])
 
   return still ? roles.join(', ') : text
 }
@@ -218,12 +231,20 @@ export function useLandingEffects(ref, { reveal = [], count = [], drift = [], sp
     const phone = window.matchMedia('(max-width: 900px)')
     let still = false
     let ticking = false
+    let firstScroll = true
     const onScroll = () => {
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
         ticking = false
         const y = window.scrollY
+        // The progress bar starts at zero in CSS. Avoid forcing a full-page layout
+        // just to recompute that same value during the initial mount.
+        if (firstScroll && y === 0) {
+          firstScroll = false
+          return
+        }
+        firstScroll = false
         const max = document.documentElement.scrollHeight - window.innerHeight
         if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`
         if (phone.matches) {

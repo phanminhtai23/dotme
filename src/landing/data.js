@@ -71,13 +71,18 @@ export function useLandingData(lang) {
       fetchSection('publications', setPubs)
     }
 
-    if ('requestIdleCallback' in window) {
-      const idleId = window.requestIdleCallback(loadSections, { timeout: 2500 })
-      return () => window.cancelIdleCallback(idleId)
+    let idleId
+    const timeoutId = window.setTimeout(() => {
+      if ('requestIdleCallback' in window) {
+        idleId = window.requestIdleCallback(loadSections, { timeout: 2000 })
+      } else {
+        loadSections()
+      }
+    }, 5000)
+    return () => {
+      window.clearTimeout(timeoutId)
+      if (idleId !== undefined) window.cancelIdleCallback(idleId)
     }
-
-    const timeoutId = window.setTimeout(loadSections, 1500)
-    return () => window.clearTimeout(timeoutId)
   }, [])
 
   const fallbackPub = { id:'static', title:tr.pubTitle, authors:tr.authorList, year:'2025', conference:tr.conference, link:'https://goodtechs.eai-conferences.org/2025/' }
