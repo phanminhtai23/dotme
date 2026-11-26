@@ -223,6 +223,14 @@ export function useLandingEffects(ref, { reveal = [], count = [], drift = [], sp
 
     const bar = root.querySelector('.fx-progress')
     const drifting = Array.from(root.querySelectorAll('[data-parallax]'))
+    let maxScroll = 0
+    const measureProgress = () => {
+      maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+      if (bar) bar.style.transform = `scaleX(${maxScroll > 0 ? Math.min(1, window.scrollY / maxScroll) : 0})`
+    }
+    const sizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measureProgress)
+    sizeObserver?.observe(root)
+    window.addEventListener('resize', measureProgress, { passive: true })
     // Scroll-linked sideways drift: the element slides as it crosses the screen, centred when mid-screen.
     const sliding = []
     drift.forEach(([selector, factor]) => root.querySelectorAll(selector).forEach(el => sliding.push([el, factor])))
@@ -231,22 +239,16 @@ export function useLandingEffects(ref, { reveal = [], count = [], drift = [], sp
     const phone = window.matchMedia('(max-width: 900px)')
     let still = false
     let ticking = false
-    let firstScroll = true
     const onScroll = () => {
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
         ticking = false
         const y = window.scrollY
-        // The progress bar starts at zero in CSS. Avoid forcing a full-page layout
-        // just to recompute that same value during the initial mount.
-        if (firstScroll && y === 0) {
-          firstScroll = false
-          return
-        }
-        firstScroll = false
-        const max = document.documentElement.scrollHeight - window.innerHeight
-        if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`
+        // Older browsers without ResizeObserver measure on demand; modern browsers
+        // use the cached height updated after layout, avoiding reads during scroll.
+        if (!sizeObserver && maxScroll === 0 && y > 0) measureProgress()
+        if (bar) bar.style.transform = `scaleX(${maxScroll > 0 ? Math.min(1, y / maxScroll) : 0})`
         if (phone.matches) {
           if (!still) { still = true; sliding.forEach(([el]) => { el.style.translate = '' }); drifting.forEach(el => { el.style.translate = '' }) }
           return
@@ -266,6 +268,8 @@ export function useLandingEffects(ref, { reveal = [], count = [], drift = [], sp
 
     return () => {
       io.disconnect(); mutations.disconnect(); spyObserver?.disconnect()
+      sizeObserver?.disconnect()
+      window.removeEventListener('resize', measureProgress)
       window.removeEventListener('scroll', onScroll)
     }
   // The selector lists are constants per version, so the effect only needs to run once.
