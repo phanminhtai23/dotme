@@ -33,7 +33,8 @@ function inlineSmallEntryCss() {
           }
           return tag
         })
-        if (replaced) delete bundle[fileName]
+        // Keep the emitted CSS asset: Vite's lazy-route preload maps still refer
+        // to it even though the entry HTML uses the inline copy.
       }
 
       htmlAsset.source = html
